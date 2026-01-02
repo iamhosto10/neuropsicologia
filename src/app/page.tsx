@@ -1,5 +1,6 @@
 import FeaturesGrid from "@/components/features-grid/features-grid";
 import { HeroSection } from "@/components/heroSection/hero-section";
+import PopularActivities from "@/components/popular-activities/popular-activities";
 import { ToolsSection } from "@/components/tools-section/tools-section";
 
 export default function Home() {
@@ -8,6 +9,7 @@ export default function Home() {
       <HeroSection />
       <FeaturesGrid />
       <ToolsSection />
+      <PopularActivities />
     </main>
   );
 }

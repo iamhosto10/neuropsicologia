@@ -116,6 +116,9 @@
 }
 
 @layer base {
+  :root {
+    --neuro-green: #22C55E;
+  }
   * {
     @apply border-border outline-ring/50;
   }

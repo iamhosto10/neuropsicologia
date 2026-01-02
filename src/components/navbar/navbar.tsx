@@ -4,7 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { Blocks, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const navLinks = [
   { href: "#", label: "Actividades" },
@@ -43,7 +49,10 @@ export function Navbar() {
 
         {/* CTA Buttons (Desktop) */}
         <div className="hidden md:flex items-center gap-2">
-          <Button variant="ghost" className="rounded-full bg-gray-100 font-bold">
+          <Button
+            variant="ghost"
+            className="rounded-full bg-gray-100 font-bold"
+          >
             Login
           </Button>
           <Button
@@ -58,7 +67,12 @@ export function Navbar() {
         <div className="md:hidden">
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(true)}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMenuOpen(true)}
+                className="hover:cursor-pointer"
+              >
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -66,13 +80,16 @@ export function Navbar() {
             <SheetContent side="right">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                   <Blocks className="h-6 w-6" style={{ color: "var(--neuro-green)" }} />
-                   <span className="font-bold text-black text-lg tracking-tight">
+                  <Blocks
+                    className="h-6 w-6"
+                    style={{ color: "var(--neuro-green)" }}
+                  />
+                  <span className="font-bold text-black text-lg tracking-tight">
                     NeuroCrece
-                   </span>
+                  </span>
                 </SheetTitle>
               </SheetHeader>
-              <div className="mt-8 flex flex-col gap-6">
+              <div className="mt-8 flex flex-col gap-6 px-6">
                 {navLinks.map((link) => (
                   <Link
                     key={link.label}
@@ -84,15 +101,18 @@ export function Navbar() {
                   </Link>
                 ))}
                 <div className="flex flex-col gap-4 mt-4">
-                   <Button variant="ghost" className="rounded-full bg-gray-100 font-bold w-full">
-                     Login
-                   </Button>
-                   <Button
-                     className="rounded-full text-black font-bold w-full"
-                     style={{ backgroundColor: "var(--neuro-green)" }}
-                   >
-                     Register
-                   </Button>
+                  <Button
+                    variant="ghost"
+                    className="rounded-full bg-gray-100 font-bold w-full"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    className="rounded-full text-black font-bold w-full"
+                    style={{ backgroundColor: "var(--neuro-green)" }}
+                  >
+                    Register
+                  </Button>
                 </div>
               </div>
             </SheetContent>

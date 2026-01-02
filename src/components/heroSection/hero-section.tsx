@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="w-full bg-[#F9FAFB] py-24 lg:min-h-[85vh] flex items-center">
+    <section className="w-full bg-[#F9FAFB] py-24 lg:min-h-[85vh] flex items-center mx-auto">
       <div className="container mx-auto px-6 lg:px-10">
         <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
           {/* Text Content */}
@@ -25,7 +25,7 @@ export function HeroSection() {
           </div>
 
           {/* Illustration Placeholder */}
-          <div className="w-full lg:w-1/2 flex justify-center">
+          <div className="w-full lg:w-1/2 flex justify-end">
             <div className="w-full max-w-md aspect-square bg-[#FEF3C7] rounded-3xl flex items-center justify-center">
               <HeartHandshake className="w-1/2 h-1/2 text-yellow-500" />
             </div>

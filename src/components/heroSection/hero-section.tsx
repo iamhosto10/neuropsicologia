@@ -25,7 +25,7 @@ export function HeroSection() {
           </div>
 
           {/* Illustration Placeholder */}
-          <div className="w-full lg:w-1/2 flex justify-end">
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
             <div className="w-full max-w-md aspect-square bg-[#FEF3C7] rounded-3xl flex items-center justify-center">
               <HeartHandshake className="w-1/2 h-1/2 text-yellow-500" />
             </div>

@@ -35,7 +35,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.label}
@@ -48,7 +48,7 @@ export function Navbar() {
         </nav>
 
         {/* CTA Buttons (Desktop) */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2">
           <Button
             variant="ghost"
             className="rounded-full bg-gray-100 font-bold"
@@ -64,7 +64,7 @@ export function Navbar() {
         </div>
 
         {/* Mobile Menu Trigger */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild>
               <Button

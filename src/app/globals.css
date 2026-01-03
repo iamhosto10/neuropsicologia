@@ -127,11 +127,13 @@
     --brand-cream: 0.96 0.03 85;
     --brand-blue-soft: 0.9 0.05 240;
     --brand-purple-soft: 0.9 0.05 300;
+    --brand-mustard: 0.795 0.184 86.047;
   }
   .dark {
     --highlight-green: 0.7 0.15 145;
     --brand-amber-light: 0.98 0.04 85;
     --brand-mustard: 0.79 0.17 85;
+    --brand-mustard: 0.795 0.184 86.047;
   }
   * {
     @apply border-border outline-ring/50;

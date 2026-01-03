@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Blocks, Menu, X } from "lucide-react";
+import { Layers, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -32,7 +32,7 @@ export function Navbar() {
       <div className="flex items-center justify-between h-16 px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Blocks className="h-6 w-6" style={{ color: "var(--neuro-green)" }} />
+          <Layers className="h-6 w-6" style={{ color: "var(--neuro-green)" }} />
           <span className="font-bold text-black text-lg tracking-tight">
             NeuroCrece
           </span>
@@ -87,7 +87,7 @@ export function Navbar() {
             <SheetContent side="right">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
-                  <Blocks
+                  <Layers
                     className="h-6 w-6"
                     style={{ color: "var(--neuro-green)" }}
                   />

@@ -26,7 +26,7 @@ const features = [
 
 const FeaturesGrid: React.FC = () => {
   return (
-    <div className="grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4 lg:gap-8 mx-2 md:mx-6 lg:mx-10 py-5">
+    <div className=" container mx-auto grid grid-cols-2 gap-4 md:gap-6 lg:grid-cols-4 lg:gap-8 px-6 lg:px-10 py-5">
       {features.map((feature) => (
         <div
           key={feature.title}

@@ -121,6 +121,10 @@
   :root {
     --neuro-green: #22C55E;
     --highlight-green: 0.85 0.18 145;
+    --brand-mustard: 0.79 0.17 85;
+    --brand-cream: 0.96 0.03 85;
+    --brand-blue-soft: 0.90 0.05 240;
+    --brand-purple-soft: 0.90 0.05 300;
   }
   .dark {
     --highlight-green: 0.70 0.15 145;

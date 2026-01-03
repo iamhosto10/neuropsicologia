@@ -47,7 +47,7 @@ const toolsData = [
 
 export function ToolsSection() {
   return (
-    <section className="py-12 md:py-16 lg:py-20 bg-gray-50 w-full">
+    <section className="py-12 md:py-16 lg:py-20 bg-gray-50 w-full max-w-5xl mx-auto">
       <div className="container mx-auto px-6 lg:px-10">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">
           Herramientas para el día a día

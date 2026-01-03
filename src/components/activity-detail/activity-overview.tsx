@@ -24,7 +24,7 @@ import {
 
 const ActivityOverview = () => {
   return (
-    <div className="container mx-auto max-w-4xl px-6 lg:px-10 pt-36 pb-8 animate-in slide-in-from-bottom-5 fade-in duration-700">
+    <div className="container mx-auto max-w-5xl px-6 lg:px-10 pt-36 pb-8 animate-in slide-in-from-bottom-5 fade-in duration-700">
       {/* A. Header Info */}
       <header>
         <Breadcrumb className="text-sm text-muted-foreground">

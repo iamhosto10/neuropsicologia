@@ -16,9 +16,12 @@ const activities = [
   },
 ];
 
-const PopularActivities = () => {
+const RelatedActivities = () => {
   return (
-    <div className="container mx-auto px-6 lg:px-10 py-4 max-w-5xl">
+    <div className="container mx-auto max-w-5xl px-6 lg:px-10 py-4">
+      <h2 className="text-3xl md:text-4xl font-bold text-left mb-8">
+        Actividades Relacionadas
+      </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {activities.map((activity, index) => (
           <Card
@@ -53,4 +56,4 @@ const PopularActivities = () => {
   );
 };
 
-export default PopularActivities;
+export default RelatedActivities;

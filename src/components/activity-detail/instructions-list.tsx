@@ -25,7 +25,7 @@ const steps = [
 
 export function InstructionsList() {
   return (
-    <div className="container p-6 lg:mx-auto lg:max-w-4xl">
+    <div className="container p-6 lg:mx-auto lg:max-w-5xl">
       <Card
         className={cn(
           "w-full bg-[oklch(var(--brand-amber-light))] rounded-[2rem] p-6 md:p-10 border border-amber-100",
@@ -51,7 +51,7 @@ export function InstructionsList() {
             >
               <div
                 className={cn(
-                  "flex-shrink-0 h-10 w-10 rounded-full bg-white border-4 border-[oklch(var(--brand-mustard))] flex items-center justify-center shadow-sm"
+                  "shrink-0 h-10 w-10 rounded-full bg-white border-4 border-[oklch(var(--brand-mustard))] flex items-center justify-center shadow-sm"
                 )}
               >
                 <step.icon className="h-5 w-5 text-black" />

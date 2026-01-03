@@ -114,20 +114,24 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  --mint-green: 0.30 0.05 160;
+  --mint-green: 0.3 0.05 160;
 }
 
 @layer base {
   :root {
-    --neuro-green: #22C55E;
+    --neuro-green: #22c55e;
     --highlight-green: 0.85 0.18 145;
+    --brand-amber-light: 0.98 0.04 85;
+    --brand-mustard: 0.79 0.17 85;
     --brand-mustard: 0.79 0.17 85;
     --brand-cream: 0.96 0.03 85;
-    --brand-blue-soft: 0.90 0.05 240;
-    --brand-purple-soft: 0.90 0.05 300;
+    --brand-blue-soft: 0.9 0.05 240;
+    --brand-purple-soft: 0.9 0.05 300;
   }
   .dark {
-    --highlight-green: 0.70 0.15 145;
+    --highlight-green: 0.7 0.15 145;
+    --brand-amber-light: 0.98 0.04 85;
+    --brand-mustard: 0.79 0.17 85;
   }
   * {
     @apply border-border outline-ring/50;

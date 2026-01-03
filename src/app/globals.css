@@ -128,6 +128,12 @@
     --brand-blue-soft: 0.9 0.05 240;
     --brand-purple-soft: 0.9 0.05 300;
     --brand-mustard: 0.795 0.184 86.047;
+
+    /* Planner Palette */
+    --checklist-sky: 0.75 0.15 240;
+    --checklist-green: 0.88 0.15 150;
+    --checklist-green-solid: 0.60 0.18 150;
+    --checklist-gray-bg: 0.98 0.00 0;
   }
   .dark {
     --highlight-green: 0.7 0.15 145;

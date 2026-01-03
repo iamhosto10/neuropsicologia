@@ -11,9 +11,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useRouter, usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "#", label: "Actividades" },
+  { href: "/actividades", label: "Actividades" },
   { href: "#", label: "Cursos" },
   { href: "#", label: "Recursos" },
   { href: "#", label: "Sobre Nosotros" },
@@ -22,6 +24,8 @@ const navLinks = [
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = usePathname();
+  console.log("Current route:", router);
 
   return (
     <header className="fixed top-6 left-0 right-0 mx-auto w-[90%] max-w-5xl rounded-full border shadow-lg bg-white z-50">
@@ -40,7 +44,10 @@ export function Navbar() {
             <Link
               key={link.label}
               href={link.href}
-              className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
+              className={cn(
+                "text-sm font-medium text-gray-700 hover:text-black transition-colors",
+                router === link.href && "text-black font-bold"
+              )}
             >
               {link.label}
             </Link>

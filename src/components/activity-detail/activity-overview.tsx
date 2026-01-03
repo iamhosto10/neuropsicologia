@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
+} from "@/components/ui/breadcrumb";
 import {
   Clock,
   Users,
@@ -20,11 +20,11 @@ import {
   Lightbulb,
   CheckCircle2,
   Target,
-} from 'lucide-react';
+} from "lucide-react";
 
 const ActivityOverview = () => {
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8 animate-in slide-in-from-bottom-5 fade-in duration-700">
+    <div className="container mx-auto max-w-4xl px-6 lg:px-10 py-36 animate-in slide-in-from-bottom-5 fade-in duration-700">
       {/* A. Header Info */}
       <header>
         <Breadcrumb className="text-sm text-muted-foreground">
@@ -46,7 +46,9 @@ const ActivityOverview = () => {
           Juego de Memoria con Animales
         </h1>
         <p className="text-gray-600 mt-2">
-          Una actividad divertida para mejorar la memoria y el reconocimiento de patrones en los niños, utilizando tarjetas con ilustraciones de animales.
+          Una actividad divertida para mejorar la memoria y el reconocimiento de
+          patrones en los niños, utilizando tarjetas con ilustraciones de
+          animales.
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
           <Badge className="bg-[oklch(var(--brand-cream))] text-gray-800 hover:bg-orange-100 rounded-full px-4 py-1">
@@ -80,7 +82,10 @@ const ActivityOverview = () => {
         <Button className="w-full md:w-auto bg-[oklch(var(--brand-mustard))] text-black font-bold hover:bg-yellow-500 rounded-full text-lg h-12 px-8">
           Iniciar Actividad
         </Button>
-        <Button variant="outline" className="w-full md:w-auto bg-white border shadow-sm rounded-full h-12 px-6">
+        <Button
+          variant="outline"
+          className="w-full md:w-auto bg-white border shadow-sm rounded-full h-12 px-6"
+        >
           <Heart className="h-5 w-5 mr-2" />
           Guardar en Favoritos
         </Button>

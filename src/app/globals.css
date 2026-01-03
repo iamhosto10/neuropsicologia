@@ -121,9 +121,13 @@
   :root {
     --neuro-green: #22C55E;
     --highlight-green: 0.85 0.18 145;
+    --brand-amber-light: 0.98 0.04 85;
+    --brand-mustard: 0.79 0.17 85;
   }
   .dark {
     --highlight-green: 0.70 0.15 145;
+    --brand-amber-light: 0.98 0.04 85;
+    --brand-mustard: 0.79 0.17 85;
   }
   * {
     @apply border-border outline-ring/50;

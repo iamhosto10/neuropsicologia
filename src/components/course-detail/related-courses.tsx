@@ -1,67 +1,64 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import Image from 'next/image';
+import { CourseCard } from "../courses/courses-card";
+import { Course } from "@/lib/types";
 
 const courses = [
   {
-    title: 'Neuropsicología Infantil',
-    category: 'Infantil',
-    imageUrl: '/placeholder-image.jpg',
+    title: "Aventuras de Construcción",
+    description:
+      "Fomenta la creatividad y habilidades motoras con bloques y juegos de construcción.",
+    age: "2-4 años",
+    lessons: "8 Lecciones",
+    bgColor: "bg-orange-50",
   },
   {
-    title: 'Evaluación de Funciones Ejecutivas',
-    category: 'Evaluación',
-    imageUrl: '/placeholder-image.jpg',
+    title: "Juegos en Grupo",
+    description:
+      "Desarrolla habilidades sociales y de comunicación a través de juegos interactivos.",
+    age: "3-5 años",
+    lessons: "10 Lecciones",
+    bgColor: "bg-blue-50",
   },
   {
-    title: 'Rehabilitación Cognitiva en Adultos',
-    category: 'Rehabilitación',
-    imageUrl: '/placeholder-image.jpg',
+    title: "Arte y Creatividad",
+    description:
+      "Explora el mundo del arte con pintura, dibujo y manualidades.",
+    age: "4-6 años",
+    lessons: "12 Lecciones",
+    bgColor: "bg-green-50",
   },
   {
-    title: 'Terapia de Lenguaje',
-    category: 'Terapia',
-    imageUrl: '/placeholder-image.jpg',
+    title: "Música y Movimiento",
+    description:
+      "Introduce a los niños al ritmo y la música con instrumentos y baile.",
+    age: "2-5 años",
+    lessons: "8 Lecciones",
+    bgColor: "bg-purple-50",
   },
   {
-    title: 'Neurociencia Afectiva',
-    category: 'Neurociencia',
-    imageUrl: '/placeholder-image.jpg',
+    title: "Pequeños Científicos",
+    description:
+      "Experimentos divertidos y seguros para despertar la curiosidad científica.",
+    age: "5-7 años",
+    lessons: "15 Lecciones",
+    bgColor: "bg-yellow-50",
   },
-];
-
-// Placeholder Course Card component to match the description
-function CourseCard({ title, category, imageUrl, className }: { title: string; category: string; imageUrl: string; className?: string }) {
-  return (
-    <Card className={`overflow-hidden rounded-3xl shadow-sm hover:shadow-lg transition-shadow duration-300 ${className}`}>
-      <CardContent className="p-0">
-        <div className="relative h-48 w-full">
-          <Image src={imageUrl} alt={title} fill style={{ objectFit: 'cover' }} />
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 flex-col items-start">
-        <h3 className="font-bold text-lg mb-2">{title}</h3>
-        <Badge variant="secondary">{category}</Badge>
-      </CardFooter>
-    </Card>
-  );
-}
-
+  {
+    title: "Cuentacuentos Interactivo",
+    description:
+      "Fomenta el amor por la lectura con historias y actividades participativas.",
+    age: "3-6 años",
+    lessons: "10 Lecciones",
+    bgColor: "bg-pink-50",
+  },
+] as Course[];
 
 export function RelatedCourses() {
   return (
     <div className="w-full">
       <h2 className="text-3xl font-bold mb-6">Quizás también te interese...</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {courses.slice(0, 5).map((course, index) => (
-          <CourseCard
-            key={course.title}
-            title={course.title}
-            category={course.category}
-            imageUrl={course.imageUrl}
-            // Apply special class for the 3rd item on tablet view
-            className={index === 2 ? 'md:col-span-2 lg:col-span-1' : ''}
-          />
+        {courses.slice(0, 3).map((course, index) => (
+          <CourseCard key={course.title} course={course} />
         ))}
       </div>
     </div>

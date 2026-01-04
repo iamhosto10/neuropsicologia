@@ -1,25 +1,25 @@
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from "lucide-react";
 
 const objectives = [
-  'Comprender los fundamentos de la neuropsicología.',
-  'Aplicar técnicas de evaluación neuropsicológica.',
-  'Diseñar planes de intervención personalizados.',
-  'Analizar casos clínicos complejos.',
-  'Integrar los conocimientos en la práctica profesional.',
+  "Comprender los fundamentos de la neuropsicología.",
+  "Aplicar técnicas de evaluación neuropsicológica.",
+  "Diseñar planes de intervención personalizados.",
+  "Analizar casos clínicos complejos.",
+  "Integrar los conocimientos en la práctica profesional.",
 ];
 
 export function CourseContent() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 container w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
       {/* Section A: About */}
       <div className="space-y-4">
         <h2 className="text-3xl font-bold">Sobre este curso</h2>
         <p className="text-muted-foreground">
-          Este curso intensivo proporciona una formación completa en neuropsicología,
-          abarcando desde los principios teóricos hasta la aplicación práctica en
-          diversos contextos clínicos. Aprenderás a evaluar, diagnosticar y tratar
-          trastornos neuropsicológicos, desarrollando habilidades críticas para tu
-          carrera.
+          Este curso intensivo proporciona una formación completa en
+          neuropsicología, abarcando desde los principios teóricos hasta la
+          aplicación práctica en diversos contextos clínicos. Aprenderás a
+          evaluar, diagnosticar y tratar trastornos neuropsicológicos,
+          desarrollando habilidades críticas para tu carrera.
         </p>
       </div>
 

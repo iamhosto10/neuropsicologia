@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Heart } from "lucide-react";
+import { Course } from "@/lib/types";
+import { CourseCard } from "./courses-card";
 
 const courses = [
   {
@@ -60,7 +62,7 @@ const courses = [
     lessons: "10 Lecciones",
     bgColor: "bg-pink-50",
   },
-];
+] as Course[];
 
 export function CoursesGallery() {
   return (
@@ -137,32 +139,33 @@ export function CoursesGallery() {
       {/* Courses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 animate-in duration-1000 fade-in slide-in-from-bottom-8">
         {courses.map((course) => (
-          <Card
-            key={course.title}
-            className="bg-white pt-0 rounded-[2rem] border-none shadow-sm hover:shadow-lg overflow-hidden group transition-transform duration-500 hover:-translate-y-2"
-          >
-            <div className={`relative h-48 ${course.bgColor}`}>
-              <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full cursor-pointer">
-                <Heart className="w-5 h-5 text-black" />
-              </div>
-            </div>
-            <CardContent className="p-6 flex flex-col gap-2">
-              <h3 className="text-xl font-bold text-black line-clamp-2">
-                {course.title}
-              </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {course.description}
-              </p>
-              <div className="flex items-center gap-2 mt-4">
-                <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium hover:bg-orange-200">
-                  {course.age}
-                </Badge>
-                <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium hover:bg-orange-200">
-                  {course.lessons}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+          // <Card
+          //   key={course.title}
+          //   className="bg-white pt-0 rounded-[2rem] border-none shadow-sm hover:shadow-lg overflow-hidden group transition-transform duration-500 hover:-translate-y-2"
+          // >
+          //   <div className={`relative h-48 ${course.bgColor}`}>
+          //     <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full cursor-pointer">
+          //       <Heart className="w-5 h-5 text-black" />
+          //     </div>
+          //   </div>
+          //   <CardContent className="p-6 flex flex-col gap-2">
+          //     <h3 className="text-xl font-bold text-black line-clamp-2">
+          //       {course.title}
+          //     </h3>
+          //     <p className="text-sm text-muted-foreground line-clamp-2">
+          //       {course.description}
+          //     </p>
+          //     <div className="flex items-center gap-2 mt-4">
+          //       <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium hover:bg-orange-200">
+          //         {course.age}
+          //       </Badge>
+          //       <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium hover:bg-orange-200">
+          //         {course.lessons}
+          //       </Badge>
+          //     </div>
+          //   </CardContent>
+          // </Card>
+          <CourseCard key={course.title} course={course} />
         ))}
       </div>
     </section>

@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/actividades", label: "Actividades" },
-  { href: "#", label: "Cursos" },
+  { href: "/cursos", label: "Cursos" },
   { href: "#", label: "Recursos" },
   { href: "#", label: "Sobre Nosotros" },
   { href: "#", label: "Contacto" },
@@ -28,7 +28,7 @@ export function Navbar() {
   console.log("Current route:", router);
 
   return (
-    <header className="fixed top-6 left-0 right-0 mx-auto w-[90%] max-w-5xl rounded-full border shadow-lg bg-white z-50">
+    <header className="fixed top-6 left-0 right-0 mx-auto w-[90%] max-w-6xl rounded-full border shadow-lg bg-white z-50">
       <div className="flex items-center justify-between h-16 px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">

@@ -1,7 +1,7 @@
-import { CreativeHeader } from './creative-header';
-import { DrawingSteps } from './drawing-steps';
-import { DigitalArtCanvas } from './digital-art-canvas';
-import { CreativeSidebar } from './creative-sidebar';
+import { CreativeHeader } from "./creative-header";
+import { DrawingSteps } from "./drawing-steps";
+import { DigitalArtCanvas } from "./digital-art-canvas";
+import { LessonSidebar } from "./lesson-sidebar";
 
 function MockVideoPlayer() {
   return (
@@ -13,16 +13,18 @@ function MockVideoPlayer() {
 
 export function LessonViewV2() {
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+      <CreativeHeader />
+
+      {/* <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"> */}
+      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-12 lg:items-start">
         <main className="lg:col-span-8 space-y-8">
-          <CreativeHeader />
           <MockVideoPlayer />
           <DrawingSteps />
           <DigitalArtCanvas />
         </main>
-        <aside className="lg:col-span-4 lg:sticky lg:top-6">
-          <CreativeSidebar />
+        <aside className="col-span-12 lg:col-span-4 lg:sticky top-22">
+          <LessonSidebar />
         </aside>
       </div>
     </div>

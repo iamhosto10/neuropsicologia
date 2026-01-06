@@ -1,12 +1,12 @@
+import { Palette } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { Flag } from "lucide-react";
 import LessonObjective from "../lesson-objective/lesson-objective";
 
-export const LessonHeader = () => {
+export function CreativeHeader() {
   return (
     <header className="mb-8">
       <p className="text-sm text-gray-500">
-        Cursos &gt; Aventura Emocional &gt; Lección 1.1
+        Cursos &gt; Dibujo Creativo &gt; Lección 1.2
       </p>
       <div className="flex items-center gap-2 mt-4">
         <p className="text-xs font-bold tracking-wider uppercase">
@@ -20,25 +20,29 @@ export const LessonHeader = () => {
         <p className="text-sm font-bold">15%</p>
       </div>
       <h1 className="text-3xl font-bold mt-2">
-        Lección 1.1: ¿Qué es la alegría?
+        Lección 1.2: Dibujando emociones
       </h1>
       <LessonObjective classname="mt-4">
         <div className="flex items-start gap-4">
           <div className="bg-white p-2 rounded-full border border-amber-200">
-            <Flag className="text-amber-500 w-6 h-6 shrink-0 mt-1" />
+            <Palette className="h-6 w-6 text-[oklch(var(--creative-amber))]" />
           </div>
           <div>
             <h3 className="font-semibold text-gray-800 mb-2">
-              Objetivos de la Lección
+              Objetivos de la lección
             </h3>
             <ul className="list-disc list-inside text-gray-600 space-y-1">
-              <li>Reconocer la alegría en situaciones cotidianas.</li>
-              <li>Identificar las sensaciones físicas de la alegría.</li>
-              <li>Aprender a expresar la alegría de forma saludable.</li>
+              <li>Aprender a combinar formas básicas para crear personajes.</li>
+              <li>
+                Entender cómo las expresiones faciales transmiten emociones.
+              </li>
+              <li>
+                Practicar el dibujo de al menos tres expresiones diferentes.
+              </li>
             </ul>
           </div>
         </div>
       </LessonObjective>
     </header>
   );
-};
+}

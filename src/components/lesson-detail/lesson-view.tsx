@@ -3,6 +3,14 @@ import { InteractiveQuiz } from "./interactive-quiz";
 import { InteractiveDragDrop } from "./interactive-drag-drop";
 import { LessonSidebar } from "./lesson-sidebar";
 
+function MockVideoPlayer() {
+  return (
+    <div className="w-full aspect-video bg-slate-800 rounded-2xl flex items-center justify-center border">
+      <p className="text-slate-400 font-medium">Mock Video Player</p>
+    </div>
+  );
+}
+
 export const LessonView = () => {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-1000">
@@ -11,9 +19,7 @@ export const LessonView = () => {
 
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-12 lg:items-start">
           <main className="col-span-12 lg:col-span-8 space-y-8">
-            <div className="aspect-video w-full bg-gray-200 rounded-2xl flex items-center justify-center">
-              <p className="text-gray-500">Video Player Mock</p>
-            </div>
+            <MockVideoPlayer />
             <article className="prose max-w-none">
               <p>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed

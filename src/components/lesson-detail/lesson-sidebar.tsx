@@ -1,84 +1,70 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Check,
-  PlayCircle,
-  Lock,
-  Download,
-  FileText,
-  FileAudio,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, Download, FileText, Share2 } from "lucide-react";
 
-const modules = [
-  { title: "Módulo 1: Introducción", isLocked: false, isActive: false },
-  { title: "Lección 1.1: ¿Qué es la alegría?", isLocked: false, isActive: true },
-  { title: "Lección 1.2: La tristeza", isLocked: true, isActive: false },
-  { title: "Módulo 2: Emociones complejas", isLocked: true, isActive: false },
-];
+interface LessonSidebarProps {
+  materials?: string[];
+}
 
-export const LessonSidebar = () => {
+export function LessonSidebar({ materials }: LessonSidebarProps) {
   return (
-    <aside className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 h-fit">
-      <Button
-        className="w-full font-bold bg-[oklch(var(--learning-blue))] hover:bg-[oklch(var(--learning-blue)/0.9)]"
-      >
-        <Check className="w-5 h-5 mr-2" />
-        Completar Lección
-      </Button>
+    <div className="space-y-6">
+      {/* Progress Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Tu Progreso</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Completado</span>
+            <span className="font-bold text-green-600">0%</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-2">
+            <div className="bg-green-500 h-2 rounded-full w-0 transition-all duration-500"></div>
+          </div>
+          <Button className="w-full bg-green-600 hover:bg-green-700 text-white gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            Marcar como completado
+          </Button>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <Button variant="outline">Anterior</Button>
-        <Button
-          className="bg-[oklch(var(--brand-mustard))] hover:bg-[oklch(var(--brand-mustard)/0.9)]"
-        >
-          Siguiente
-        </Button>
-      </div>
+      {/* Materials Card */}
+      {materials && materials.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Materiales</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {materials.map((material, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors group">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white rounded-md border shadow-sm">
+                    <FileText className="w-4 h-4 text-blue-500" />
+                  </div>
+                  <div className="text-sm font-medium text-slate-700">
+                    {material}
+                  </div>
+                </div>
+              </div>
+            ))}
+             <Button variant="outline" className="w-full gap-2 mt-4">
+              <Download className="w-4 h-4" />
+              Descargar todo
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
-      <h3 className="font-bold mt-6 mb-2">Contenido del Curso</h3>
-      <ScrollArea className="h-64 pr-4">
-        <div className="space-y-2">
-          {modules.map((module, index) => (
-            <div
-              key={index}
-              className={cn(
-                "flex items-center gap-3 p-3 rounded-lg transition-colors",
-                {
-                  "bg-blue-50 text-blue-700 font-bold": module.isActive,
-                  "text-gray-400": module.isLocked,
-                  "hover:bg-gray-50": !module.isActive && !module.isLocked,
-                }
-              )}
-            >
-              {module.isActive ? (
-                <PlayCircle className="w-5 h-5" />
-              ) : module.isLocked ? (
-                <Lock className="w-5 h-5" />
-              ) : (
-                <div className="w-5 h-5" /> // Placeholder for alignment
-              )}
-              <span className="flex-1">{module.title}</span>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
-
-      <div className="mt-6 p-4 bg-sky-50 rounded-xl">
-        <h4 className="font-bold mb-3">Recursos</h4>
-        <ul className="space-y-2">
-          <li className="flex items-center gap-2 text-sm text-gray-700 hover:underline cursor-pointer">
-            <Download className="w-4 h-4 text-sky-600" />
-            <FileText className="w-4 h-4 text-sky-600" />
-            <span>Guía de la Lección (PDF)</span>
-          </li>
-          <li className="flex items-center gap-2 text-sm text-gray-700 hover:underline cursor-pointer">
-            <Download className="w-4 h-4 text-sky-600" />
-            <FileAudio className="w-4 h-4 text-sky-600" />
-            <span>Audio Relajante (MP3)</span>
-          </li>
-        </ul>
-      </div>
-    </aside>
+      {/* Share Card */}
+      <Card>
+        <CardContent className="p-6">
+          <Button variant="ghost" className="w-full gap-2 text-slate-600">
+            <Share2 className="w-4 h-4" />
+            Compartir lección
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
-};
+}

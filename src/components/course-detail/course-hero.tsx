@@ -9,14 +9,39 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+import { SanityCourseDetail } from "@/lib/types";
 
-const metadata = [
-  { icon: Smile, label: "4 - 6 años", value: "Edad Recomendada" },
-  { icon: Clock, label: "10 horas", value: "Duración" },
-  { icon: BarChart, label: "Nivel", value: "Principiante" },
-];
+interface CourseHeroProps {
+  course: SanityCourseDetail;
+}
 
-export function CourseHero() {
+export function CourseHero({ course }: CourseHeroProps) {
+  // Calculate total duration if possible, or use a placeholder/field if available
+  // The query doesn't return total duration on the course object, but we have it on lessons.
+  // Let's assume we sum up duration from lessons if available, or just show a placeholder.
+
+  let totalDuration = 0;
+  if(course.syllabus) {
+      course.syllabus.forEach(module => {
+          if(module.lessons) {
+              module.lessons.forEach(lesson => {
+                  totalDuration += lesson.duration || 0;
+              });
+          }
+      });
+  }
+
+  // Determine level from the first lesson or a common field? The query has level on lessons.
+  // Let's pick the level from the first lesson as a representative, or default to "Principiante".
+  const level = course.syllabus?.[0]?.lessons?.[0]?.level || "Principiante";
+
+
+  const metadata = [
+    { icon: Smile, label: "Edad Recomendada", value: course.age },
+    { icon: Clock, label: "Duración Estimada", value: `${totalDuration} min` }, // Assuming duration is in minutes
+    { icon: BarChart, label: "Nivel", value: level },
+  ];
+
   return (
     <div className=" flex  flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-0 gap-8">
       <header>
@@ -31,33 +56,27 @@ export function CourseHero() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Aventura de las emociones</BreadcrumbPage>
+              <BreadcrumbPage>{course.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <h1 className="text-3xl md:text-5xl font-extrabold text-black mt-2">
-          Aventura de las emociones
+          {course.title}
         </h1>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-8 ">
         {/* Left Column: Video */}
         <div className="w-full lg:w-2/3">
-          <div className="relative aspect-video bg-gray-900 rounded-[2rem] flex items-center justify-center p-4">
+          <div className={`relative aspect-video ${course.bgColor || "bg-gray-900"} rounded-[2rem] flex items-center justify-center p-4`}>
             {/* Placeholder for a video or image */}
-            <div className="absolute inset-0 bg-black/50 rounded-[2rem]"></div>
+            <div className="absolute inset-0 bg-black/10 rounded-[2rem]"></div>
             <PlayCircle className="h-20 w-20 text-white/70" />
           </div>
         </div>
 
         {/* Right Column: Sidebar/Metadata */}
         <div className="w-full lg:w-1/3 flex flex-col gap-4">
-          {/*
-          Layout Logic:
-          - Mobile (<md): flex-col (default, but handled by parent's flex direction)
-          - Tablet (md to lg): flex-row
-          - Desktop (lg+): flex-col (as it's inside a flex-col container)
-        */}
           <div className="flex flex-col gap-4">
             <div className="flex flex-1 flex-col md:flex-row lg:flex-col gap-4">
               {metadata.map((item, index) => (

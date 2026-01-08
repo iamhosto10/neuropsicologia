@@ -1,7 +1,5 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -9,62 +7,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Heart } from "lucide-react";
-import { Course } from "@/lib/types";
+import { SanityCourse } from "@/lib/types";
 import { CourseCard } from "./courses-card";
 
-const courses = [
-  {
-    title: "Aventuras de Construcción",
-    description:
-      "Fomenta la creatividad y habilidades motoras con bloques y juegos de construcción.",
-    age: "2-4 años",
-    lessons: "8 Lecciones",
-    bgColor: "bg-orange-50",
-  },
-  {
-    title: "Juegos en Grupo",
-    description:
-      "Desarrolla habilidades sociales y de comunicación a través de juegos interactivos.",
-    age: "3-5 años",
-    lessons: "10 Lecciones",
-    bgColor: "bg-blue-50",
-  },
-  {
-    title: "Arte y Creatividad",
-    description:
-      "Explora el mundo del arte con pintura, dibujo y manualidades.",
-    age: "4-6 años",
-    lessons: "12 Lecciones",
-    bgColor: "bg-green-50",
-  },
-  {
-    title: "Música y Movimiento",
-    description:
-      "Introduce a los niños al ritmo y la música con instrumentos y baile.",
-    age: "2-5 años",
-    lessons: "8 Lecciones",
-    bgColor: "bg-purple-50",
-  },
-  {
-    title: "Pequeños Científicos",
-    description:
-      "Experimentos divertidos y seguros para despertar la curiosidad científica.",
-    age: "5-7 años",
-    lessons: "15 Lecciones",
-    bgColor: "bg-yellow-50",
-  },
-  {
-    title: "Cuentacuentos Interactivo",
-    description:
-      "Fomenta el amor por la lectura con historias y actividades participativas.",
-    age: "3-6 años",
-    lessons: "10 Lecciones",
-    bgColor: "bg-pink-50",
-  },
-] as Course[];
+interface CoursesGalleryProps {
+  courses: SanityCourse[];
+}
 
-export function CoursesGallery() {
+export function CoursesGallery({ courses }: CoursesGalleryProps) {
   return (
     <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
       {/* Header */}
@@ -139,33 +89,7 @@ export function CoursesGallery() {
       {/* Courses Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 animate-in duration-1000 fade-in slide-in-from-bottom-8">
         {courses.map((course) => (
-          // <Card
-          //   key={course.title}
-          //   className="bg-white pt-0 rounded-[2rem] border-none shadow-sm hover:shadow-lg overflow-hidden group transition-transform duration-500 hover:-translate-y-2"
-          // >
-          //   <div className={`relative h-48 ${course.bgColor}`}>
-          //     <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full cursor-pointer">
-          //       <Heart className="w-5 h-5 text-black" />
-          //     </div>
-          //   </div>
-          //   <CardContent className="p-6 flex flex-col gap-2">
-          //     <h3 className="text-xl font-bold text-black line-clamp-2">
-          //       {course.title}
-          //     </h3>
-          //     <p className="text-sm text-muted-foreground line-clamp-2">
-          //       {course.description}
-          //     </p>
-          //     <div className="flex items-center gap-2 mt-4">
-          //       <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium hover:bg-orange-200">
-          //         {course.age}
-          //       </Badge>
-          //       <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium hover:bg-orange-200">
-          //         {course.lessons}
-          //       </Badge>
-          //     </div>
-          //   </CardContent>
-          // </Card>
-          <CourseCard key={course.title} course={course} />
+          <CourseCard key={course.slug} course={course} />
         ))}
       </div>
     </section>

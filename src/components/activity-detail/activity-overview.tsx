@@ -1,7 +1,7 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Activity } from "../../lib/types";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,7 +22,7 @@ import {
   Target,
 } from "lucide-react";
 
-const ActivityOverview = () => {
+const ActivityOverview = ({ activity }: { activity: Activity }) => {
   return (
     <div className="container mx-auto max-w-5xl px-6 lg:px-10 pt-36 pb-8 animate-in slide-in-from-bottom-5 fade-in duration-700">
       {/* A. Header Info */}
@@ -38,43 +38,40 @@ const ActivityOverview = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Juego de Memoria</BreadcrumbPage>
+              <BreadcrumbPage>{activity?.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <h1 className="text-3xl md:text-5xl font-extrabold text-black mt-2">
-          Juego de Memoria con Animales
+          {activity?.title}
         </h1>
-        <p className="text-gray-600 mt-2">
-          Una actividad divertida para mejorar la memoria y el reconocimiento de
-          patrones en los niños, utilizando tarjetas con ilustraciones de
-          animales.
-        </p>
+        <p className="text-gray-600 mt-2">{activity?.description}</p>
         <div className="flex flex-wrap gap-2 mt-4">
           <Badge className="bg-[oklch(var(--brand-cream))] text-gray-800 hover:bg-orange-100 rounded-full px-4 py-1">
             <Clock className="h-4 w-4 mr-1" />
-            20 min
+            {activity?.duration} min
           </Badge>
           <Badge className="bg-[oklch(var(--brand-cream))] text-gray-800 hover:bg-orange-100 rounded-full px-4 py-1">
             <Users className="h-4 w-4 mr-1" />
-            3-5 años
+            {activity?.ageRange}
           </Badge>
           <Badge className="bg-[oklch(var(--brand-cream))] text-gray-800 hover:bg-orange-100 rounded-full px-4 py-1">
             <BarChart className="h-4 w-4 mr-1" />
-            Nivel Básico
+            {activity?.level}
           </Badge>
         </div>
       </header>
 
       {/* B. Media Player */}
-      <div className="relative w-full h-64 md:h-96 rounded-[2rem] overflow-hidden mt-8 shadow-md">
-        <div className="bg-gray-200 object-cover w-full h-full"></div>
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <button className="h-16 w-16 rounded-full bg-[oklch(var(--brand-mustard))] text-black flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
-            <Play className="h-8 w-8 fill-black" />
-          </button>
-        </div>
+
+      <div className="relative w-full h-72 md:h-98 lg:h-[550px] rounded-[2rem] overflow-hidden mt-8 shadow-md">
+        <video
+          className="w-full h-full object-cover"
+          src={activity.video?.file.asset.url}
+          controls
+          preload="metadata"
+        />
+        <div className="absolute inset-0 pointer-events-none bg-black/10" />
       </div>
 
       {/* C. Action Bar */}
@@ -103,18 +100,12 @@ const ActivityOverview = () => {
           </CardHeader>
           <CardContent className="p-0 mt-4">
             <ul className="space-y-2">
-              <li className="flex items-center">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                <span>Tarjetas de memoria de animales</span>
-              </li>
-              <li className="flex items-center">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                <span>Superficie plana (mesa o suelo)</span>
-              </li>
-              <li className="flex items-center">
-                <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-                <span>Cronómetro (opcional)</span>
-              </li>
+              {activity?.materials?.map((act, idx) => (
+                <li className="flex items-center" key={idx}>
+                  <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
+                  <span>{act}</span>
+                </li>
+              ))}
             </ul>
           </CardContent>
         </Card>
@@ -129,18 +120,12 @@ const ActivityOverview = () => {
           </CardHeader>
           <CardContent className="p-0 mt-4">
             <ul className="space-y-2">
-              <li className="flex items-center">
-                <Target className="h-5 w-5 text-yellow-600 mr-2" />
-                <span>Mejorar la memoria a corto plazo</span>
-              </li>
-              <li className="flex items-center">
-                <Target className="h-5 w-5 text-yellow-600 mr-2" />
-                <span>Fomentar la concentración</span>
-              </li>
-              <li className="flex items-center">
-                <Target className="h-5 w-5 text-yellow-600 mr-2" />
-                <span>Reconocer diferentes animales</span>
-              </li>
+              {activity?.objectives?.map((obj, idx) => (
+                <li className="flex items-center">
+                  <Target className="h-5 w-5 text-yellow-600 mr-2" />
+                  <span>{obj}</span>
+                </li>
+              ))}
             </ul>
           </CardContent>
         </Card>

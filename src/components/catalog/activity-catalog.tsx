@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 import { Heart, Smile, Clock } from "lucide-react";
+import { Activity } from "@/lib/types";
+import { urlFor } from "@/sanity/lib/image";
+import Link from "next/link";
 
 const durationTags = ["15 min", "30 min", "45+ min"];
 const difficultyTags = ["Fácil", "Medio", "Difícil"];
@@ -88,46 +91,52 @@ function ActivityCard({
   activity,
   delay,
 }: {
-  activity: (typeof mockActivities)[0];
+  activity: Activity;
   delay: number;
 }) {
   return (
-    <Card
-      className="bg-white shadow-sm rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-1000 pt-0"
-      style={{ animationDelay: `${delay}ms` }}
-    >
-      <CardHeader className="p-0 relative">
-        <div className="aspect-video bg-gray-100" />
-        <Button
-          size="icon"
-          className="absolute top-3 right-3 bg-white rounded-full shadow hover:bg-gray-50"
-        >
-          <Heart className="h-5 w-5 text-gray-500" />
-        </Button>
-      </CardHeader>
-      <CardContent className="p-4">
-        <CardTitle className="font-bold text-lg mb-1">
-          {activity.title}
-        </CardTitle>
-        <p className="text-gray-600 text-sm line-clamp-2">
-          {activity.description}
-        </p>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex items-center justify-between text-sm text-gray-500">
-        <div className="flex items-center gap-2">
-          <Smile className="h-4 w-4" />
-          <span>{activity.age}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4" />
-          <span>{activity.duration}</span>
-        </div>
-      </CardFooter>
-    </Card>
+    <Link href={`/actividades/${activity.slug.current}`}>
+      <Card
+        className="bg-white shadow-sm rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-1000 pt-0 cursor-pointer"
+        style={{ animationDelay: `${delay}ms` }}
+      >
+        <CardHeader className="p-0 relative">
+          <img
+            src={urlFor(activity.image?.asset.url).url()}
+            alt={activity.title}
+            className="rounded-md w-full object-cover"
+          />
+          <Button
+            size="icon"
+            className="absolute top-3 right-3 bg-white rounded-full shadow hover:bg-gray-50"
+          >
+            <Heart className="h-5 w-5 text-gray-500" />
+          </Button>
+        </CardHeader>
+        <CardContent className="p-4">
+          <CardTitle className="font-bold text-lg mb-1">
+            {activity.title}
+          </CardTitle>
+          <p className="text-gray-600 text-sm line-clamp-2">
+            {activity.description}
+          </p>
+        </CardContent>
+        <CardFooter className="p-4 pt-0 flex items-center justify-between text-sm text-gray-500">
+          <div className="flex items-center gap-2">
+            <Smile className="h-4 w-4" />
+            <span>{activity.ageRange}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <span>{activity.duration}</span>
+          </div>
+        </CardFooter>
+      </Card>
+    </Link>
   );
 }
 
-export function ActivityCatalog() {
+export function ActivityCatalog({ activities }: { activities: Activity[] }) {
   const [ageRange, setAgeRange] = useState([2, 12]);
   const [selectedDuration, setSelectedDuration] = useState("30 min");
   const [selectedDifficulty, setSelectedDifficulty] = useState("Medio");
@@ -263,9 +272,9 @@ export function ActivityCatalog() {
         {/* Activity Grid */}
         <main className="w-full lg:w-3/4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockActivities.map((activity, i) => (
+            {activities.map((activity, i) => (
               <ActivityCard
-                key={activity.id}
+                key={activity._id}
                 activity={activity}
                 delay={i * 200}
               />

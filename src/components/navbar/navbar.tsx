@@ -60,13 +60,13 @@ export function Navbar() {
             variant="ghost"
             className="rounded-full bg-gray-100 font-bold"
           >
-            Login
+            Iniciar Sesion
           </Button>
           <Button
             className="rounded-full text-black font-bold"
             style={{ backgroundColor: "var(--neuro-green)" }}
           >
-            Register
+            Registro
           </Button>
         </div>
 
@@ -112,13 +112,13 @@ export function Navbar() {
                     variant="ghost"
                     className="rounded-full bg-gray-100 font-bold w-full"
                   >
-                    Login
+                    Iniciar Sesion
                   </Button>
                   <Button
                     className="rounded-full text-black font-bold w-full"
                     style={{ backgroundColor: "var(--neuro-green)" }}
                   >
-                    Register
+                    Registro
                   </Button>
                 </div>
               </div>

@@ -1,11 +1,3 @@
-export type Course = {
-  title: string;
-  description: string;
-  age: string;
-  lessons: string;
-  bgColor: string;
-};
-
 export interface Activity {
   _id: string;
   _type: "activity";
@@ -44,4 +36,55 @@ export interface Activity {
   benefits?: string;
   advice?: string;
   relatedActivity?: Activity[];
+}
+export interface Lesson {
+  _id: string;
+  _type: "lesson";
+  _createdAt: string;
+  _updatedAt: string;
+
+  title: string;
+  slug: {
+    _type: "slug";
+    current: string;
+  };
+}
+
+export interface Course {
+  _id: string;
+  _type: "course";
+  _createdAt: string;
+  _updatedAt: string;
+
+  title: string;
+  slug: {
+    current: string;
+  };
+  description?: string;
+
+  age?: string;
+  duration?: number;
+
+  level?: "Básico" | "Intermedio" | "Avanzado";
+
+  image?: {
+    asset: {
+      url: string;
+      _id: string;
+    };
+  };
+  video?: {
+    url: string;
+    file: {
+      asset: {
+        url: string;
+        _id: string;
+      };
+    };
+  };
+
+  objectives?: string[];
+
+  syllabus?: { title: string; lessons: Lesson[] }[];
+  relatedCourse: Course[];
 }

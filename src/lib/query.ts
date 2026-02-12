@@ -99,3 +99,125 @@ export const activitiesBySlugQuery = `
   }
 }
 `;
+
+export const coursesQuery = `
+*[_type == "course"] | order(_createdAt desc) {
+  _id,
+  _type,
+  _createdAt,
+  _updatedAt,
+
+  title,
+  description,
+  age,
+  duration,
+  level,
+
+  slug {
+    current
+  },
+
+  image {
+    _type,
+    asset->{
+      _id,
+      url
+    }
+  },
+
+  video {
+    file {
+      asset->{
+        _id,
+        url
+      }
+    },
+    url
+  },
+
+  objectives[],
+
+  syllabus[] {
+    title,
+    lessons[]->{
+      _id,
+      title,
+      slug {
+        current
+      },
+    }
+  }
+}
+`;
+
+export const courseBySlugQuery = `
+*[_type == "course" && slug.current == $slug][0]{
+  _id,
+  _type,
+  _createdAt,
+  _updatedAt,
+
+  title,
+  description,
+  age,
+  duration,
+  level,
+
+  slug {
+    current
+  },
+
+  image {
+    _type,
+    asset->{
+      _id,
+      url
+    }
+  },
+
+  video {
+    file {
+      asset->{
+        _id,
+        url
+      }
+    },
+    url
+  },
+
+  objectives[],
+
+  syllabus[] {
+    title,
+    lessons[]->{
+      _id,
+      title,
+      slug {
+        current
+      },
+    }
+  },
+  relatedCourse[]->{
+    _id,
+    title,
+    slug,
+    age,
+    syllabus[] {
+    title,
+    lessons[]->{
+      _id,
+      title,
+      slug {
+        current
+      },
+    }
+  },
+    image {
+      asset->{
+        _id,
+        url
+      }
+    }
+  }
+}
+`;

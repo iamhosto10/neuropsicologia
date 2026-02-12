@@ -129,7 +129,7 @@ export const activity = defineType({
 
     {
       name: "relatedActivity",
-      title: "Related Activity",
+      title: "Actividades Relacionadas",
       type: "array",
       of: [{ type: "reference", to: [{ type: "activity" }] }],
     },

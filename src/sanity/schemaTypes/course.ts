@@ -1,77 +1,122 @@
-import { defineField, defineType } from 'sanity'
+import { defineField, defineType } from "sanity";
 
 export const course = defineType({
-  name: 'course',
-  title: 'Course',
-  type: 'document',
+  name: "course",
+  title: "Course",
+  type: "document",
   fields: [
     defineField({
-      name: 'title',
-      title: 'Title',
-      type: 'string',
+      name: "title",
+      title: "Titulo",
+      type: "string",
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'slug',
-      title: 'Slug',
-      type: 'slug',
+      name: "slug",
+      title: "Slug",
+      type: "slug",
       options: {
-        source: 'title',
+        source: "title",
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'description',
-      title: 'Description',
-      type: 'text',
+      name: "description",
+      title: "Descripcion",
+      type: "text",
       rows: 3,
     }),
     defineField({
-      name: 'age',
-      title: 'Age Group',
-      type: 'string',
-      description: 'e.g. "6-9 ans"',
+      name: "age",
+      title: "Edad Recomendad",
+      type: "string",
+      description: 'ej. "6-9 años"',
     }),
     defineField({
-      name: 'bgColor',
-      title: 'Background Color Class',
-      type: 'string',
-      description: 'CSS class for background color, e.g. "bg-blue-100"',
+      name: "duration",
+      title: "Duracion (minutos)",
+      type: "number",
+      description: "30",
     }),
     defineField({
-      name: 'image',
-      title: 'Course Image',
-      type: 'image',
+      name: "level",
+      title: "Nivel",
+      type: "string",
+      options: {
+        list: [
+          { title: "Básico", value: "Básico" },
+          { title: "Intermedio", value: "Intermedio" },
+          { title: "Avanzado", value: "Avanzado" },
+        ],
+      },
+    }),
+    defineField({
+      name: "image",
+      title: "Imagen",
+      type: "image",
       options: {
         hotspot: true,
       },
     }),
     defineField({
-      name: 'syllabus',
-      title: 'Syllabus',
-      type: 'array',
+      name: "video",
+      title: "Video",
+      type: "object",
+      fields: [
+        {
+          name: "file",
+          title: "Archivo de video",
+          type: "file",
+          options: {
+            accept: "video/*",
+          },
+        },
+        {
+          name: "url",
+          title: "URL del video (YouTube / Vimeo)",
+          type: "url",
+        },
+      ],
+    }),
+    defineField({
+      name: "objectives",
+      title: "Objetivos de Aprendizaje",
+      type: "array",
+      of: [{ type: "string" }],
+    }),
+    defineField({
+      name: "syllabus",
+      title: "Contenido del Curso",
+      type: "array",
       of: [
         {
-          type: 'object',
-          name: 'module',
-          title: 'Module',
+          type: "object",
+          name: "module",
+          title: "Module",
           fields: [
             defineField({
-              name: 'title',
-              title: 'Module Title',
-              type: 'string',
+              name: "title",
+              title: "Module Title",
+              type: "string",
               validation: (Rule) => Rule.required(),
             }),
             defineField({
-              name: 'lessons',
-              title: 'Lessons / Activities',
-              type: 'array',
-              of: [{ type: 'reference', to: { type: 'activity' } }],
+              name: "lessons",
+              title: "Lessons / Activities",
+              type: "array",
+              of: [{ type: "reference", to: { type: "lesson" } }],
             }),
           ],
         },
       ],
     }),
+
+    defineField({
+      name: "relatedCourse",
+      title: "Cursos Relacionados",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "course" }] }],
+    }),
   ],
-})
+});

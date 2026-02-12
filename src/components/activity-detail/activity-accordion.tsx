@@ -9,27 +9,25 @@ import {
 } from "@/components/ui/accordion";
 import { Leaf, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Activity } from "@/lib/types";
 
-const accordionItems = [
-  {
-    value: "item-1",
-    title: "Beneficios de esta actividad",
-    IconComponent: Leaf,
-    iconColor: "text-[#22C55E]", // Vibrant Green
-    content:
-      "Esta actividad estimula la coordinación mano-ojo y fomenta la paciencia. Al buscar parejas, el niño ejercita su memoria visual y aprende a seguir reglas sencillas.",
-  },
-  {
-    value: "item-2",
-    title: "Consejos para acompañar",
-    IconComponent: Users,
-    iconColor: "text-[oklch(var(--brand-mustard))]", // Mustard/Amber
-    content:
-      "Si notas que el niño se frustra, reduce la cantidad de cartas a la mitad. Celebra cada pequeño logro con entusiasmo para reforzar su confianza.",
-  },
-];
-
-const ActivityAccordion = () => {
+const ActivityAccordion = ({ activity }: { activity: Activity }) => {
+  const accordionItems = [
+    {
+      value: "item-1",
+      title: "Beneficios de esta actividad",
+      IconComponent: Leaf,
+      iconColor: "text-[#22C55E]", // Vibrant Green
+      content: activity?.benefits,
+    },
+    {
+      value: "item-2",
+      title: "Consejos para acompañar",
+      IconComponent: Users,
+      iconColor: "text-[oklch(var(--brand-mustard))]", // Mustard/Amber
+      content: activity.advice,
+    },
+  ];
   return (
     <div className=" container p-6 lg:mx-auto lg:max-w-5xl max-w-5xl mx-auto w-full px-4 animate-in slide-in-from-bottom-8 fade-in duration-700">
       <Accordion

@@ -145,6 +145,9 @@
     --checklist-green: 0.88 0.15 150;
     --checklist-green-solid: 0.6 0.18 150;
     --checklist-gray-bg: 0.98 0 0;
+    --empathy-purple: 0.88 0.12 300;
+    --empathy-sunny: 0.94 0.15 95;
+    --progress-orange: 0.75 0.18 50;
   }
   .dark {
     --highlight-green: 0.7 0.15 145;

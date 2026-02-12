@@ -13,58 +13,58 @@ import { Heart } from "lucide-react";
 import { Course } from "@/lib/types";
 import { CourseCard } from "./courses-card";
 
-const courses = [
-  {
-    title: "Aventuras de Construcción",
-    description:
-      "Fomenta la creatividad y habilidades motoras con bloques y juegos de construcción.",
-    age: "2-4 años",
-    lessons: "8 Lecciones",
-    bgColor: "bg-orange-50",
-  },
-  {
-    title: "Juegos en Grupo",
-    description:
-      "Desarrolla habilidades sociales y de comunicación a través de juegos interactivos.",
-    age: "3-5 años",
-    lessons: "10 Lecciones",
-    bgColor: "bg-blue-50",
-  },
-  {
-    title: "Arte y Creatividad",
-    description:
-      "Explora el mundo del arte con pintura, dibujo y manualidades.",
-    age: "4-6 años",
-    lessons: "12 Lecciones",
-    bgColor: "bg-green-50",
-  },
-  {
-    title: "Música y Movimiento",
-    description:
-      "Introduce a los niños al ritmo y la música con instrumentos y baile.",
-    age: "2-5 años",
-    lessons: "8 Lecciones",
-    bgColor: "bg-purple-50",
-  },
-  {
-    title: "Pequeños Científicos",
-    description:
-      "Experimentos divertidos y seguros para despertar la curiosidad científica.",
-    age: "5-7 años",
-    lessons: "15 Lecciones",
-    bgColor: "bg-yellow-50",
-  },
-  {
-    title: "Cuentacuentos Interactivo",
-    description:
-      "Fomenta el amor por la lectura con historias y actividades participativas.",
-    age: "3-6 años",
-    lessons: "10 Lecciones",
-    bgColor: "bg-pink-50",
-  },
-] as Course[];
+// const courses = [
+//   {
+//     title: "Aventuras de Construcción",
+//     description:
+//       "Fomenta la creatividad y habilidades motoras con bloques y juegos de construcción.",
+//     age: "2-4 años",
+//     lessons: "8 Lecciones",
+//     bgColor: "bg-orange-50",
+//   },
+//   {
+//     title: "Juegos en Grupo",
+//     description:
+//       "Desarrolla habilidades sociales y de comunicación a través de juegos interactivos.",
+//     age: "3-5 años",
+//     lessons: "10 Lecciones",
+//     bgColor: "bg-blue-50",
+//   },
+//   {
+//     title: "Arte y Creatividad",
+//     description:
+//       "Explora el mundo del arte con pintura, dibujo y manualidades.",
+//     age: "4-6 años",
+//     lessons: "12 Lecciones",
+//     bgColor: "bg-green-50",
+//   },
+//   {
+//     title: "Música y Movimiento",
+//     description:
+//       "Introduce a los niños al ritmo y la música con instrumentos y baile.",
+//     age: "2-5 años",
+//     lessons: "8 Lecciones",
+//     bgColor: "bg-purple-50",
+//   },
+//   {
+//     title: "Pequeños Científicos",
+//     description:
+//       "Experimentos divertidos y seguros para despertar la curiosidad científica.",
+//     age: "5-7 años",
+//     lessons: "15 Lecciones",
+//     bgColor: "bg-yellow-50",
+//   },
+//   {
+//     title: "Cuentacuentos Interactivo",
+//     description:
+//       "Fomenta el amor por la lectura con historias y actividades participativas.",
+//     age: "3-6 años",
+//     lessons: "10 Lecciones",
+//     bgColor: "bg-pink-50",
+//   },
+// ] as Course[];
 
-export function CoursesGallery() {
+export function CoursesGallery({ courses }: { courses: Course[] }) {
   return (
     <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
       {/* Header */}

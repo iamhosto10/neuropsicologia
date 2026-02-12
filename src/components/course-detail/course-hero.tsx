@@ -9,6 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+import { Course } from "@/lib/types";
 
 const metadata = [
   { icon: Smile, label: "4 - 6 años", value: "Edad Recomendada" },
@@ -16,7 +17,7 @@ const metadata = [
   { icon: BarChart, label: "Nivel", value: "Principiante" },
 ];
 
-export function CourseHero() {
+export function CourseHero({ course }: { course: Course }) {
   return (
     <div className=" flex  flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-0 gap-8">
       <header>
@@ -31,22 +32,33 @@ export function CourseHero() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>Aventura de las emociones</BreadcrumbPage>
+              <BreadcrumbPage>{course?.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <h1 className="text-3xl md:text-5xl font-extrabold text-black mt-2">
-          Aventura de las emociones
+          {course?.title}
         </h1>
       </header>
 
       <div className="flex flex-col lg:flex-row gap-8 ">
         {/* Left Column: Video */}
-        <div className="w-full lg:w-2/3">
+        {/* <div className="w-full lg:w-2/3">
           <div className="relative aspect-video bg-gray-900 rounded-[2rem] flex items-center justify-center p-4">
-            {/* Placeholder for a video or image */}
+
             <div className="absolute inset-0 bg-black/50 rounded-[2rem]"></div>
             <PlayCircle className="h-20 w-20 text-white/70" />
+          </div>
+        </div> */}
+
+        <div className="w-full lg:w-2/3">
+          <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-black">
+            <video
+              className="w-full h-full object-cover"
+              src={course.video?.file.asset.url}
+              controls
+              preload="metadata"
+            />
           </div>
         </div>
 

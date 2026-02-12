@@ -7,7 +7,7 @@ const page = () => {
       {/* esta sera la leccion estilo 1 */}
       <LessonView />
       {/* esta sera la leccion estilo 2 */}
-      <LessonViewV2 />
+      {/* <LessonViewV2 /> */}
     </>
   );
 };

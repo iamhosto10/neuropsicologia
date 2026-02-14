@@ -13,6 +13,13 @@ import {
 } from "@/components/ui/sheet";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import {
+  SignedIn,
+  SignedOut,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 
 const navLinks = [
   { href: "/actividades", label: "Actividades" },
@@ -46,7 +53,7 @@ export function Navbar() {
               href={link.href}
               className={cn(
                 "text-sm font-medium text-gray-700 hover:text-black transition-colors",
-                router === link.href && "text-black font-bold"
+                router === link.href && "text-black font-bold",
               )}
             >
               {link.label}
@@ -56,18 +63,27 @@ export function Navbar() {
 
         {/* CTA Buttons (Desktop) */}
         <div className="hidden lg:flex items-center gap-2">
-          <Button
-            variant="ghost"
-            className="rounded-full bg-gray-100 font-bold"
-          >
-            Iniciar Sesion
-          </Button>
-          <Button
-            className="rounded-full text-black font-bold"
-            style={{ backgroundColor: "var(--neuro-green)" }}
-          >
-            Registro
-          </Button>
+          <SignedOut>
+            <SignInButton>
+              <Button
+                variant="ghost"
+                className="rounded-full bg-gray-100 font-bold"
+              >
+                Iniciar Sesion
+              </Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button
+                className="rounded-full text-black font-bold"
+                style={{ backgroundColor: "var(--neuro-green)" }}
+              >
+                Registro
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
         </div>
 
         {/* Mobile Menu Trigger */}

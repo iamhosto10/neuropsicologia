@@ -1,6 +1,6 @@
 import { defineQuery } from "next-sanity";
+import { groq } from "next-sanity";
 
-// 1. Get all courses (for gallery/cards)
 export const GET_COURSES = defineQuery(`
   *[_type == "course"] {
     title,
@@ -12,7 +12,6 @@ export const GET_COURSES = defineQuery(`
   }
 `);
 
-// 2. Get single course by slug (with syllabus and activities expanded)
 export const GET_COURSE_BY_SLUG = defineQuery(`
   *[_type == "course" && slug.current == $slug][0] {
     title,
@@ -33,7 +32,6 @@ export const GET_COURSE_BY_SLUG = defineQuery(`
   }
 `);
 
-// 3. Get single activity by slug
 export const GET_ACTIVITY_BY_SLUG = defineQuery(`
   *[_type == "activity" && slug.current == $slug][0] {
     title,
@@ -49,7 +47,6 @@ export const GET_ACTIVITY_BY_SLUG = defineQuery(`
   }
 `);
 
-// 4. Get User Profile with completed courses
 export const GET_USER_PROFILE = defineQuery(`
   *[_type == "user" && slug.current == $slug][0] {
     name,
@@ -62,3 +59,17 @@ export const GET_USER_PROFILE = defineQuery(`
     }
   }
 `);
+
+export const GET_USER_BY_CLERK_ID = groq`
+  *[_type == "user" && clerkId == $clerkId][0] {
+    _id,
+    name,
+    email,
+    image,
+    role,
+    "completedCourses": completedCourses[]->{
+      title,
+      slug
+    }
+  }
+`;

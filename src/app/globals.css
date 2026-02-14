@@ -155,6 +155,13 @@
     --dash-gradient-end: 0.6 0.15 250;
     --dash-progress-orange: 0.75 0.18 50;
     --dash-progress-blue: 0.65 0.18 240;
+
+    /* Activity Palette */
+    --act-sky: 0.70 0.15 240;
+    --act-amber: 0.75 0.18 50;
+    --act-pastel-blue: 0.96 0.03 240;
+    --act-pastel-purple: 0.96 0.04 300;
+    --act-pastel-green: 0.96 0.05 140;
   }
   .dark {
     --highlight-green: 0.7 0.15 145;

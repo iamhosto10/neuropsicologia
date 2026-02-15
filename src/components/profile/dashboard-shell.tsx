@@ -79,7 +79,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
       >
         <div className="flex flex-col h-full">
           {/* Collapse Button */}
-          <div className="absolute right-[-12px] top-6 z-10">
+          <div className="absolute -right-3 top-6 z-10">
             <Button
               variant="outline"
               size="icon"
@@ -95,19 +95,38 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
 
           {/* Profile Section (Top) */}
-          <div className={cn("p-6 pb-2 transition-all", isCollapsed && "px-2 py-4 flex justify-center")}>
-             <div className={cn("flex items-center gap-3", isCollapsed && "justify-center")}>
-               <Avatar className={cn("border-2 border-background shadow-sm", isCollapsed ? "h-10 w-10" : "h-12 w-12")}>
-                 <AvatarImage src="/placeholder-avatar.jpg" alt="Niño/a" />
-                 <AvatarFallback>N</AvatarFallback>
-               </Avatar>
-               {!isCollapsed && (
-                 <div className="flex flex-col overflow-hidden">
-                   <span className="text-base font-bold text-foreground leading-tight">Niño/a</span>
-                   <span className="text-xs text-muted-foreground truncate">Perfil del niño/a</span>
-                 </div>
-               )}
-             </div>
+          <div
+            className={cn(
+              "p-6 pb-2 transition-all",
+              isCollapsed && "px-2 py-4 flex justify-center",
+            )}
+          >
+            <div
+              className={cn(
+                "flex items-center gap-3",
+                isCollapsed && "justify-center",
+              )}
+            >
+              <Avatar
+                className={cn(
+                  "border-2 border-background shadow-sm",
+                  isCollapsed ? "h-10 w-10" : "h-12 w-12",
+                )}
+              >
+                <AvatarImage src="/placeholder-avatar.jpg" alt="Niño/a" />
+                <AvatarFallback>N</AvatarFallback>
+              </Avatar>
+              {!isCollapsed && (
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-base font-bold text-foreground leading-tight">
+                    Niño/a
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate">
+                    Perfil del niño/a
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           <nav className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-6">
@@ -115,7 +134,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
               {NAV_ITEMS.map((item) => {
                 const isActive =
                   pathname === item.href ||
-                  (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                  (item.href !== "/dashboard" &&
+                    pathname.startsWith(item.href));
                 return (
                   <li key={item.href}>
                     <Link
@@ -131,7 +151,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
                       <item.icon
                         className={cn(
                           "h-5 w-5 transition-colors",
-                          isActive ? "text-brand-mustard" : "text-muted-foreground group-hover:text-foreground"
+                          isActive
+                            ? "text-brand-mustard"
+                            : "text-muted-foreground group-hover:text-foreground",
                         )}
                         strokeWidth={isActive ? 2.5 : 2}
                       />
@@ -143,17 +165,22 @@ export function DashboardShell({ children }: DashboardShellProps) {
             </ul>
 
             <div className="mt-auto pt-4 border-t border-border/50">
-               {/* Call to Action: Ver Progreso */}
+              {/* Call to Action: Ver Progreso */}
               <Link
                 href="/dashboard/progress"
                 className={cn(
                   "flex items-center justify-center gap-2 rounded-2xl px-3 py-3.5 text-sm font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 mb-6",
                   "bg-brand-mustard text-white",
-                  isCollapsed ? "px-0 w-10 h-10 mx-auto rounded-full" : "w-full",
+                  isCollapsed
+                    ? "px-0 w-10 h-10 mx-auto rounded-full"
+                    : "w-full",
                 )}
                 title="Ver Progreso"
               >
-                <Trophy className={cn("h-5 w-5", isCollapsed ? "" : "mr-1")} strokeWidth={2.5} />
+                <Trophy
+                  className={cn("h-5 w-5", isCollapsed ? "" : "mr-1")}
+                  strokeWidth={2.5}
+                />
                 {!isCollapsed && <span>Ver Progreso</span>}
               </Link>
 
@@ -193,13 +220,17 @@ export function DashboardShell({ children }: DashboardShellProps) {
       <div className="flex flex-1 flex-col h-full overflow-hidden">
         {/* Mobile Top Bar */}
         <header className="flex md:hidden h-16 items-center justify-between bg-white shadow-sm px-4 sticky top-0 z-50">
-          <h1 className="text-xl font-bold tracking-tight text-foreground">{pageTitle}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            {pageTitle}
+          </h1>
           <Sheet>
             <SheetTrigger asChild>
               <button className="outline-none rounded-full ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
                 <Avatar className="h-9 w-9 border border-border shadow-sm">
                   <AvatarImage src="/placeholder-avatar.jpg" alt="Niño/a" />
-                  <AvatarFallback className="bg-brand-amber-light text-brand-mustard font-bold">N</AvatarFallback>
+                  <AvatarFallback className="bg-brand-amber-light text-brand-mustard font-bold">
+                    N
+                  </AvatarFallback>
                 </Avatar>
               </button>
             </SheetTrigger>
@@ -211,7 +242,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border/50">
                   <Avatar className="h-14 w-14 border-2 border-background shadow-sm">
                     <AvatarImage src="/placeholder-avatar.jpg" alt="Niño/a" />
-                    <AvatarFallback className="bg-brand-amber-light text-brand-mustard font-bold text-lg">N</AvatarFallback>
+                    <AvatarFallback className="bg-brand-amber-light text-brand-mustard font-bold text-lg">
+                      N
+                    </AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="font-bold text-lg">Niño/a</p>
@@ -265,7 +298,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 href={item.href}
                 className={cn(
                   "flex flex-col items-center justify-center w-full h-full gap-1.5 transition-all duration-200",
-                  isActive ? "-translate-y-1" : ""
+                  isActive ? "-translate-y-1" : "",
                 )}
               >
                 <div
@@ -276,7 +309,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
                       : "text-muted-foreground bg-transparent",
                   )}
                 >
-                  <item.icon className={cn("h-6 w-6", isActive && "fill-current")} strokeWidth={isActive ? 2.5 : 2} />
+                  <item.icon
+                    className={cn("h-6 w-6", isActive && "fill-current")}
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
                 </div>
                 <span
                   className={cn(

@@ -2,12 +2,10 @@ import { Progress } from "@/components/ui/progress";
 import { Flag } from "lucide-react";
 import LessonObjective from "../lesson-objective/lesson-objective";
 
-export const LessonHeader = () => {
+export const LessonHeader = ({ title }: { title: string }) => {
   return (
     <header className="mb-8">
-      <p className="text-sm text-gray-500">
-        Cursos &gt; Aventura Emocional &gt; Lección 1.1
-      </p>
+      <p className="text-sm text-gray-500">{title} &gt; Lección 1.1</p>
       <div className="flex items-center gap-2 mt-4">
         <p className="text-xs font-bold tracking-wider uppercase">
           Progreso del curso
@@ -19,9 +17,7 @@ export const LessonHeader = () => {
         />
         <p className="text-sm font-bold">15%</p>
       </div>
-      <h1 className="text-3xl font-bold mt-2">
-        Lección 1.1: ¿Qué es la alegría?
-      </h1>
+      <h1 className="text-3xl font-bold mt-2">Lección 1.1: {title}</h1>
       <LessonObjective classname="mt-4">
         <div className="flex items-start gap-4">
           <div className="bg-white p-2 rounded-full border border-amber-200">

@@ -21,5 +21,11 @@ export const lesson = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: "content",
+      title: "Contenido de la Lección",
+      type: "array",
+      of: [{ type: "block" }, { type: "image" }, { type: "gameModule" }],
+    }),
   ],
 });

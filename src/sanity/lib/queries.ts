@@ -73,3 +73,29 @@ export const GET_USER_BY_CLERK_ID = groq`
     }
   }
 `;
+
+export const GET_LESSON_BY_SLUG = defineQuery(`
+  *[_type == "lesson" && slug.current == $slug][0] {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    content[]{
+      ...,
+      _type == "image" => {
+        asset->
+      },
+      _type == "gameModule" => {
+        _key,
+        _type,
+        gameType,
+        title,
+        instruction,
+        difficulty,
+        duration,
+        targetObject,
+        distractorObjects[]
+      }
+    }
+  }
+`);

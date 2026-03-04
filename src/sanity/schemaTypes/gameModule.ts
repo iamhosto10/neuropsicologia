@@ -79,6 +79,10 @@ export const gameModule = defineType({
             title: "Panel de Seguridad (Memoria Visoespacial)",
             value: "memori",
           },
+          {
+            title: "Gran Evasión (Multitarea y Atención Dividida)",
+            value: "multitask",
+          },
         ],
         layout: "dropdown",
       },

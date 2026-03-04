@@ -6,6 +6,7 @@ import { urlFor } from "@/sanity/lib/image";
 import { PortableText, type PortableTextComponents } from "next-sanity";
 import SatelliteTrackerGame from "../games/satellite-tracker-game";
 import AsteroidFieldGame from "../games/asteroid-field-game";
+import ReverseCommunicatorGame from "../games/reverse-communicator-game";
 
 // 2. Definimos los estilos SOLO para el texto (fuera del componente para orden)
 const textComponents: PortableTextComponents = {
@@ -99,31 +100,6 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
 
   const renderContent = (block: any) => {
     switch (block._type) {
-      // case "gameModule":
-      //   const gameConfig = {
-      //     title: block.title,
-      //     instruction: block.instruction,
-      //     difficulty: block.difficulty,
-      //     duration: block.duration,
-      //     targetImage: block.targetImage
-      //       ? urlFor(block.targetImage).url()
-      //       : undefined,
-      //     distractorImages:
-      //       block.distractorImages?.map((img: any) => urlFor(img).url()) || [],
-      //   };
-
-      //   return (
-      //     <div
-      //       key={block._key}
-      //       className="my-12 border-t border-slate-800 pt-8"
-      //     >
-      //       <h4 className="text-xl font-semibold mb-6 text-white flex items-center gap-2">
-      //         🎮 Zona de Entrenamiento
-      //       </h4>
-      //       <SpaceCleanupGame config={gameConfig} />
-      //     </div>
-      //   );
-
       case "gameModule":
         console.log("Renderizando módulo de juego con datos:", block);
         const gameConfig = {
@@ -171,8 +147,10 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
             ) : block.gameType === "asteroid" ? (
               // AQUÍ ESTÁ EL NUEVO JUEGO
               <AsteroidFieldGame config={gameConfig} />
-            ) : (
+            ) : block.gameType === "cleanup" ? (
               <SpaceCleanupGame config={gameConfig} />
+            ) : (
+              <ReverseCommunicatorGame config={gameConfig} />
             )}
 
             <p className="text-center text-xs text-slate-500 mt-6 uppercase tracking-widest">
@@ -184,8 +162,6 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
         );
 
       case "block":
-        // 3. AQUÍ ESTÁ EL CAMBIO SOLICITADO
-        // Usamos PortableText pasando el bloque actual dentro de un array [block]
         return (
           <div key={block._key} className="mb-2">
             <PortableText value={[block]} components={textComponents} />

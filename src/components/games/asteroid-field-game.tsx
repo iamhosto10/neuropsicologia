@@ -14,8 +14,6 @@ import {
   VolumeX,
 } from "lucide-react";
 
-// IMPORTAMOS EL HOOK DE SONIDO
-// Nota: Si te da error de importación, recuerda hacer 'npm install use-sound'
 import useSound from "use-sound";
 
 interface AsteroidGameProps {

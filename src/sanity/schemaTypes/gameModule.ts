@@ -69,11 +69,12 @@ export const gameModule = defineType({
           {
             title: "Centinela Satélite (Atención Sostenida)",
             value: "satellite",
-          }, // <--- Nuevo
+          },
           {
             title: "Campo de Asteroides (Control Inhibitorio)",
             value: "asteroid",
           },
+          { title: "Comunicador Inverso (Flexibilidad)", value: "reverse" },
         ],
         layout: "radio",
       },

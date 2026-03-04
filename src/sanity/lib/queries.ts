@@ -99,3 +99,25 @@ export const GET_LESSON_BY_SLUG = defineQuery(`
     }
   }
 `);
+
+export const getKidDashboardQuery = `
+  *[_type == "kidProfile" && _id == $kidId][0]{
+    _id,
+    alias,
+    energyCrystals,
+    avatarStatus,
+    // Buscamos la sesión diaria asignada a este niño que coincida con la fecha de hoy
+    "todaySession": *[_type == "dailySession" && references(^._id) && date == $todayDate][0]{
+      _id,
+      isCompleted,
+      completedMissions,
+      missions[]->{
+        _id,
+        title,
+        gameType,
+        difficulty,
+        energyReward
+      }
+    }
+  }
+`;

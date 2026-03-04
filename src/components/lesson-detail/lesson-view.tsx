@@ -295,7 +295,14 @@ export const LessonView = ({ lesson }: LessonViewProps) => {
               <SatelliteTrackerGame config={gameConfig} />
             ) : block.gameType === "asteroid" ? (
               // AQUÍ ESTÁ EL NUEVO JUEGO
-              <AsteroidFieldGame config={gameConfig} />
+              <AsteroidFieldGame
+                config={{
+                  ...gameConfig,
+                  energyReward: 10,
+                  kidId: "a5a34e5b-625e-4229-9aed-21ac9cf9bb22",
+                  missionId: "",
+                }}
+              />
             ) : (
               <SpaceCleanupGame config={gameConfig} />
             )}

@@ -7,6 +7,7 @@ import { PortableText, type PortableTextComponents } from "next-sanity";
 import SatelliteTrackerGame from "../games/satellite-tracker-game";
 import AsteroidFieldGame from "../games/asteroid-field-game";
 import ReverseCommunicatorGame from "../games/reverse-communicator-game";
+import MemoryMatrixGame from "../games/memory-matrix-game";
 
 // 2. Definimos los estilos SOLO para el texto (fuera del componente para orden)
 const textComponents: PortableTextComponents = {
@@ -149,8 +150,10 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
               <AsteroidFieldGame config={gameConfig} />
             ) : block.gameType === "cleanup" ? (
               <SpaceCleanupGame config={gameConfig} />
-            ) : (
+            ) : block.gameType === "reverse" ? (
               <ReverseCommunicatorGame config={gameConfig} />
+            ) : (
+              <MemoryMatrixGame config={gameConfig} />
             )}
 
             <p className="text-center text-xs text-slate-500 mt-6 uppercase tracking-widest">

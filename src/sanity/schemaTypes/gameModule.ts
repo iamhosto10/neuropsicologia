@@ -75,8 +75,12 @@ export const gameModule = defineType({
             value: "asteroid",
           },
           { title: "Comunicador Inverso (Flexibilidad)", value: "reverse" },
+          {
+            title: "Panel de Seguridad (Memoria Visoespacial)",
+            value: "memori",
+          },
         ],
-        layout: "radio",
+        layout: "dropdown",
       },
       initialValue: "cleanup",
       validation: (rule) => rule.required(),

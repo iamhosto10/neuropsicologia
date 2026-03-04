@@ -38,7 +38,7 @@ export const dailySession = defineType({
       type: "array",
       of: [{ type: "string" }],
       initialValue: [],
-      readOnly: true, // Lo llenaremos por código, no a mano
+      // readOnly: true, // Lo llenaremos por código, no a mano
     }),
     defineField({
       name: "isCompleted",

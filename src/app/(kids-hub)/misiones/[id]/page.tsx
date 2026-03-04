@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import AsteroidFieldGame from "@/components/games/asteroid-field-game";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import MemoryMatrixGame from "@/components/games/memory-matrix-game";
 
 // Consulta para obtener la configuración de la misión
 const getMissionQuery = `*[_type == "mission" && _id == $id][0]`;
@@ -53,7 +54,18 @@ export default async function MissionPage({
             }}
           />
         )}
-
+        {mission.gameType === "simon_says_reverse" && (
+          <MemoryMatrixGame
+            config={{
+              title: mission.title,
+              difficulty: mission.difficulty,
+              duration: 20,
+              kidId: TEST_KID_ID,
+              missionId: id,
+              energyReward: mission.energyReward,
+            }}
+          />
+        )}
         {/* Aquí en el futuro añadirás los otros juegos */}
         {mission.gameType === "emotion_faces" && (
           <div className="text-white text-2xl">

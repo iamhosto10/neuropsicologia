@@ -161,7 +161,14 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
             ) : block.gameType === "reverse" ? (
               <ReverseCommunicatorGame config={gameConfig} />
             ) : block.gameType === "memori" ? (
-              <MemoryMatrixGame config={gameConfig} />
+              <MemoryMatrixGame
+                config={{
+                  ...gameConfig,
+                  energyReward: 10,
+                  kidId: "",
+                  missionId: "",
+                }}
+              />
             ) : (
               <MultitaskEvasionGame config={gameConfig} />
             )}

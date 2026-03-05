@@ -15,10 +15,14 @@ export default async function HeadquartersPage() {
   const today = new Date().toISOString().split("T")[0];
 
   // 2. Ejecutamos la consulta a Sanity
-  const dashboardData = await client.fetch(getKidDashboardQuery, {
-    kidId: TEST_KID_ID,
-    todayDate: today,
-  });
+  const dashboardData = await client.fetch(
+    getKidDashboardQuery,
+    {
+      kidId: TEST_KID_ID,
+      todayDate: today,
+    },
+    { cache: "no-store" }, // Evitamos cache para siempre tener datos frescos
+  );
 
   // Si no encuentra al niño, mostramos un error amigable
   if (!dashboardData) {

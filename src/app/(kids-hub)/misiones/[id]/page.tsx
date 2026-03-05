@@ -67,7 +67,7 @@ export default async function MissionPage({
           />
         )}
         {/* Aquí en el futuro añadirás los otros juegos */}
-        {mission.gameType === "emotion_faces" && (
+        {/* {mission.gameType === "emotion_faces" && (
           <div className="text-white text-2xl">
             Constructor de Caras (Próximamente)
           </div>
@@ -77,7 +77,7 @@ export default async function MissionPage({
           <div className="text-white text-2xl">
             Secuencia Inversa (Próximamente)
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

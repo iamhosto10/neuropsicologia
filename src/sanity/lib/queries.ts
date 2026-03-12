@@ -129,3 +129,18 @@ export const getKidsByParentQuery = `
     energyCrystals
   }
 `;
+
+export const getKidClinicalReportQuery = `
+  *[_type == "kidProfile" && _id == $kidId && parent._ref == $parentSanityId][0]{
+    _id,
+    alias,
+    energyCrystals,
+    "sessionsHistory": *[_type == "dailySession" && references(^._id)] | order(date desc)[0...7]{
+      _id,
+      date,
+      isCompleted,
+      "assignedCount": count(missions),
+      "completedCount": count(completedMissions)
+    }
+  }
+`;

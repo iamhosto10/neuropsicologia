@@ -6,7 +6,7 @@ export default function KidsHubLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 select-none font-sans relative">
+    <div className="h-screen overflow-auto w-screen  bg-slate-950 text-slate-100 select-none font-sans relative">
       {/* Opcional: Un fondo de estrellas súper sutil (baja estimulación) */}
       <div
         className="absolute inset-0 opacity-20 pointer-events-none"

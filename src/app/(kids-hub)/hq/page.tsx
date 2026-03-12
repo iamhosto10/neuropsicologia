@@ -1,30 +1,25 @@
-// src/app/(kids-hub)/hq/page.tsx
-import { Button } from "@/components/ui/button";
 import { Zap, Shield, Play } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
+import { getActiveKidId, clearKidProfile } from "@/app/actions/profile.actions";
+import { redirect } from "next/navigation";
 
-// 1. Convertimos el componente a 'async' para poder hacer fetch en el servidor
 export default async function HeadquartersPage() {
-  // 🔴 IMPORTANTE: Ve a tu Sanity Studio, entra al perfil del niño que creaste,
-  // copia su ID (suele estar en la URL o en el menú del documento) y pégalo aquí.
-  const TEST_KID_ID = "a5a34e5b-625e-4229-9aed-21ac9cf9bb22";
+  const kidId = await getActiveKidId();
 
-  // Obtenemos la fecha de hoy en formato YYYY-MM-DD para buscar la sesión
+  if (!kidId) {
+    redirect("/select-profile");
+  }
+
   const today = new Date().toISOString().split("T")[0];
 
-  // 2. Ejecutamos la consulta a Sanity
   const dashboardData = await client.fetch(
     getKidDashboardQuery,
-    {
-      kidId: TEST_KID_ID,
-      todayDate: today,
-    },
-    { cache: "no-store" }, // Evitamos cache para siempre tener datos frescos
+    { kidId, todayDate: today },
+    { cache: "no-store" },
   );
 
-  // Si no encuentra al niño, mostramos un error amigable
   if (!dashboardData) {
     return (
       <div className="text-center text-white">
@@ -33,12 +28,12 @@ export default async function HeadquartersPage() {
       </div>
     );
   }
-
+  console.log(dashboardData);
   return (
     <div className="w-full max-w-4xl flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
       {/* Cabecera dinámica */}
       <div className="text-center space-y-2">
-        <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 tracking-tight">
+        <h1 className="text-5xl font-black text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-600 tracking-tight">
           Cuartel General
         </h1>
         <p className="text-xl text-slate-400 font-medium">
@@ -49,8 +44,6 @@ export default async function HeadquartersPage() {
             : " Tienes misiones pendientes."}
         </p>
       </div>
-
-      {/* Estado del Jugador dinámico */}
       <div className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 flex items-center gap-6 shadow-2xl w-full max-w-md justify-center">
         <div className="w-24 h-24 bg-slate-800 rounded-2xl border-4 border-slate-700 flex items-center justify-center">
           <Shield className="w-12 h-12 text-slate-500" />
@@ -67,8 +60,6 @@ export default async function HeadquartersPage() {
           </div>
         </div>
       </div>
-
-      {/* Renderizado de Misiones o Mensaje de Descanso */}
       <div className="w-full mt-8">
         {!dashboardData.todaySession ? (
           <div className="text-center bg-slate-800/50 p-8 rounded-2xl border border-slate-700">
@@ -95,7 +86,6 @@ export default async function HeadquartersPage() {
             </h3>
             {dashboardData.todaySession.missions.map(
               (mission: any, index: number) => {
-                // Verificamos si el ID de esta misión ya está en la lista de completadas
                 const isDone =
                   dashboardData.todaySession.completedMissions?.includes(
                     mission._id,
@@ -120,7 +110,6 @@ export default async function HeadquartersPage() {
                       </p>
                     </div>
 
-                    {/* Si está completada, mostramos un Check gigante verde, sino, el botón de Play */}
                     {isDone ? (
                       <div className="w-12 h-12 flex items-center justify-center bg-green-500/20 rounded-full border border-green-500/50 shadow-[0_0_15px_-3px_#22c55e]">
                         <span className="text-2xl">✅</span>

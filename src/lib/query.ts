@@ -221,3 +221,18 @@ export const courseBySlugQuery = `
   }
 }
 `;
+
+export const getParentDashboardQuery = `
+  *[_type == "kidProfile" && parent._ref == $parentSanityId]{
+    _id,
+    alias,
+    avatarStatus,
+    energyCrystals,
+    "latestSession": *[_type == "dailySession" && references(^._id)] | order(_createdAt desc)[0]{
+      date,
+      isCompleted,
+      completedMissions,
+      missions
+    }
+  }
+`;

@@ -1,6 +1,7 @@
+// src/components/games/space-cleanup-game.tsx
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,16 +11,13 @@ import {
   RotateCcw,
   Play,
   AlertTriangle,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
-
-type GameObject = {
-  id: number;
-  x: number;
-  type: "target" | "distractor";
-  rotation: number;
-  speed: number;
-  imageUrl?: string;
-};
+import useSound from "use-sound";
+import { useRouter } from "next/navigation";
+import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { useSpaceCleanupEngine } from "@/hooks/useSpaceCleanupEngine";
 
 interface SpaceCleanupProps {
   config: {
@@ -29,113 +27,24 @@ interface SpaceCleanupProps {
     distractorImages?: string[];
     duration?: number;
     difficulty?: "easy" | "medium" | "hard";
+    kidId: string;
+    missionId: string;
+    energyReward: number;
   };
 }
 
 export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
-  const duration = config.duration || 60;
-  const difficulty = config.difficulty || "medium";
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
-  // Estados del juego
-  const [gameState, setGameState] = useState<"start" | "playing" | "finished">(
-    "start",
-  );
-  const [gameResult, setGameResult] = useState<"win" | "lose" | null>(null);
-
-  const [score, setScore] = useState(0);
-  const [energy, setEnergy] = useState(100);
-  const [items, setItems] = useState<GameObject[]>([]);
-  const [timeLeft, setTimeLeft] = useState(duration);
-
-  const settings = {
-    easy: { spawnRate: 1500, speed: 8, damage: 20 },
-    medium: { spawnRate: 1000, speed: 6, damage: 25 },
-    hard: { spawnRate: 600, speed: 3, damage: 34 },
-  }[difficulty];
-
-  // --- 1. Función de Finalización ---
-  const finishGame = useCallback((result: "win" | "lose") => {
-    setGameState("finished");
-    setGameResult(result);
-    setItems([]);
-  }, []);
-
-  // --- 2. Control del Tiempo ---
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    if (gameState === "playing" && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            finishGame("win");
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => clearInterval(timer);
-  }, [gameState, timeLeft, finishGame]);
-
-  // --- 3. Lógica de Spawning (Generación de Objetos) ---
-  useEffect(() => {
-    if (gameState !== "playing") return;
-
-    const spawnInterval = setInterval(() => {
-      const isTarget = Math.random() > 0.6;
-
-      // CAMBIO: Lógica de selección de imagen
-      let selectedImage: string | undefined = undefined;
-
-      if (isTarget) {
-        // Si hay imagen de objetivo en config, úsala
-        selectedImage = config.targetImage;
-      } else {
-        // Si hay distractores en config, elige uno al azar
-        if (config.distractorImages && config.distractorImages.length > 0) {
-          const randomIndex = Math.floor(
-            Math.random() * config.distractorImages.length,
-          );
-          selectedImage = config.distractorImages[randomIndex];
-        }
-      }
-
-      const newItem: GameObject = {
-        id: Date.now(),
-        x: Math.random() * 80 + 10,
-        type: isTarget ? "target" : "distractor",
-        rotation: Math.random() * 360,
-        speed: settings.speed + Math.random() * 2,
-        imageUrl: selectedImage, // Asignamos la imagen seleccionada
-      };
-
-      setItems((prev) => [...prev, newItem]);
-    }, settings.spawnRate);
-
-    return () => clearInterval(spawnInterval);
-  }, [gameState, settings, config]); // Agregamos config a dependencias
-
-  // --- 4. Interacción ---
-  const handleInteraction = (item: GameObject) => {
-    if (gameState !== "playing") return;
-
-    if (item.type === "target") {
-      setScore((prev) => prev + 100);
-      setEnergy((prev) => Math.min(prev + 5, 100));
-    } else {
-      triggerGlitchEffect();
-      setEnergy((prev) => {
-        const newEnergy = Math.max(prev - settings.damage, 0);
-        if (newEnergy === 0) {
-          finishGame("lose");
-        }
-        return newEnergy;
-      });
-    }
-    setItems((prev) => prev.filter((i) => i.id !== item.id));
-  };
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
+    loop: true,
+    volume: 0.2,
+  });
+  const [playGood] = useSound("/sounds/laser-shoot.mp3", { volume: 0.4 });
+  const [playBad] = useSound("/sounds/error-buzz.mp3", { volume: 0.5 });
+  const [playWin] = useSound("/sounds/combo-powerup.mp3", { volume: 0.6 });
 
   const triggerGlitchEffect = () => {
     const container = document.getElementById("game-viewport");
@@ -148,39 +57,88 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
     }
   };
 
-  const startGame = () => {
-    setGameState("playing");
-    setGameResult(null);
-    setScore(0);
-    setEnergy(100);
-    setTimeLeft(duration);
-    setItems([]);
+  const engine = useSpaceCleanupEngine({
+    duration: config.duration || 60,
+    difficulty: config.difficulty || "medium",
+    targetImage: config.targetImage,
+    distractorImages: config.distractorImages,
+    onHit: () => {
+      if (soundEnabled) playGood();
+    },
+    onMiss: () => {
+      if (soundEnabled) playBad();
+    },
+    onTriggerGlitch: triggerGlitchEffect,
+    onFinish: async (finalScore, telemetry) => {
+      stopBg();
+      if (soundEnabled && telemetry[0].result === "win") playWin();
+      setIsSaving(true);
+
+      // SOLUCIÓN 3: Evitamos enviar 'NaN' a Sanity asegurando un valor numérico
+      const baseReward = Number(config.energyReward) || 50;
+      const reward =
+        telemetry[0].result === "win" ? baseReward : Math.floor(baseReward / 2);
+
+      await saveMissionProgress(
+        config.kidId,
+        config.missionId,
+        reward,
+        telemetry,
+      );
+      router.push("/hq");
+    },
+  });
+
+  const toggleSound = () => {
+    setSoundEnabled((prev) => {
+      const newVal = !prev;
+      if (newVal && engine.gameState === "playing") playBg();
+      if (!newVal) stopBg();
+      return newVal;
+    });
+  };
+
+  const handleStart = () => {
+    if (soundEnabled) playBg();
+    engine.startGame();
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-8 font-sans select-none">
-      {/* HUD SUPERIOR */}
+    <div className="w-full max-w-4xl mx-auto my-8 font-sans select-none relative">
       <div
-        className={`flex justify-between items-center bg-slate-900 text-cyan-400 p-4 rounded-t-xl border-b-4 transition-colors duration-300 shadow-lg ${energy < 30 ? "border-red-600 animate-pulse" : "border-cyan-600"}`}
+        className={`flex justify-between items-center bg-slate-900 p-4 rounded-t-xl border-b-4 transition-colors duration-300 shadow-lg ${engine.energy < 30 ? "border-red-600" : "border-cyan-600"}`}
       >
-        <div className="flex items-center gap-2">
-          <Zap
-            className={`w-5 h-5 ${energy < 30 ? "text-red-500 fill-red-500" : "text-yellow-400 fill-yellow-400"}`}
-          />
-          <div className="w-24 md:w-32 h-4 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
-            <div
-              className={`h-full transition-all duration-300 ${energy < 30 ? "bg-red-500" : "bg-yellow-400"}`}
-              style={{ width: `${energy}%` }}
+        <div className="flex items-center gap-4 w-1/3">
+          <button
+            onClick={toggleSound}
+            className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
+          >
+            {soundEnabled ? (
+              <Volume2 className="w-5 h-5 text-cyan-400" />
+            ) : (
+              <VolumeX className="w-5 h-5 text-slate-500" />
+            )}
+          </button>
+          <div className="flex items-center gap-2 w-full">
+            <Zap
+              className={`w-5 h-5 ${engine.energy < 30 ? "text-red-500 fill-red-500 animate-pulse" : "text-yellow-400 fill-yellow-400"}`}
             />
+            <div className="w-full h-4 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
+              <div
+                className={`h-full transition-all duration-300 ${engine.energy < 30 ? "bg-red-500" : "bg-yellow-400"}`}
+                style={{ width: `${engine.energy}%` }}
+              />
+            </div>
           </div>
         </div>
-        <div className="text-3xl font-bold font-mono text-white">
-          {timeLeft}s
+        <div className="text-3xl font-bold font-mono text-slate-200">
+          {engine.timeLeft}s
         </div>
-        <div className="text-xl font-mono text-white">PTS: {score}</div>
+        <div className="text-xl font-mono text-cyan-400 w-1/3 text-right">
+          PTS: {engine.score}
+        </div>
       </div>
 
-      {/* VIEWPORT */}
       <div
         id="game-viewport"
         className="relative h-[500px] w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl"
@@ -189,12 +147,19 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
             "radial-gradient(circle at center, #1e293b 0%, #020617 100%)",
         }}
       >
-        {/* OVERLAYS DE ESTADO (Inicio / Fin) */}
-        {gameState !== "playing" && (
+        {isSaving && (
+          <div className="absolute inset-0 z-[110] bg-black/80 flex items-center justify-center backdrop-blur-sm">
+            <p className="text-cyan-400 font-bold text-2xl animate-pulse">
+              Sincronizando Bitácora...
+            </p>
+          </div>
+        )}
+
+        {engine.gameState !== "playing" && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm text-white p-8 text-center animate-in fade-in duration-300">
-            {gameState === "finished" ? (
+            {engine.gameState === "finished" ? (
               <div className="space-y-6">
-                {gameResult === "win" ? (
+                {engine.gameResult === "win" ? (
                   <>
                     <h2 className="text-4xl font-bold text-yellow-400 animate-bounce">
                       ¡Misión Cumplida!
@@ -207,7 +172,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                         Puntaje Final
                       </p>
                       <p className="text-5xl font-mono font-bold text-cyan-300">
-                        {score}
+                        {engine.score}
                       </p>
                     </div>
                   </>
@@ -220,45 +185,41 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                       Misión Abortada
                     </h2>
                     <p className="text-xl text-slate-300 max-w-md">
-                      La nave se quedó sin energía. Ten cuidado con la basura
-                      espacial.
+                      La nave se quedó sin energía.
                     </p>
                     <div className="bg-slate-800/50 p-4 rounded-xl border border-red-900/50">
                       <p className="text-slate-400 text-sm">
-                        Puntaje alcanzado: {score}
+                        Puntaje alcanzado: {engine.score}
                       </p>
                     </div>
                   </>
                 )}
-
                 <Button
-                  onClick={startGame}
+                  onClick={handleStart}
                   size="lg"
-                  className={`text-lg px-8 py-6 rounded-xl shadow-lg group transition-all ${gameResult === "win" ? "bg-cyan-600 hover:bg-cyan-500 shadow-cyan-900/20" : "bg-red-600 hover:bg-red-500 shadow-red-900/20"}`}
+                  className={`text-lg px-8 py-6 rounded-xl shadow-lg group transition-all ${engine.gameResult === "win" ? "bg-cyan-600 hover:bg-cyan-500" : "bg-red-600 hover:bg-red-500"}`}
                 >
-                  <RotateCcw className="mr-2 h-5 w-5 group-hover:-rotate-180 transition-transform" />
+                  <RotateCcw className="mr-2 h-5 w-5 group-hover:-rotate-180 transition-transform" />{" "}
                   Intentar de Nuevo
                 </Button>
               </div>
             ) : (
-              // PANTALLA DE INICIO
               <div className="space-y-6 max-w-lg">
                 <div className="w-20 h-20 bg-cyan-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-cyan-500/30">
-                  {/* CAMBIO: Mostrar la imagen objetivo en la pantalla de inicio si existe */}
                   {config.targetImage ? (
                     <img
                       src={config.targetImage}
                       alt="Objetivo"
-                      className="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                      className="w-16 h-16 object-contain"
                     />
                   ) : (
-                    <Star className="w-10 h-10 text-cyan-400 fill-cyan-400/20" />
+                    <Star className="w-10 h-10 text-cyan-400" />
                   )}
                 </div>
                 <h2 className="text-3xl font-bold text-white">
                   {config.title || "Operación Limpieza"}
                 </h2>
-                <p className="text-lg text-slate-300 leading-relaxed">
+                <p className="text-lg text-slate-300">
                   {config.instruction ||
                     "Haz clic solo en los objetivos azules."}
                 </p>
@@ -267,77 +228,60 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                     {config.targetImage ? (
                       <img
                         src={config.targetImage}
-                        alt="Objetivo"
-                        className="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                        className="w-8 h-8 object-contain"
                       />
                     ) : (
-                      <Star className="w-10 h-10 text-cyan-400 fill-cyan-400/20" />
-                    )}
+                      <Star className="w-6 h-6 text-cyan-400" />
+                    )}{" "}
                     +Puntos
                   </div>
                   <div className="flex items-center gap-2">
-                    {config.distractorImages ? (
-                      config.distractorImages.map((img) => (
-                        <img
-                          src={img}
-                          alt="Objetivo"
-                          className="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]"
-                        />
-                      ))
+                    {config.distractorImages &&
+                    config.distractorImages.length > 0 ? (
+                      <img
+                        src={config.distractorImages[0]}
+                        className="w-8 h-8 object-contain"
+                      />
                     ) : (
-                      <Trash2 className="w-4 h-4 text-red-400" />
-                    )}
+                      <Trash2 className="w-6 h-6 text-red-400" />
+                    )}{" "}
                     -Energía
                   </div>
                 </div>
                 <Button
-                  onClick={startGame}
+                  onClick={handleStart}
                   size="lg"
-                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl shadow-lg shadow-green-900/20 animate-pulse"
+                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl animate-pulse"
                 >
-                  <Play className="mr-2 h-5 w-5 fill-current" />
-                  INICIAR MISIÓN
+                  <Play className="mr-2 h-5 w-5 fill-current" /> INICIAR MISIÓN
                 </Button>
               </div>
             )}
           </div>
         )}
 
-        {/* ELEMENTOS DEL JUEGO */}
         <AnimatePresence>
-          {items.map((item) => (
+          {engine.items.map((item) => (
             <motion.button
               key={item.id}
               initial={{ top: -80, left: `${item.x}%`, rotate: item.rotation }}
               animate={{ top: "120%", rotate: item.rotation + 180 }}
               transition={{ duration: item.speed, ease: "linear" }}
-              onAnimationComplete={() =>
-                setItems((prev) => prev.filter((i) => i.id !== item.id))
-              }
-              onPointerDown={() => handleInteraction(item)}
+              onAnimationComplete={() => engine.removeItem(item.id)}
+              onPointerDown={() => engine.handleInteraction(item)}
               className="absolute w-20 h-20 flex items-center justify-center focus:outline-none touch-none select-none z-10"
             >
               <div
-                className={`
-                w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform active:scale-95 transition-transform overflow-hidden
-                ${
-                  item.type === "target"
-                    ? "bg-cyan-500/20 border-2 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.5)]"
-                    : "bg-red-500/20 border-2 border-red-500/50"
-                }
-              `}
+                className={`w-16 h-16 rounded-full flex items-center justify-center shadow-lg transform active:scale-95 transition-transform overflow-hidden ${item.type === "target" ? "bg-cyan-500/20 border-2 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.5)]" : "bg-red-500/20 border-2 border-red-500/50"}`}
               >
-                {/* CAMBIO: Renderizado condicional Imagen vs Icono */}
                 {item.imageUrl ? (
-                  // Si tenemos imagen de Sanity, la usamos
                   <img
                     src={item.imageUrl}
                     alt={item.type}
                     className="w-full h-full object-cover"
                     draggable={false}
                   />
-                ) : // Fallback a iconos si no hay imagen
-                item.type === "target" ? (
+                ) : item.type === "target" ? (
                   <Star className="w-8 h-8 text-cyan-200 fill-cyan-400" />
                 ) : (
                   <Trash2 className="w-8 h-8 text-red-400" />
@@ -353,7 +297,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
             backgroundImage: "radial-gradient(white 1px, transparent 1px)",
             backgroundSize: "50px 50px",
           }}
-        ></div>
+        />
       </div>
     </div>
   );

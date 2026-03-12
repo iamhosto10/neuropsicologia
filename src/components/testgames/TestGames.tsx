@@ -144,7 +144,7 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
             {/* <SatelliteTrackerGame config={gameConfig} /> */}
             {/* <SpaceCleanupGame config={gameConfig} /> */}
 
-            {block.gameType === "satellite" ? (
+            {/* {block.gameType === "satellite" ? (
               <SatelliteTrackerGame config={gameConfig} />
             ) : block.gameType === "asteroid" ? (
               // AQUÍ ESTÁ EL NUEVO JUEGO
@@ -161,10 +161,17 @@ export const TestGames = ({ lesson }: LessonViewProps) => {
             ) : block.gameType === "reverse" ? (
               <ReverseCommunicatorGame config={gameConfig} />
             ) : block.gameType === "memori" ? (
-              <MemoryMatrixGame config={gameConfig} />
+              <MemoryMatrixGame
+                config={{
+                  ...gameConfig,
+                  energyReward: 10,
+                  kidId: "",
+                  missionId: "",
+                }}
+              />
             ) : (
               <MultitaskEvasionGame config={gameConfig} />
-            )}
+            )} */}
 
             <p className="text-center text-xs text-slate-500 mt-6 uppercase tracking-widest">
               {block.gameType === "satellite"

@@ -27,7 +27,7 @@ export const dailySession = defineType({
       of: [{ type: "reference", to: [{ type: "mission" }] }],
       validation: (Rule) =>
         Rule.required()
-          .max(3)
+          .max(10)
           .error(
             "Por protocolo terapéutico, un niño no debe tener más de 3 misiones al día.",
           ),
@@ -38,7 +38,7 @@ export const dailySession = defineType({
       type: "array",
       of: [{ type: "string" }],
       initialValue: [],
-      readOnly: true, // Lo llenaremos por código, no a mano
+      // readOnly: true, // Lo llenaremos por código, no a mano
     }),
     defineField({
       name: "isCompleted",

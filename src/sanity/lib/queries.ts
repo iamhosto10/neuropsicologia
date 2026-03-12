@@ -106,7 +106,6 @@ export const getKidDashboardQuery = `
     alias,
     energyCrystals,
     avatarStatus,
-    // Buscamos la sesión diaria asignada a este niño que coincida con la fecha de hoy
     "todaySession": *[_type == "dailySession" && references(^._id) && date == $todayDate][0]{
       _id,
       isCompleted,
@@ -119,5 +118,14 @@ export const getKidDashboardQuery = `
         energyReward
       }
     }
+  }
+`;
+
+export const getKidsByParentQuery = `
+  *[_type == "kidProfile" && parent._ref == $parentSanityId]{
+    _id,
+    alias,
+    avatarStatus,
+    energyCrystals
   }
 `;

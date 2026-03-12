@@ -25,6 +25,13 @@ export const mission = defineType({
           },
           { title: "Constructor de Caras (Emociones)", value: "emotion_faces" },
           { title: "Secuencia Inversa (Memoria)", value: "simon_says_reverse" },
+          { title: "Evasión Multitarea", value: "multitask_evasion" },
+          { title: "Comunicador Inverso", value: "reverse_communicator" },
+          { title: "Rastreador de Satélites", value: "satellite_tracker" },
+          {
+            title: "Limpieza Espacial (Atención Dividida)",
+            value: "space_cleanup",
+          },
         ],
       },
       validation: (Rule) => Rule.required(),
@@ -48,6 +55,13 @@ export const mission = defineType({
       type: "number",
       initialValue: 50,
       description: "Cristales que gana el niño al completarla",
+    }),
+    defineField({
+      name: "timeLimit",
+      title: "Límite de Tiempo (segundos)",
+      type: "number",
+      initialValue: 60,
+      description: "Tiempo para completar la misión (en segundos)",
     }),
   ],
 });

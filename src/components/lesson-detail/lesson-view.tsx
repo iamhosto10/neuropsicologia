@@ -291,7 +291,7 @@ export const LessonView = ({ lesson }: LessonViewProps) => {
             {/* <SatelliteTrackerGame config={gameConfig} /> */}
             {/* <SpaceCleanupGame config={gameConfig} /> */}
 
-            {block.gameType === "satellite" ? (
+            {/* {block.gameType === "satellite" ? (
               <SatelliteTrackerGame config={gameConfig} />
             ) : block.gameType === "asteroid" ? (
               // AQUÍ ESTÁ EL NUEVO JUEGO
@@ -305,7 +305,7 @@ export const LessonView = ({ lesson }: LessonViewProps) => {
               />
             ) : (
               <SpaceCleanupGame config={gameConfig} />
-            )}
+            )} */}
 
             <p className="text-center text-xs text-slate-500 mt-6 uppercase tracking-widest">
               {block.gameType === "satellite"

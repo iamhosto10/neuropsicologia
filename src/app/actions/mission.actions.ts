@@ -50,6 +50,8 @@ export async function saveMissionProgress(
     // 3. Ejecutamos todos los cambios a la vez
     await tx.commit();
 
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
     console.log(`✅ Misión ${missionId} completada. Cristales sumados.`);
     revalidatePath("/hq");
 

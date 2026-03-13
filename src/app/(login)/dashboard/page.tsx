@@ -8,6 +8,8 @@ import WeeklyChecklist from "@/components/weekly-checklist/weekly-checklist";
 import MyActivitiesDashboard from "@/components/profile/my-activities-dashboard";
 import { MobileProgressCard } from "@/components/dashboard/mobile-progress-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   // 1. Obtenemos la sesión de Clerk
   const { userId, redirectToSignIn } = await auth();
@@ -19,9 +21,13 @@ export default async function DashboardPage() {
 
   // 2. Buscamos los datos de los hijos (cadetes) en Sanity
   const sanityUserId = `user-${userClerk?.id}`;
-  const kids = await client.fetch(getParentDashboardQuery, {
-    parentSanityId: sanityUserId,
-  });
+  const kids = await client.withConfig({ useCdn: false }).fetch(
+    getParentDashboardQuery,
+    {
+      parentSanityId: sanityUserId,
+    },
+    { cache: "no-store" },
+  );
 
   // 3. Renderizamos la vista manteniendo tu diseño original
   return (

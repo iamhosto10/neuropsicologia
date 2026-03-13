@@ -134,13 +134,12 @@ const DashboardOverview = ({ kidsData = [] }: DashboardOverviewProps) => {
                 <p className="text-slate-500 mb-2">
                   No hay perfiles registrados.
                 </p>
-                <a
-                  href="/studio"
-                  target="_blank"
+                <Link
+                  href="/dashboard/add-cadet"
                   className="text-cyan-600 underline text-sm"
                 >
-                  Registrar en Sanity
-                </a>
+                  Reclutar mi primer cadete
+                </Link>
               </Card>
             )}
           </div>
@@ -177,7 +176,7 @@ const DashboardOverview = ({ kidsData = [] }: DashboardOverviewProps) => {
               <CardTitle>Agenda del Día</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[200px]">
+              <ScrollArea className="h-50">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 opacity-60">
                     <Check className="h-5 w-5" />
@@ -198,7 +197,7 @@ const DashboardOverview = ({ kidsData = [] }: DashboardOverviewProps) => {
           </Card>
 
           {/* Tip Card */}
-          <div className="bg-gradient-to-br from-[oklch(var(--dash-gradient-start))] to-[oklch(var(--dash-gradient-end))] rounded-[2rem] p-6 text-white relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="bg-linear-to-br from-[oklch(var(--dash-gradient-start))] to-[oklch(var(--dash-gradient-end))] rounded-[2rem] p-6 text-white relative overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="relative z-10">
               <Lightbulb className="h-8 w-8 mb-2" />
               <h3 className="font-bold text-lg mb-1">Consejo del Día</h3>

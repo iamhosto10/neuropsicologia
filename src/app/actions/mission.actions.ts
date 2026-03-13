@@ -11,6 +11,7 @@ export async function saveMissionProgress(
   crystalsEarned: number,
   telemetry: any[],
 ) {
+  console.log("telemetria", telemetry);
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
@@ -39,11 +40,20 @@ export async function saveMissionProgress(
         const isFullyCompleted =
           newCompletedArray.length >= (session.missions?.length || 0);
 
+        const telemetryRecord = JSON.stringify({
+          missionId,
+          timestamp: new Date().toISOString(),
+          metrics: telemetry[0] || telemetry, // Tomamos los datos del juego
+        });
+
         tx.patch(session._id, (p) =>
-          p.set({
-            completedMissions: newCompletedArray,
-            isCompleted: isFullyCompleted,
-          }),
+          p
+            .setIfMissing({ telemetryData: [] })
+            .append("telemetryData", [telemetryRecord])
+            .set({
+              completedMissions: newCompletedArray,
+              isCompleted: isFullyCompleted,
+            }),
         );
       }
     }

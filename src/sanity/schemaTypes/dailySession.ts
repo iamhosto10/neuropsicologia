@@ -48,7 +48,17 @@ export const dailySession = defineType({
       description:
         "Se marcará como true automáticamente cuando el niño termine las 3 misiones.",
     }),
+    defineField({
+      name: "telemetryData",
+      title: "Telemetría Clínica (JSON)",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "Datos crudos de rendimiento cognitivo guardados en formato JSON.",
+      initialValue: [],
+    }),
   ],
+
   preview: {
     select: {
       title: "kidProfile.alias",

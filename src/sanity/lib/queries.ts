@@ -140,7 +140,8 @@ export const getKidClinicalReportQuery = `
       date,
       isCompleted,
       "assignedCount": count(missions),
-      "completedCount": count(completedMissions)
+      "completedCount": count(completedMissions),
+      telemetryData
     }
   }
 `;

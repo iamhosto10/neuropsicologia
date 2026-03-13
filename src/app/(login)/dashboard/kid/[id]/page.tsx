@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import CognitiveChart from "@/components/dashboard/cognitive-chart";
+import AccuracyChart from "@/components/dashboard/accuracy-chart";
+import { Target } from "lucide-react";
 
 export default async function KidReportPage({
   params,
@@ -148,6 +150,19 @@ export default async function KidReportPage({
           </CardHeader>
           <CardContent>
             <CognitiveChart sessions={kidData.sessionsHistory || []} />
+          </CardContent>
+        </Card>
+
+        {/* Gráfica de Precisión (NUEVA) */}
+        <Card className="rounded-[2rem] shadow-sm lg:col-span-2 mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-purple-600" /> Evolución de
+              Precisión Clínica
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AccuracyChart sessions={kidData.sessionsHistory || []} />
           </CardContent>
         </Card>
 

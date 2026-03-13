@@ -53,24 +53,33 @@ export default async function KidReportPage({
   return (
     <div className="max-w-6xl mx-auto md:p-8 space-y-8 font-sans animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Cabecera / Botón de Regreso */}
-      <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full shadow-sm hover:bg-slate-100"
-          >
-            <ArrowLeft className="w-5 h-5" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full shadow-sm hover:bg-slate-100"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              Reporte de {kidData.alias}
+            </h1>
+            <p className="text-slate-500 text-sm">
+              Identificador Clínico: {kidData._id.split("-").pop()}
+            </p>
+          </div>
+        </div>
+
+        {/* 👇 AQUÍ AÑADIMOS EL NUEVO BOTÓN */}
+        <Link href={`/dashboard/kid/${id}/assign`}>
+          <Button className="rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-md shadow-cyan-900/20">
+            Asignar Nuevas Misiones
           </Button>
         </Link>
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            Reporte de {kidData.alias}
-          </h1>
-          <p className="text-slate-500 text-sm">
-            Identificador Clínico: {kidData._id.split("-").pop()}
-          </p>
-        </div>
       </div>
 
       {/* Tarjetas de Resumen KPI */}

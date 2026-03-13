@@ -236,3 +236,14 @@ export const getParentDashboardQuery = `
     }
   }
 `;
+
+export const getAllMissionsQuery = `
+  *[_type == "mission"]{
+    _id,
+    title,
+    gameType,
+    difficulty,
+    timeLimit,
+    energyReward
+  }
+`;

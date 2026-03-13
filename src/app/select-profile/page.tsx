@@ -61,9 +61,8 @@ export default async function SelectProfilePage() {
             </form>
           ))}
 
-          {/* Botón para añadir otro niño (Lleva al dashboard de padres) */}
           <a
-            href="/dashboard"
+            href="/dashboard/add-cadet"
             className="group flex flex-col items-center gap-4 transition-transform hover:scale-110 focus:outline-none"
           >
             <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-transparent border-4 border-dashed border-slate-700 group-hover:border-slate-500 flex items-center justify-center transition-all">

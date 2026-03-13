@@ -2,6 +2,7 @@
 
 import { client } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 // 👇 Añadimos 'missionId' a los parámetros
 export async function saveMissionProgress(
@@ -60,4 +61,45 @@ export async function saveMissionProgress(
     console.error("❌ Error guardando progreso:", error);
     return { success: false };
   }
+}
+
+export async function assignDailySession(kidId: string, missionIds: string[]) {
+  if (!missionIds || missionIds.length === 0) {
+    return { error: "Debes seleccionar al menos una misión." };
+  }
+
+  try {
+    const writeClient = client.withConfig({
+      token: process.env.SANITY_API_WRITE_TOKEN,
+      useCdn: false,
+    });
+
+    const today = new Date().toISOString().split("T")[0];
+
+    await writeClient.create({
+      _type: "dailySession",
+      kidProfile: {
+        _type: "reference",
+        _ref: kidId,
+      },
+      date: today,
+      missions: missionIds.map((id) => ({
+        _key: Math.random().toString(36).substring(7),
+        _type: "reference",
+        _ref: id,
+      })),
+      completedMissions: [],
+      isCompleted: false,
+    });
+  } catch (error) {
+    console.error("❌ Error asignando misiones:", error);
+    return { error: "Hubo un error al asignar las misiones." };
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  revalidatePath("/hq");
+  revalidatePath(`/dashboard/kid/${kidId}`);
+
+  redirect(`/dashboard/kid/${kidId}`);
 }

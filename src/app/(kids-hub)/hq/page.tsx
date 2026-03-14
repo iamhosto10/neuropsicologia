@@ -1,4 +1,4 @@
-import { Zap, Shield, Play } from "lucide-react";
+import { Zap, Shield, Play, ShoppingCart } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
@@ -43,6 +43,20 @@ export default async function HeadquartersPage() {
             ? " ¡Misiones de hoy terminadas!"
             : " Tienes misiones pendientes."}
         </p>
+        <Link
+          href="/hq/store"
+          className="bg-linear-to-r from-yellow-500 to-orange-500 p-6 rounded-3xl border-4 border-yellow-400 shadow-[0_0_30px_rgba(234,179,8,0.3)] hover:scale-105 transition-transform flex items-center justify-between group"
+        >
+          <div>
+            <h3 className="text-2xl font-black text-slate-950 mb-1">
+              Bazar Espacial
+            </h3>
+            <p className="text-yellow-900 font-medium">
+              Usa tus cristales aquí
+            </p>
+          </div>
+          <ShoppingCart className="w-12 h-12 text-slate-950 opacity-80 group-hover:opacity-100 group-hover:rotate-12 transition-all" />
+        </Link>
       </div>
       <div className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 flex items-center gap-6 shadow-2xl w-full max-w-md justify-center">
         <div className="w-24 h-24 bg-slate-800 rounded-2xl border-4 border-slate-700 flex items-center justify-center">

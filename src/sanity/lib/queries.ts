@@ -106,6 +106,8 @@ export const getKidDashboardQuery = `
     alias,
     energyCrystals,
     avatarStatus,
+    unlockedAvatars,
+    activeAvatar,
     "todaySession": *[_type == "dailySession" && references(^._id) && date == $todayDate][0]{
       _id,
       isCompleted,

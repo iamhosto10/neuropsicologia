@@ -5,6 +5,9 @@ import { getKidsByParentQuery } from "@/sanity/lib/queries";
 import { selectKidProfile } from "@/app/actions/profile.actions";
 import { Shield, Rocket, UserPlus, LogOut } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
+import { getAvatarIcon } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export default async function SelectProfilePage() {
   const { userId, redirectToSignIn } = await auth();
@@ -17,9 +20,13 @@ export default async function SelectProfilePage() {
   const sanityUserId = `user-${user?.id}`;
 
   // 3. Buscamos los hijos de este padre
-  const kids = await client.fetch(getKidsByParentQuery, {
-    parentSanityId: sanityUserId,
-  });
+  const kids = await client.withConfig({ useCdn: false }).fetch(
+    getKidsByParentQuery,
+    {
+      parentSanityId: sanityUserId,
+    },
+    { cache: "no-store" },
+  );
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans select-none relative overflow-hidden">
@@ -49,7 +56,9 @@ export default async function SelectProfilePage() {
             >
               <button className="group flex flex-col items-center gap-4 transition-transform hover:scale-110 focus:outline-none hover:cursor-pointer">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-slate-800 border-4 border-slate-700 group-hover:border-cyan-400 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.5)] flex items-center justify-center transition-all overflow-hidden relative">
-                  <Shield className="w-16 h-16 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                  <div className="text-6xl group-hover:scale-110 group-hover:-translate-y-2 transition-all duration-300 drop-shadow-md">
+                    {getAvatarIcon(kid.activeAvatar)}
+                  </div>
                   <div className="absolute bottom-0 w-full bg-slate-900/80 py-1 text-xs font-mono text-yellow-400 border-t border-slate-700">
                     ⚡ {kid.energyCrystals}
                   </div>

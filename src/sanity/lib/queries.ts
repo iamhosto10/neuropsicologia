@@ -128,6 +128,7 @@ export const getKidsByParentQuery = `
     _id,
     alias,
     avatarStatus,
+    activeAvatar,
     energyCrystals
   }
 `;

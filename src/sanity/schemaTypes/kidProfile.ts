@@ -42,6 +42,21 @@ export const kidProfile = defineType({
       initialValue: "hungry",
       description: "Cómo se ve el robot cuando el niño entra hoy",
     }),
+    defineField({
+      name: "unlockedAvatars",
+      title: "Avatares Desbloqueados",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "IDs de los avatares que el niño ha comprado.",
+      initialValue: ["default-cadet"],
+    }),
+    defineField({
+      name: "activeAvatar",
+      title: "Avatar Activo",
+      type: "string",
+      description: "El avatar que tiene puesto actualmente.",
+      initialValue: "default-cadet",
+    }),
   ],
   preview: {
     select: {

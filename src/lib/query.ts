@@ -227,6 +227,7 @@ export const getParentDashboardQuery = `
     _id,
     alias,
     avatarStatus,
+    activeAvatar,
     energyCrystals,
     "latestSession": *[_type == "dailySession" && references(^._id)] | order(_createdAt desc)[0]{
       date,

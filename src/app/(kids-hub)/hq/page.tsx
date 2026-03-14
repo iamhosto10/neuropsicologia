@@ -4,6 +4,7 @@ import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
 import { getActiveKidId, clearKidProfile } from "@/app/actions/profile.actions";
 import { redirect } from "next/navigation";
+import { getAvatarIcon } from "@/lib/utils";
 
 export default async function HeadquartersPage() {
   const kidId = await getActiveKidId();
@@ -36,13 +37,30 @@ export default async function HeadquartersPage() {
         <h1 className="text-5xl font-black text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-600 tracking-tight">
           Cuartel General
         </h1>
-        <p className="text-xl text-slate-400 font-medium">
+        {/* <p className="text-xl text-slate-400 font-medium">
           Hola,{" "}
           <span className="text-white font-bold">{dashboardData.alias}</span>.
+        
           {dashboardData.todaySession?.isCompleted
             ? " ¡Misiones de hoy terminadas!"
             : " Tienes misiones pendientes."}
         </p>
+         */}
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-slate-800 rounded-full border-2 border-slate-700 flex items-center justify-center text-4xl shadow-lg relative">
+            {/* 🔥 AQUÍ USAMOS LA FUNCIÓN DINÁMICA */}
+            {getAvatarIcon(dashboardData.activeAvatar)}
+            <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-slate-900"></div>
+          </div>
+          <div>
+            <p className="text-slate-400 font-mono text-sm uppercase tracking-wider">
+              Modo Entrenamiento
+            </p>
+            <h1 className="text-2xl font-black text-white">
+              ¡Hola, {dashboardData.alias}!
+            </h1>
+          </div>
+        </div>
         <Link
           href="/hq/store"
           className="bg-linear-to-r from-yellow-500 to-orange-500 p-6 rounded-3xl border-4 border-yellow-400 shadow-[0_0_30px_rgba(234,179,8,0.3)] hover:scale-105 transition-transform flex items-center justify-between group"

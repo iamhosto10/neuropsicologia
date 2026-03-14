@@ -1,4 +1,3 @@
-// src/components/dashboard/dashboard-overview.tsx
 "use client";
 
 import React from "react";
@@ -21,6 +20,7 @@ import {
   Shield,
 } from "lucide-react";
 import Link from "next/link";
+import { getAvatarIcon } from "@/lib/utils";
 
 // Añadimos una interfaz para recibir los datos de Sanity
 interface DashboardOverviewProps {
@@ -79,8 +79,8 @@ const DashboardOverview = ({ kidsData = [] }: DashboardOverviewProps) => {
                     <div className="flex justify-between items-start mb-6">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12 border-2 border-cyan-100">
-                          <AvatarFallback className="bg-cyan-50 text-cyan-700 font-bold">
-                            {kid.alias.charAt(0).toUpperCase()}
+                          <AvatarFallback className="bg-slate-100 text-3xl border-2 border-cyan-100 shadow-inner">
+                            {getAvatarIcon(kid.activeAvatar)}
                           </AvatarFallback>
                         </Avatar>
                         <div>

@@ -12,8 +12,8 @@ export default async function Home() {
     redirect("/dashboard");
   }
   return (
-    <main className="bg-[#F9FAFB] ">
-      <HeroSection />
+    <main className="bg-[rgb(249,250,251)] ">
+      {/* <HeroSection /> */}
       <FeaturesGrid />
       <ToolsSection />
       <PopularActivities />

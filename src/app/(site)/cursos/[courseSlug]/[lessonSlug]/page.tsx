@@ -4,8 +4,16 @@ import { getCourseAndLessonQuery } from "@/lib/query";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { PortableText } from "@portabletext/react";
-import { ArrowLeft, BookOpen, CheckCircle, PlayCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CheckCircle,
+  PlayCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+// 🔥 Importamos nuestros componentes personalizados
+import { ptComponents } from "@/components/lesson-detail/portable-text-components";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +34,18 @@ export default async function LessonPage({
   }
 
   const { currentLesson, syllabus, title: courseTitle } = data;
+
+  // 🔥 LÓGICA DE NAVEGACIÓN: Aplanamos el temario para saber dónde estamos
+  const flatLessons =
+    syllabus?.flatMap((module: any) => module.lessons || []) || [];
+  const currentIndex = flatLessons.findIndex((l: any) => l.slug === lessonSlug);
+
+  // Calculamos quién está antes y quién está después
+  const prevLesson = currentIndex > 0 ? flatLessons[currentIndex - 1] : null;
+  const nextLesson =
+    currentIndex < flatLessons.length - 1
+      ? flatLessons[currentIndex + 1]
+      : null;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row pt-16">
@@ -88,22 +108,24 @@ export default async function LessonPage({
       {/* MAIN CONTENT: Área de Lectura / Visualización */}
       <main className="flex-1 bg-white md:h-[calc(100vh-4rem)] overflow-y-auto">
         <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
-          {/* Cabecera de la Lección */}
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 bg-cyan-50 text-cyan-600 px-3 py-1 rounded-full text-sm font-bold mb-6">
-              <BookOpen className="w-4 h-4" /> Lección Actual
+              <BookOpen className="w-4 h-4" /> Módulo{" "}
+              {syllabus.findIndex((m: any) =>
+                m.lessons?.some((l: any) => l.slug === lessonSlug),
+              ) + 1}
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
               {currentLesson.title}
             </h1>
           </div>
 
-          {/* El Renderizador Mágico de Sanity */}
-          <div className="prose prose-lg prose-slate prose-headings:font-bold prose-a:text-cyan-600 hover:prose-a:text-cyan-500 prose-img:rounded-3xl prose-img:shadow-md max-w-none">
+          {/* 🔥 APLICAMOS NUESTROS COMPONENTES PERSONALIZADOS */}
+          <div className="prose prose-lg prose-slate prose-headings:font-bold prose-a:text-cyan-600 hover:prose-a:text-cyan-500 max-w-none">
             {currentLesson.content ? (
               <PortableText
                 value={currentLesson.content}
-                // Aquí puedes añadir custom renderers para imágenes o módulos de juego más adelante
+                components={ptComponents}
               />
             ) : (
               <p className="text-slate-500 italic">
@@ -112,17 +134,40 @@ export default async function LessonPage({
             )}
           </div>
 
-          {/* Controles Inferiores */}
-          <div className="mt-20 pt-8 border-t border-slate-100 flex justify-between items-center">
-            <Button
-              variant="outline"
-              className="rounded-xl h-12 px-6 font-bold text-slate-600 border-slate-200"
-            >
-              Lección Anterior
-            </Button>
-            <Button className="rounded-xl h-12 px-6 font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/20">
-              Marcar como Completada
-            </Button>
+          {/* 🔥 CONTROLES INFERIORES CON NAVEGACIÓN REAL */}
+          <div className="mt-20 pt-8 border-t border-slate-100 flex flex-col-reverse md:flex-row gap-4 justify-between items-center">
+            {prevLesson ? (
+              <Link
+                href={`/cursos/${courseSlug}/${prevLesson.slug}`}
+                className="w-full md:w-auto"
+              >
+                <Button
+                  variant="outline"
+                  className="w-full md:w-auto rounded-xl h-14 px-6 font-bold text-slate-600 border-slate-200 gap-2"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Lección Anterior
+                </Button>
+              </Link>
+            ) : (
+              <div className="w-full md:w-auto hidden md:block"></div> /* Espaciador si no hay anterior */
+            )}
+
+            {nextLesson ? (
+              <Link
+                href={`/cursos/${courseSlug}/${nextLesson.slug}`}
+                className="w-full md:w-auto"
+              >
+                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/20 gap-2">
+                  Siguiente Lección <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            ) : (
+              <Link href={`/cursos/${courseSlug}`} className="w-full md:w-auto">
+                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 gap-2">
+                  Finalizar Curso <CheckCircle className="w-5 h-5" />
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </main>

@@ -1,46 +1,61 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Heart } from "lucide-react";
-import { Course } from "@/lib/types";
-import { urlFor } from "@/sanity/lib/image";
+// src/components/courses/courses-card.tsx
 import Link from "next/link";
+import { Card, CardContent } from "@/components/ui/card";
+import { Clock, ArrowRight } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-type CourseCardProps = {
-  course: Course;
-};
+interface CoursesCardProps {
+  title: string;
+  description: string;
+  image: string;
+  href: string;
+  duration?: number | string;
+  level?: string;
+}
 
-export function CourseCard({ course }: CourseCardProps) {
+export default function CoursesCard({
+  title,
+  description,
+  image,
+  href,
+  duration,
+  level,
+}: CoursesCardProps) {
   return (
-    <Link href={`/cursos/${course?.slug?.current}`}>
-      <Card className="bg-white pt-0 rounded-[2rem] border-none shadow-sm hover:shadow-lg overflow-hidden group transition-all duration-500 hover:-translate-y-2 cursor-pointer">
-        <div className={`relative h-48 `}>
-          <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full cursor-pointer transition hover:scale-105">
-            <Heart className="w-5 h-5 text-black" />
-          </div>
+    <Link href={href} className="group h-full flex cursor-pointer">
+      <Card className="rounded-3xl border-none shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col bg-white hover:-translate-y-1 w-full">
+        {/* Portada del Curso */}
+        <div className="h-48 relative bg-slate-100 overflow-hidden">
           <img
-            src={urlFor(course.image?.asset.url).url()}
-            alt={course.title}
-            className="rounded-md w-full object-cover"
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
+          {level && (
+            <Badge className="absolute top-4 left-4 bg-white/90 text-slate-800 hover:bg-white border-none shadow-sm font-bold capitalize">
+              Nivel: {level}
+            </Badge>
+          )}
         </div>
 
-        <CardContent className="p-6 flex flex-col gap-2">
-          <h3 className="text-xl font-bold text-black line-clamp-2">
-            {course.title}
+        {/* Contenido */}
+        <CardContent className="p-6 flex flex-col grow">
+          <h3 className="text-xl font-bold text-slate-900 mb-3 line-clamp-2 group-hover:text-cyan-600 transition-colors">
+            {title}
           </h3>
-
-          <p className="text-sm text-muted-foreground line-clamp-2">
-            {course.description}
+          <p className="text-slate-500 text-sm mb-6 line-clamp-3 grow leading-relaxed">
+            {description}
           </p>
 
-          <div className="flex items-center gap-2 mt-4">
-            <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium">
-              {course.age}
-            </Badge>
-
-            <Badge className="bg-[oklch(var(--brand-pastel-tag))] text-amber-900 rounded-full font-medium">
-              Lecciones: {course.syllabus?.length}
-            </Badge>
+          {/* Footer de la tarjeta */}
+          <div className="flex items-center justify-between text-sm font-bold text-slate-400 pt-4 border-t border-slate-100 mt-auto">
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-cyan-500" />{" "}
+              {duration ? `${duration} min` : "A tu ritmo"}
+            </span>
+            <span className="flex items-center text-cyan-500 group-hover:translate-x-1 transition-transform">
+              Ver Curso <ArrowRight className="w-4 h-4 ml-1" />
+            </span>
           </div>
         </CardContent>
       </Card>

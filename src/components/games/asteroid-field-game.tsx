@@ -26,6 +26,7 @@ interface AsteroidGameProps {
     kidId: string; // NUEVO
     missionId: string;
     energyReward: number; // NUEVO
+    isPractice?: boolean;
   };
 }
 
@@ -58,6 +59,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
     },
     onFinish: async (finalScore, telemetry) => {
       stopBackground();
+      if (config.isPractice) return;
       console.log(
         "Misión Terminada. Datos Clínicos listos para enviar:",
         telemetry,
@@ -116,7 +118,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
       {/* VIEWPORT DEL JUEGO */}
       <div
         onClick={engine.handleAction}
-        className="relative h-[500px] w-full bg-black overflow-hidden rounded-b-xl border-4 border-t-0 border-slate-800 cursor-pointer"
+        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-4 border-t-0 border-slate-800 cursor-pointer"
       >
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <AnimatePresence mode="wait">
@@ -128,7 +130,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
                 exit={{ scale: 1.2, opacity: 0 }}
                 className="relative"
               >
-                <div className="w-56 h-56 rounded-full border-[12px] border-green-500 flex items-center justify-center bg-green-900/20 shadow-[0_0_50px_#22c55e]">
+                <div className="w-56 h-56 rounded-full border-12 border-green-500 flex items-center justify-center bg-green-900/20 shadow-[0_0_50px_#22c55e]">
                   <Hexagon className="w-28 h-28 text-green-400" />
                 </div>
                 <p className="absolute -bottom-16 w-full text-center text-green-400 font-bold text-3xl">
@@ -145,7 +147,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
                 exit={{ scale: 1.2, opacity: 0 }}
                 className="relative"
               >
-                <div className="w-56 h-56 rounded-full border-[12px] border-red-500 flex items-center justify-center bg-red-900/20 shadow-[0_0_50px_#ef4444]">
+                <div className="w-56 h-56 rounded-full border-12 border-red-500 flex items-center justify-center bg-red-900/20 shadow-[0_0_50px_#ef4444]">
                   <AlertTriangle className="w-28 h-28 text-red-500" />
                 </div>
                 <p className="absolute -bottom-16 w-full text-center text-red-500 font-bold text-3xl">

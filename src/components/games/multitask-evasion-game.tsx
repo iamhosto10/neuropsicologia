@@ -387,7 +387,7 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
       <div
         id="warp-viewport"
         onPointerMove={handlePointerMove}
-        className="relative h-[600px] w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair touch-none"
+        className="relative h-150 w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair touch-none"
       >
         {/* Fondo Parallax SUAVIZADO */}
         <div

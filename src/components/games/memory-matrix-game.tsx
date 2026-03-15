@@ -27,6 +27,7 @@ interface MemoryGameProps {
     kidId: string; // Requerido para guardar datos
     missionId: string; // Requerido para marcar completada
     energyReward: number; // Requerido para la recompensa
+    isPractice?: boolean;
   };
 }
 
@@ -71,6 +72,8 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
     },
     onFinish: async (finalScore, telemetry) => {
       stopBg();
+      if (config.isPractice) return;
+
       setIsSaving(true);
       console.log("Telemetría Clínica (Memoria):", telemetry);
       await saveMissionProgress(
@@ -134,7 +137,7 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       {/* VIEWPORT PRINCIPAL */}
       <div
         id="security-panel"
-        className="relative min-h-[600px] w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl flex flex-col items-center justify-center p-4"
+        className="relative min-h-150 w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl flex flex-col items-center justify-center p-4"
       >
         {isSaving && (
           <div className="absolute inset-0 z-50 bg-black/80 flex items-center justify-center backdrop-blur-sm">

@@ -30,6 +30,7 @@ interface SatelliteGameProps {
     kidId: string;
     missionId: string;
     energyReward: number;
+    isPractice?: boolean;
   };
 }
 
@@ -61,6 +62,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
     },
     onFinish: async (finalScore, telemetry) => {
       stopBg();
+      if (config.isPractice) return;
       setIsSaving(true);
       console.log("Telemetría Radar Satelital:", telemetry);
       await saveMissionProgress(

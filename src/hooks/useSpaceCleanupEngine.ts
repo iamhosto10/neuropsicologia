@@ -1,4 +1,3 @@
-// src/hooks/useSpaceCleanupEngine.ts
 import { useState, useRef, useCallback, useEffect } from "react";
 
 export type GameState = "start" | "playing" | "finished";

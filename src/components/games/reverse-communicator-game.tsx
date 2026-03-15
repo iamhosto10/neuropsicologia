@@ -30,6 +30,7 @@ interface ReverseGameProps {
     kidId: string;
     missionId: string;
     energyReward: number;
+    isPractice?: boolean;
   };
 }
 
@@ -106,6 +107,7 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
     onFinish: async (finalScore, telemetry) => {
       stopBg();
       stopAllVoices();
+      if (config.isPractice) return;
       setIsSaving(true);
       console.log("Telemetría Comunicador Inverso:", telemetry);
       await saveMissionProgress(

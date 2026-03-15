@@ -30,6 +30,7 @@ interface SpaceCleanupProps {
     kidId: string;
     missionId: string;
     energyReward: number;
+    isPractice?: boolean;
   };
 }
 
@@ -71,6 +72,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
     onTriggerGlitch: triggerGlitchEffect,
     onFinish: async (finalScore, telemetry) => {
       stopBg();
+      if (config.isPractice) return;
       if (soundEnabled && telemetry[0].result === "win") playWin();
       setIsSaving(true);
 
@@ -141,14 +143,14 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
 
       <div
         id="game-viewport"
-        className="relative h-[500px] w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl"
+        className="relative h-125 w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl"
         style={{
           backgroundImage:
             "radial-gradient(circle at center, #1e293b 0%, #020617 100%)",
         }}
       >
         {isSaving && (
-          <div className="absolute inset-0 z-[110] bg-black/80 flex items-center justify-center backdrop-blur-sm">
+          <div className="absolute inset-0 z-110 bg-black/80 flex items-center justify-center backdrop-blur-sm">
             <p className="text-cyan-400 font-bold text-2xl animate-pulse">
               Sincronizando Bitácora...
             </p>
@@ -156,7 +158,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
         )}
 
         {engine.gameState !== "playing" && (
-          <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm text-white p-8 text-center animate-in fade-in duration-300">
+          <div className="absolute inset-0 z-100 flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm text-white p-8 text-center animate-in fade-in duration-300">
             {engine.gameState === "finished" ? (
               <div className="space-y-6">
                 {engine.gameResult === "win" ? (

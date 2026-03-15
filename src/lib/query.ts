@@ -248,3 +248,72 @@ export const getAllMissionsQuery = `
     energyReward
   }
 `;
+
+export const getAllCoursesQuery = `
+  *[_type == "course"] | order(_createdAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    "imageUrl": image.asset->url,
+    duration,
+    level,
+    "lessonsCount": count(lessons)
+  }
+`;
+
+// Traer todas las Actividades
+export const getAllActivitiesQuery = `
+  *[_type == "activity"] | order(_createdAt desc) {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    "imageUrl": image.asset->url,
+    ageRange,
+    duration,
+    category
+  }
+`;
+
+export const getCourseBySlugQuery = `
+  *[_type == "course" && slug.current == $slug][0] {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    "imageUrl": image.asset->url,
+    duration,
+    level,
+    // Entramos al syllabus para buscar los módulos y sus lecciones referenciadas
+    syllabus[]{
+      title,
+      lessons[]->{
+        _id,
+        title,
+        "slug": slug.current
+      }
+    }
+  }
+`;
+
+export const getCourseAndLessonQuery = `
+  *[_type == "course" && slug.current == $courseSlug][0] {
+    title,
+    "courseSlug": slug.current,
+    syllabus[]{
+      title,
+      lessons[]->{
+        _id,
+        title,
+        "slug": slug.current
+      }
+    },
+    // Sub-consulta para traer el contenido de la lección exacta que estamos viendo
+    "currentLesson": *[_type == "lesson" && slug.current == $lessonSlug][0] {
+      _id,
+      title,
+      content
+    }
+  }
+`;

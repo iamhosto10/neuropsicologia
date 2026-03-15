@@ -1,79 +1,63 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Course } from "@/lib/types";
+import Link from "next/link";
+import { PlayCircle } from "lucide-react";
 
-const syllabus = [
-  {
-    module: 1,
-    title: "Introducción a la Neuropsicología",
-    lessons: [
-      "Historia y desarrollo de la neuropsicología",
-      "Conceptos básicos de neuroanatomía funcional",
-      "Modelos de organización cerebral",
-    ],
-  },
-  {
-    module: 2,
-    title: "Evaluación Neuropsicológica",
-    lessons: [
-      "Principios de la evaluación neuropsicológica",
-      "Baterías de pruebas y tests específicos",
-      "Interpretación de resultados y elaboración de informes",
-    ],
-  },
-  {
-    module: 3,
-    title: "Patologías y Trastornos",
-    lessons: [
-      "Trastornos del neurodesarrollo",
-      "Daño cerebral adquirido: ACV, TCE",
-      "Enfermedades neurodegenerativas",
-    ],
-  },
-  {
-    module: 4,
-    title: "Intervención y Rehabilitación",
-    lessons: [
-      "Principios de la rehabilitación neuropsicológica",
-      "Diseño de programas de intervención",
-      "Técnicas de estimulación cognitiva",
-    ],
-  },
-];
-
-export function CourseSyllabus({ course }: { course: Course }) {
+export default function CourseSyllabus({
+  syllabus = [],
+  courseSlug,
+}: {
+  syllabus: any[];
+  courseSlug: string;
+}) {
   return (
-    <div className="w-full">
-      <h2 className="text-3xl font-bold mb-6">Contenido del Curso</h2>
-      <Accordion type="single" collapsible className="w-full space-y-3">
-        {course?.syllabus?.map((item, index) => (
-          <AccordionItem
-            key={index}
-            value={`item-${index + 1}`}
-            className="border rounded-2xl"
-          >
-            <AccordionTrigger className="p-4 text-left hover:no-underline">
-              <div className="flex items-center gap-4">
-                <div className="h-8 w-8 bg-yellow-100 rounded-md flex items-center justify-center text-yellow-700 font-bold shrink-0">
-                  {index + 1}
-                </div>
-                <span className="font-semibold text-lg">{item.title}</span>
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100">
+      <h2 className="text-2xl font-bold text-slate-900 mb-6">
+        Contenido del Curso
+      </h2>
+
+      {syllabus?.length > 0 ? (
+        <div className="space-y-8">
+          {/* Mapeamos los Módulos */}
+          {syllabus.map((module, moduleIndex) => (
+            <div key={moduleIndex} className="space-y-4">
+              <h3 className="text-lg font-bold text-slate-800 border-b pb-2 border-slate-100">
+                {module.title}
+              </h3>
+
+              {/* Mapeamos las lecciones dentro de este módulo */}
+              <div className="space-y-3">
+                {module.lessons?.length > 0 ? (
+                  module.lessons.map((lesson: any, lessonIndex: number) => (
+                    <Link
+                      href={`/cursos/${courseSlug}/${lesson.slug}`}
+                      key={lesson._id || lessonIndex}
+                      className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-cyan-200 hover:bg-cyan-50/50 transition group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
+                          <PlayCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-800 group-hover:text-cyan-700 transition-colors">
+                            Lección {lessonIndex + 1}: {lesson.title}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500 italic pl-4">
+                    No hay lecciones en este módulo aún.
+                  </p>
+                )}
               </div>
-            </AccordionTrigger>
-            <AccordionContent className="p-4 pt-0">
-              <ul className="list-disc pl-8 space-y-2 text-muted-foreground">
-                {item?.lessons?.map((lesson, index) => (
-                  <li key={index}>{lesson.title}</li>
-                ))}
-              </ul>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-slate-500 text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+          Las lecciones de este curso estarán disponibles pronto.
+        </p>
+      )}
     </div>
   );
 }

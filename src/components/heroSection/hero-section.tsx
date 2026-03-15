@@ -1,36 +1,41 @@
-import { HeartHandshake } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { cn } from "@/lib/utils";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  title: string;
+  subtitle: string;
+  color?: string;
+}
+
+export function HeroSection({
+  title,
+  subtitle,
+  color = "bg-cyan-500",
+}: HeroSectionProps) {
   return (
-    <section className="w-full bg-[#F9FAFB] py-24 lg:min-h-[85vh] flex items-center mx-auto">
-      <div className="container mx-auto px-6 lg:px-10 max-w-5xl">
-        <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
-          {/* Text Content */}
-          <div className="lg:w-1/2 text-center lg:text-left">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-black leading-tight">
-              Actividades para el desarrollo{" "}
-              <span className="text-(--neuro-green)">infantil y juvenil</span>
-            </h1>
-            <p className="mt-4 text-lg md:text-xl text-gray-600">
-              Recursos y herramientas para el desarrollo de tus hijos, desde la
-              primera infancia hasta la adolescencia.
-            </p>
-            <Button
-              className="mt-8 rounded-full bg-(--neuro-green) text-black font-bold hover:bg-green-600 hover:cursor-pointer"
-              size="lg"
-            >
-              Explorar Actividades
-            </Button>
-          </div>
+    <section
+      className={cn(
+        "w-full py-16 md:py-24 text-white relative overflow-hidden",
+        color,
+      )}
+    >
+      {/* Patrón de fondo sutil */}
+      <div
+        className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at 20px 20px, white 2%, transparent 0)",
+          backgroundSize: "40px 40px",
+        }}
+      />
 
-          {/* Illustration Placeholder */}
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-            <div className="w-full max-w-md aspect-square bg-[#FEF3C7] rounded-3xl flex items-center justify-center">
-              <HeartHandshake className="w-1/2 h-1/2 text-yellow-500" />
-            </div>
-          </div>
-        </div>
+      <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tight drop-shadow-md">
+          {title}
+        </h1>
+        <p className="text-lg md:text-xl font-medium text-white/90 max-w-2xl mx-auto leading-relaxed">
+          {subtitle}
+        </p>
       </div>
     </section>
   );

@@ -1,4 +1,3 @@
-import React from "react";
 import { cn } from "@/lib/utils";
 
 interface HeroSectionProps {
@@ -15,11 +14,10 @@ export function HeroSection({
   return (
     <section
       className={cn(
-        "w-full py-16 md:py-24 text-white relative overflow-hidden",
+        "w-full pt-32 pb-16 md:pt-40 md:pb-24 text-white relative overflow-hidden",
         color,
       )}
     >
-      {/* Patrón de fondo sutil */}
       <div
         className="absolute inset-0 opacity-10"
         style={{

@@ -12,7 +12,7 @@ export default async function CursosPage() {
   const courses = await client.fetch(getAllCoursesQuery);
 
   return (
-    <main className="min-h-screen bg-slate-50 pt-20">
+    <main className="min-h-screen bg-slate-50">
       <HeroSection
         title="Nuestros Cursos"
         subtitle="Aprende estrategias y herramientas neuropsicológicas diseñadas para el desarrollo integral."

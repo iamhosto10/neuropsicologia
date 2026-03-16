@@ -1,70 +1,92 @@
-"use client";
-
-import React from "react";
+// src/components/activity-detail/activity-accordion.tsx
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Leaf, Users } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Activity } from "@/lib/types";
+import { Target, Box } from "lucide-react";
 
-const ActivityAccordion = ({ activity }: { activity: Activity }) => {
-  const accordionItems = [
-    {
-      value: "item-1",
-      title: "Beneficios de esta actividad",
-      IconComponent: Leaf,
-      iconColor: "text-[#22C55E]", // Vibrant Green
-      content: activity?.benefits,
-    },
-    {
-      value: "item-2",
-      title: "Consejos para acompañar",
-      IconComponent: Users,
-      iconColor: "text-[oklch(var(--brand-mustard))]", // Mustard/Amber
-      content: activity.advice,
-    },
-  ];
+interface ActivityAccordionProps {
+  objectives: string[];
+  materials: string[];
+}
+
+export default function ActivityAccordion({
+  objectives,
+  materials,
+}: ActivityAccordionProps) {
   return (
-    <div className=" container p-6 lg:mx-auto lg:max-w-5xl max-w-5xl mx-auto w-full px-4 animate-in slide-in-from-bottom-8 fade-in duration-700">
+    <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
       <Accordion
         type="single"
         collapsible
+        defaultValue="objectives"
         className="w-full"
-        defaultValue="item-1"
       >
-        {accordionItems.map((item) => (
-          <AccordionItem
-            key={item.value}
-            value={item.value}
-            className="bg-white border border-gray-100 rounded-[2rem] mb-4 overflow-scroll"
-          >
-            <AccordionTrigger className="flex flex-row items-center justify-between w-full p-6 md:p-8 hover:no-underline">
-              <div className="flex flex-row items-center gap-4">
-                <item.IconComponent
-                  className={cn("h-6 w-6 shrink-0", item.iconColor)}
-                  aria-hidden="true"
-                />
-                <span className="text-lg font-extrabold text-gray-900 text-left">
-                  {item.title}
-                </span>
+        {/* Acordeón de Objetivos */}
+        <AccordionItem value="objectives" className="border-b border-slate-100">
+          <AccordionTrigger className="hover:no-underline py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-500">
+                <Target className="w-5 h-5" />
               </div>
-            </AccordionTrigger>
-            <AccordionContent className="bg-white px-6 md:px-8 pb-8 pt-2">
-              <div className="border-t border-gray-100 pt-6">
-                <p className="text-base text-gray-700 leading-relaxed">
-                  {item.content}
-                </p>
+              <span className="font-bold text-lg text-slate-800">
+                Objetivos Terapéuticos
+              </span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2 pb-6">
+            {objectives && objectives.length > 0 ? (
+              <ul className="space-y-3">
+                {objectives.map((obj, i) => (
+                  <li key={i} className="flex items-start gap-3 text-slate-600">
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 shrink-0" />
+                    <span>{obj}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-slate-500 italic text-sm pl-4">
+                No se especificaron objetivos.
+              </p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Acordeón de Materiales */}
+        <AccordionItem value="materials" className="border-none">
+          <AccordionTrigger className="hover:no-underline py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500">
+                <Box className="w-5 h-5" />
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
+              <span className="font-bold text-lg text-slate-800">
+                Materiales Necesarios
+              </span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="pt-2 pb-6">
+            {materials && materials.length > 0 ? (
+              <ul className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                {materials.map((mat, i) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-3 text-slate-700 font-medium"
+                  >
+                    <div className="w-6 h-6 rounded-md bg-white border border-slate-200 flex items-center justify-center shrink-0 shadow-sm" />
+                    {mat}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-slate-500 italic text-sm pl-4">
+                No se requieren materiales.
+              </p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
       </Accordion>
     </div>
   );
-};
-
-export default ActivityAccordion;
+}

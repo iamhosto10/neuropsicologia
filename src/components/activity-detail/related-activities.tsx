@@ -1,74 +1,53 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Activity } from "@/lib/types";
-import { urlFor } from "@/sanity/lib/image";
+import Link from "next/link";
+import { Clock, ArrowRight } from "lucide-react";
 
-const activities = [
-  {
-    title: "Pintura Sensorial",
-    tags: ["3-5 años", "20 min", "Bajo"],
-  },
-  {
-    title: "Construcción con Bloques",
-    tags: ["4-6 años", "30 min", "Medio"],
-  },
-  {
-    title: "Caja de Tesoros",
-    tags: ["2-4 años", "15 min", "Bajo"],
-  },
-];
+interface RelatedActivity {
+  id: string;
+  title: string;
+  image: string;
+  duration: string;
+  href: string;
+}
 
-const RelatedActivities = ({ activity }: { activity: Activity }) => {
+interface RelatedActivitiesProps {
+  activities: RelatedActivity[];
+}
+
+export default function RelatedActivities({
+  activities,
+}: RelatedActivitiesProps) {
   return (
-    <div className="container mx-auto max-w-5xl px-6 lg:px-10 py-4">
-      <h2 className="text-3xl md:text-4xl font-bold text-left mb-8">
-        Actividades Relacionadas
-      </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {activity.relatedActivity?.map((activity, index) => (
-          <Card
-            key={activity.title}
-            className={`cursor-pointer 
-              bg-white rounded-3xl shadow-sm hover:shadow-md 
-              animate-fade-in animate-slide-in-from-bottom pt-0 transition-all
-              animate-delay-${1 + index + 100}
-            `}
+    <div className="bg-slate-900 rounded-3xl p-6 shadow-xl border border-slate-800">
+      <h3 className="text-xl font-black text-white mb-6">
+        Actividades Similares
+      </h3>
+
+      <div className="space-y-4">
+        {activities.map((activity) => (
+          <Link
+            key={activity.id}
+            href={activity.href}
+            className="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-800 transition-colors group"
           >
-            <img
-              src={urlFor(activity.image?.asset.url).url()}
-              alt={activity.title}
-              className="rounded-md w-full object-cover"
-            />
-            <CardHeader>
-              <CardTitle>{activity.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-row gap-2">
-                <Badge
-                  variant="secondary"
-                  className="rounded-full bg-[oklch(var(--mint-green))] text-green-800"
-                >
-                  {activity?.ageRange}
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="rounded-full bg-[oklch(var(--mint-green))] text-green-800"
-                >
-                  {activity?.duration} min
-                </Badge>
-                <Badge
-                  variant="secondary"
-                  className="rounded-full bg-[oklch(var(--mint-green))] text-green-800"
-                >
-                  {activity?.level}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-800">
+              <img
+                src={activity.image}
+                alt={activity.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-slate-200 group-hover:text-cyan-400 transition-colors line-clamp-2 leading-tight mb-1">
+                {activity.title}
+              </h4>
+              <p className="text-xs text-slate-500 flex items-center gap-1">
+                <Clock className="w-3 h-3" /> {activity.duration}
+              </p>
+            </div>
+            <ArrowRight className="w-5 h-5 text-slate-600 group-hover:text-cyan-500 transition-colors shrink-0" />
+          </Link>
         ))}
       </div>
     </div>
   );
-};
-
-export default RelatedActivities;
+}

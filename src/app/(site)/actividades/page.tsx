@@ -10,7 +10,7 @@ export default async function ActividadesPage() {
   const activities = await client.fetch(getAllActivitiesQuery);
 
   return (
-    <main className="min-h-screen bg-slate-50 pt-20">
+    <main className="min-h-screen bg-slate-50">
       <HeroSection
         title="Catálogo de Actividades"
         subtitle="Ejercicios prácticos y dinámicos para reforzar el aprendizaje en casa o en consulta."

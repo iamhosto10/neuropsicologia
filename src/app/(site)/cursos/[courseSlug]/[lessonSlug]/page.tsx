@@ -11,6 +11,8 @@ import {
   BookOpen,
   CheckCircle,
   PlayCircle,
+  Award,
+  Rocket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ptComponents } from "@/components/lesson-detail/portable-text-components";
@@ -120,7 +122,6 @@ export default async function LessonPage({
         </div>
       </aside>
 
-      {/* MAIN CONTENT: Área de Lectura / Visualización */}
       <main className="flex-1 bg-white md:h-[calc(100vh-4rem)] overflow-y-auto">
         <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
           {/* Cabecera */}
@@ -169,7 +170,7 @@ export default async function LessonPage({
               >
                 <Button
                   variant="outline"
-                  className="w-full md:w-auto rounded-xl h-14 px-6 font-bold text-slate-600 border-slate-200 gap-2"
+                  className="w-full md:w-auto rounded-xl h-14 px-6 font-bold text-slate-600 border-slate-200 gap-2 hover:bg-slate-100 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> Lección Anterior
                 </Button>
@@ -178,23 +179,50 @@ export default async function LessonPage({
               <div className="w-full md:w-auto hidden md:block"></div>
             )}
 
-            {nextLesson ? (
+            {/* Solo mostramos el botón Siguiente si existe una lección posterior */}
+            {nextLesson && (
               <Link
                 href={`/cursos/${courseSlug}/${nextLesson.slug}`}
                 className="w-full md:w-auto"
               >
-                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-lg gap-2">
+                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-lg gap-2 transition-transform active:scale-95">
                   Siguiente Lección <ArrowRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            ) : (
-              <Link href={`/cursos/${courseSlug}`} className="w-full md:w-auto">
-                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-lg gap-2">
-                  Finalizar Curso <CheckCircle className="w-5 h-5" />
                 </Button>
               </Link>
             )}
           </div>
+
+          {!nextLesson && (
+            <div className="mt-16 bg-linear-to-br from-green-500 to-emerald-600 rounded-[2.5rem] p-8 md:p-12 text-center text-white shadow-xl shadow-green-500/20 animate-in fade-in slide-in-from-bottom-8 duration-700 border-4 border-green-400/30">
+              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner backdrop-blur-md">
+                <Award className="w-12 h-12 text-yellow-300 drop-shadow-md" />
+              </div>
+              <h3 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">
+                ¡Has completado el curso!
+              </h3>
+              <p className="text-green-50 text-lg md:text-xl mb-8 max-w-lg mx-auto font-medium leading-relaxed">
+                Llegaste al final de todas las lecciones. Tus nuevos
+                conocimientos están listos para ponerse en práctica en el
+                cuartel.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link href="/hq" className="w-full sm:w-auto">
+                  <Button className="w-full sm:w-auto rounded-xl h-14 px-8 font-black bg-white text-green-700 hover:bg-green-50 hover:scale-105 transition-all shadow-xl shadow-black/10 gap-2 text-lg">
+                    <Rocket className="w-6 h-6" /> Volver al Cuartel
+                  </Button>
+                </Link>
+                <Link href="/cursos" className="w-full sm:w-auto">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto rounded-xl h-14 px-8 font-bold text-green-700 border-white/40 hover:bg-white/20 gap-2 transition-colors text-lg"
+                  >
+                    Explorar la Academia
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

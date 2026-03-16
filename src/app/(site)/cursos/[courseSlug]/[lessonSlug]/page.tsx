@@ -1,4 +1,5 @@
-// src/app/(site)/cursos/[courseSlug]/[lessonSlug]/page.tsx
+import { getActiveKidId } from "@/app/actions/profile.actions";
+import CompleteLessonButton from "@/components/lesson-detail/complete-lesson-button";
 import { client } from "@/sanity/lib/client";
 import { getCourseAndLessonQuery } from "@/lib/query";
 import { notFound } from "next/navigation";
@@ -12,7 +13,6 @@ import {
   PlayCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-// 🔥 Importamos nuestros componentes personalizados
 import { ptComponents } from "@/components/lesson-detail/portable-text-components";
 
 export const dynamic = "force-dynamic";
@@ -24,23 +24,37 @@ export default async function LessonPage({
 }) {
   const { courseSlug, lessonSlug } = await params;
 
+  // 1. Buscamos el curso y la lección
   const data = await client.fetch(getCourseAndLessonQuery, {
     courseSlug,
     lessonSlug,
   });
-
-  if (!data || !data.currentLesson) {
-    notFound();
-  }
+  if (!data || !data.currentLesson) notFound();
 
   const { currentLesson, syllabus, title: courseTitle } = data;
 
-  // 🔥 LÓGICA DE NAVEGACIÓN: Aplanamos el temario para saber dónde estamos
+  // 2. Buscamos quién está viendo esto y su progreso
+  const kidId = await getActiveKidId();
+  let completedLessons: string[] = [];
+
+  if (kidId) {
+    // 🔥 Corregido el await que faltaba aquí
+    const kidData = await client
+      .withConfig({ useCdn: false })
+      .fetch(`*[_type == "kidProfile" && _id == $kidId][0]{completedLessons}`, {
+        kidId,
+      });
+    completedLessons = kidData?.completedLessons || [];
+  }
+
+  const isCurrentCompleted = completedLessons.includes(currentLesson._id);
+  const currentPath = `/cursos/${courseSlug}/${lessonSlug}`;
+
+  // 3. LÓGICA DE NAVEGACIÓN
   const flatLessons =
     syllabus?.flatMap((module: any) => module.lessons || []) || [];
   const currentIndex = flatLessons.findIndex((l: any) => l.slug === lessonSlug);
 
-  // Calculamos quién está antes y quién está después
   const prevLesson = currentIndex > 0 ? flatLessons[currentIndex - 1] : null;
   const nextLesson =
     currentIndex < flatLessons.length - 1
@@ -72,6 +86,7 @@ export default async function LessonPage({
               <div className="space-y-1">
                 {module.lessons?.map((lesson: any, lIndex: number) => {
                   const isActive = lesson.slug === lessonSlug;
+                  const isDone = completedLessons.includes(lesson._id);
                   return (
                     <Link
                       key={lesson._id}
@@ -83,7 +98,7 @@ export default async function LessonPage({
                       }`}
                     >
                       <div
-                        className={`mt-0.5 ${isActive ? "text-cyan-500" : "text-slate-300"}`}
+                        className={`mt-0.5 ${isActive ? "text-cyan-500" : isDone ? "text-green-500" : "text-slate-300"}`}
                       >
                         {isActive ? (
                           <PlayCircle className="w-5 h-5" />
@@ -92,7 +107,7 @@ export default async function LessonPage({
                         )}
                       </div>
                       <p
-                        className={`text-sm font-medium ${isActive ? "text-cyan-700 font-bold" : "text-slate-600"}`}
+                        className={`text-sm font-medium ${isActive ? "text-cyan-700 font-bold" : isDone ? "text-slate-500 line-through decoration-slate-300" : "text-slate-600"}`}
                       >
                         {lIndex + 1}. {lesson.title}
                       </p>
@@ -108,6 +123,7 @@ export default async function LessonPage({
       {/* MAIN CONTENT: Área de Lectura / Visualización */}
       <main className="flex-1 bg-white md:h-[calc(100vh-4rem)] overflow-y-auto">
         <div className="max-w-3xl mx-auto px-6 py-12 md:py-20">
+          {/* Cabecera */}
           <div className="mb-12">
             <div className="inline-flex items-center gap-2 bg-cyan-50 text-cyan-600 px-3 py-1 rounded-full text-sm font-bold mb-6">
               <BookOpen className="w-4 h-4" /> Módulo{" "}
@@ -120,7 +136,7 @@ export default async function LessonPage({
             </h1>
           </div>
 
-          {/* 🔥 APLICAMOS NUESTROS COMPONENTES PERSONALIZADOS */}
+          {/* Contenido Renderizado */}
           <div className="prose prose-lg prose-slate prose-headings:font-bold prose-a:text-cyan-600 hover:prose-a:text-cyan-500 max-w-none">
             {currentLesson.content ? (
               <PortableText
@@ -134,8 +150,18 @@ export default async function LessonPage({
             )}
           </div>
 
-          {/* 🔥 CONTROLES INFERIORES CON NAVEGACIÓN REAL */}
-          <div className="mt-20 pt-8 border-t border-slate-100 flex flex-col-reverse md:flex-row gap-4 justify-between items-center">
+          {/* 🔥 AQUÍ PONEMOS EL BOTÓN DE PROGRESO */}
+          <div className="mt-16 flex justify-center border-t border-slate-100 pt-12">
+            <CompleteLessonButton
+              kidId={kidId}
+              lessonId={currentLesson._id}
+              isCompleted={isCurrentCompleted}
+              currentPath={currentPath}
+            />
+          </div>
+
+          {/* CONTROLES INFERIORES DE NAVEGACIÓN */}
+          <div className="mt-12 flex flex-col-reverse md:flex-row gap-4 justify-between items-center">
             {prevLesson ? (
               <Link
                 href={`/cursos/${courseSlug}/${prevLesson.slug}`}
@@ -149,7 +175,7 @@ export default async function LessonPage({
                 </Button>
               </Link>
             ) : (
-              <div className="w-full md:w-auto hidden md:block"></div> /* Espaciador si no hay anterior */
+              <div className="w-full md:w-auto hidden md:block"></div>
             )}
 
             {nextLesson ? (
@@ -157,13 +183,13 @@ export default async function LessonPage({
                 href={`/cursos/${courseSlug}/${nextLesson.slug}`}
                 className="w-full md:w-auto"
               >
-                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/20 gap-2">
+                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-lg gap-2">
                   Siguiente Lección <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             ) : (
               <Link href={`/cursos/${courseSlug}`} className="w-full md:w-auto">
-                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 gap-2">
+                <Button className="w-full md:w-auto rounded-xl h-14 px-8 font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-lg gap-2">
                   Finalizar Curso <CheckCircle className="w-5 h-5" />
                 </Button>
               </Link>

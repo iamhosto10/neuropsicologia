@@ -57,6 +57,15 @@ export const kidProfile = defineType({
       description: "El avatar que tiene puesto actualmente.",
       initialValue: "default-cadet",
     }),
+    defineField({
+      name: "completedLessons",
+      title: "Lecciones Completadas (Cursos)",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "IDs de las lecciones educativas que este cadete ha terminado.",
+      initialValue: [],
+    }),
   ],
   preview: {
     select: {

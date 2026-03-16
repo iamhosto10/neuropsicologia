@@ -1,44 +1,69 @@
-// src/app/(login)/dashboard/page.tsx
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { client } from "@/sanity/lib/client";
-import { getParentDashboardQuery } from "@/lib/query";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { client } from "@/sanity/lib/client";
 import DashboardOverview from "@/components/dashboard/dashboard-overview";
-import WeeklyChecklist from "@/components/weekly-checklist/weekly-checklist";
-import MyActivitiesDashboard from "@/components/profile/my-activities-dashboard";
-import { MobileProgressCard } from "@/components/dashboard/mobile-progress-card";
+import MobileProgressCard from "@/components/dashboard/mobile-progress-card";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  // 1. Obtenemos la sesión de Clerk
-  const { userId, redirectToSignIn } = await auth();
-  const userClerk = await currentUser();
-
+  // 1. Identificamos al Terapeuta/Padre
+  const { userId } = await auth();
   if (!userId) {
-    return redirectToSignIn();
+    redirect("/");
   }
 
-  // 2. Buscamos los datos de los hijos (cadetes) en Sanity
-  const sanityUserId = `user-${userClerk?.id}`;
-  const kids = await client.withConfig({ useCdn: false }).fetch(
-    getParentDashboardQuery,
-    {
-      parentSanityId: sanityUserId,
-    },
+  // 🔥 CORRECCIÓN: Creamos el ID exacto que usa tu base de datos
+  const sanityUserId = `user-${userId}`;
+  const today = new Date().toISOString().split("T")[0];
+
+  // 🔥 CORRECCIÓN: Buscamos usando parent._ref en lugar de parentId
+  const query = `*[_type == "kidProfile" && parent._ref == $sanityUserId] | order(_createdAt desc) {
+    _id,
+    alias,
+    activeAvatar,
+    energyCrystals,
+    "todaySession": *[_type == "dailySession" && kidReference._ref == ^._id && date == $today][0] {
+      isCompleted,
+      "totalMissions": count(missions),
+      "completedMissions": count(completedMissions)
+    }
+  }`;
+
+  const kids = await client.fetch(
+    query,
+    { sanityUserId, today },
     { cache: "no-store" },
   );
 
-  // 3. Renderizamos la vista manteniendo tu diseño original
-  return (
-    <div className="max-w-full mx-auto md:p-8 space-y-8">
-      {/* Pasamos los datos de los niños al componente principal para que los muestre */}
-      <DashboardOverview kidsData={kids} />
+  // 3. Calculamos la data global
+  const totalEnergy = kids.reduce(
+    (sum: number, kid: any) => sum + (kid.energyCrystals || 0),
+    0,
+  );
+  const totalKids = kids.length;
 
-      {/* Tus otros componentes se mantienen intactos en el layout */}
-      <MobileProgressCard />
-      <WeeklyChecklist />
-      <MyActivitiesDashboard />
+  return (
+    <div className="p-6 md:p-8 space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
+          Panel de Comando
+        </h1>
+        <p className="text-slate-500 mt-2 text-lg">
+          Monitorea el progreso de tu escuadrón en tiempo real.
+        </p>
+      </div>
+
+      {/* Tarjeta de Resumen Global */}
+      <MobileProgressCard totalEnergy={totalEnergy} totalKids={totalKids} />
+
+      {/* Grilla de Pacientes Reales */}
+      <div>
+        <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+          Tus Cadetes
+        </h2>
+        <DashboardOverview kids={kids} />
+      </div>
     </div>
   );
 }

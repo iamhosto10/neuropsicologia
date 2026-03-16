@@ -317,3 +317,31 @@ export const getCourseAndLessonQuery = `
     }
   }
 `;
+
+export const getActivityBySlugQuery = `
+  *[_type == "activity" && slug.current == $slug][0] {
+    _id,
+    title,
+    "slug": slug.current,
+    description,
+    "imageUrl": image.asset->url,
+    ageRange,
+    duration,
+    category,
+    objectives,
+    materials,
+    instructions[]{
+      step,
+      description
+    },
+    videoUrl,
+    "relatedActivities": *[_type == "activity" && category == ^.category && slug.current != ^.slug.current][0...3] {
+      _id,
+      title,
+      "slug": slug.current,
+      "imageUrl": image.asset->url,
+      duration,
+      category
+    }
+  }
+`;

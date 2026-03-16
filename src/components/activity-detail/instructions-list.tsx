@@ -1,74 +1,45 @@
-import { Card } from "@/components/ui/card";
-import { Activity } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { Eye, Hand, ListOrdered, Smile } from "lucide-react";
+// src/components/activity-detail/instructions-list.tsx
+import { CheckCircle2 } from "lucide-react";
 
-const steps = [
-  {
-    icon: Eye,
-    title: "Observa las cartas",
-    description:
-      "Mira atentamente todas las cartas que están sobre la mesa boca arriba.",
-  },
-  {
-    icon: Hand,
-    title: "Toca dos cartas",
-    description:
-      "Selecciona dos cartas para intentar encontrar una pareja coincidente.",
-  },
-  {
-    icon: Smile,
-    title: "¡Celebra!",
-    description:
-      "Si las cartas son iguales, déjalas boca arriba y gana un punto.",
-  },
-];
+interface Instruction {
+  step?: string;
+  description?: string;
+}
 
-export function InstructionsList({ activity }: { activity: Activity }) {
+interface InstructionsListProps {
+  instructions: Instruction[];
+}
+
+export default function InstructionsList({
+  instructions,
+}: InstructionsListProps) {
   return (
-    <div className="container p-6 lg:mx-auto lg:max-w-5xl">
-      <Card
-        className={cn(
-          "w-full bg-[oklch(var(--brand-amber-light))] rounded-[2rem] p-6 md:p-10 border border-amber-100",
-          "animate-in slide-in-from-bottom-6 fade-in duration-700"
-        )}
-      >
-        <div className="flex flex-row items-center gap-4">
-          <ListOrdered className="h-8 w-8 text-[oklch(var(--brand-mustard))]" />
-          <h2 className="text-2xl font-extrabold text-black">
-            Instrucciones Paso a Paso
-          </h2>
-        </div>
+    <div className="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-100">
+      <h2 className="text-2xl font-bold text-slate-900 mb-8">Paso a Paso</h2>
 
-        <div className="mt-8 flex flex-col gap-8 relative">
-          <div className="w-0.5 bg-amber-200/60 absolute top-4 bottom-4 left-[1.15rem]" />
-          {activity?.instructions?.map((step, index) => {
-            const Icon =
-              step.icon === "Eye" ? Eye : step.icon === "Hand" ? Hand : Smile;
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "flex flex-row gap-6 relative z-10 animate-in slide-in-from-bottom-4 fade-in"
-                )}
-                style={{ animationDelay: `${index * 200}ms` }}
-              >
-                <div
-                  className={cn(
-                    "shrink-0 h-10 w-10 rounded-full bg-white border-4 border-[oklch(var(--brand-mustard))] flex items-center justify-center shadow-sm"
-                  )}
-                >
-                  <Icon className="h-5 w-5 text-black" />
-                </div>
-                <div className="flex flex-col">
-                  <h3 className="text-lg font-bold text-black">{step.title}</h3>
-                  <p className="text-stone-600">{step.description}</p>
-                </div>
+      <div className="space-y-6">
+        {instructions.map((instruction, index) => (
+          <div
+            key={index}
+            className="flex gap-6 p-6 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group"
+          >
+            <div className="shrink-0">
+              <div className="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-black text-lg group-hover:bg-cyan-500 group-hover:text-white transition-colors">
+                {index + 1}
               </div>
-            );
-          })}
-        </div>
-      </Card>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2">
+                {instruction.step || `Paso ${index + 1}`}
+                <CheckCircle2 className="w-5 h-5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </h3>
+              <p className="text-slate-600 leading-relaxed">
+                {instruction.description}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

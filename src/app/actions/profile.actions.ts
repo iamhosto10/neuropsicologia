@@ -71,3 +71,21 @@ export async function createKidProfile(formData: FormData) {
   revalidatePath("/select-profile");
   redirect("/dashboard");
 }
+
+export async function selectKidAndRedirect(
+  kidId: string,
+  destinationUrl: string,
+) {
+  const cookieStore = await cookies();
+
+  // 1. Guardamos al niño activo en la galleta (cookie)
+  cookieStore.set("activeKidId", kidId, {
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 12,
+  });
+
+  // 2. Lo teletransportamos al curso
+  redirect(destinationUrl);
+}

@@ -45,7 +45,7 @@ export default async function HeadquartersPage() {
   }
 
   return (
-    <div className="w-full max-w-4xl flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16 overflow-auto relative [scrollbar-width:none]">
+    <div className="w-full max-w-5xl px-10 flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16 overflow-auto relative [scrollbar-width:none]">
       {/* 🔥 NUEVO BOTÓN FLOTANTE: Cambiar Piloto */}
       <div className="absolute top-0 right-0 z-50">
         <Link href="/select-profile">

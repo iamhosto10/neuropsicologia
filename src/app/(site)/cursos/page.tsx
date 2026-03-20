@@ -3,7 +3,8 @@ import { client } from "@/sanity/lib/client";
 import { cookies } from "next/headers";
 import CoursesGallery from "@/components/courses/courses-gallery";
 import CoursesCard from "@/components/courses/courses-card";
-import { Target, Compass } from "lucide-react";
+import { Target, Compass, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,15 @@ export default async function CursosPage() {
           Aprende nuevas habilidades para tu misión intergaláctica.
         </p>
       </div>
+      {activeKidId && (
+        <Link
+          href="/hq"
+          className="inline-flex items-center bg-white text-cyan-600 hover:text-cyan-700 font-bold mb-8 px-5 py-3 rounded-full border-2 border-emerald-100 shadow-sm hover:shadow-md hover:border-emerald-300 group transition-all"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+          Volver al Cuartel General
+        </Link>
+      )}
 
       {/* 🔥 LA MAGIA: Sección exclusiva solo si el cadete tiene tareas pendientes */}
       {assignedCourses.length > 0 && (

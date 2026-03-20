@@ -81,6 +81,15 @@ export const kidProfile = defineType({
       description:
         "Actividades recomendadas por el terapeuta para este cadete.",
     }),
+    defineField({
+      name: "completedActivities",
+      title: "Actividades Completadas",
+      type: "array",
+      of: [{ type: "string" }],
+      description:
+        "IDs de las actividades de laboratorio que este cadete ha terminado.",
+      initialValue: [],
+    }),
   ],
   preview: {
     select: {

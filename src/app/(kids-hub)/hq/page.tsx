@@ -11,11 +11,12 @@ import {
   BookOpen,
   Beaker,
   Zap,
+  ArrowLeftRight, // 🔥 Añadido el icono para el botón
 } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
-import { getActiveKidId, clearKidProfile } from "@/app/actions/profile.actions";
+import { getActiveKidId } from "@/app/actions/profile.actions";
 import { redirect } from "next/navigation";
 import { getAvatarIcon } from "@/lib/utils";
 
@@ -44,13 +45,26 @@ export default async function HeadquartersPage() {
   }
 
   return (
-    <div className="w-full max-w-4xl flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16 overflow-auto [scrollbar-width:none]">
+    <div className="w-full max-w-4xl flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16 overflow-auto relative [scrollbar-width:none]">
+      {/* 🔥 NUEVO BOTÓN FLOTANTE: Cambiar Piloto */}
+      <div className="absolute top-0 right-0 z-50">
+        <Link href="/select-profile">
+          <button className="flex items-center gap-2 bg-slate-800/80 hover:bg-cyan-600/90 text-slate-300 hover:text-white px-4 py-2 rounded-full border border-slate-700 hover:border-cyan-400 backdrop-blur-sm transition-all shadow-lg hover:shadow-cyan-500/20 group">
+            <ArrowLeftRight className="w-4 h-4 group-hover:-rotate-180 transition-transform duration-500" />
+            <span className="text-xs font-bold uppercase tracking-wider hidden sm:block">
+              Cambiar Piloto
+            </span>
+          </button>
+        </Link>
+      </div>
+
       {/* Cabecera dinámica */}
-      <div className="text-center space-y-4 w-full">
+      <div className="text-center space-y-4 w-full pt-8 sm:pt-0">
+        {" "}
+        {/* Añadido padding-top en móvil para que el botón flotante no pise el título */}
         <h1 className="text-5xl font-black text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-600 tracking-tight mb-6">
           Cuartel General
         </h1>
-
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           {/* Identificación del Cadete */}
           <div className="flex items-center gap-4 bg-slate-900 border-2 border-slate-800 p-4 rounded-3xl w-full max-w-sm justify-center">
@@ -162,7 +176,7 @@ export default async function HeadquartersPage() {
         )}
       </div>
 
-      {/* 🔥 NUEVO: ZONA DE NAVEGACIÓN SECUNDARIA (Tienda, Cursos, Actividades) */}
+      {/* ZONA DE NAVEGACIÓN SECUNDARIA (Tienda, Cursos, Actividades) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
         {/* Portal a Tienda */}
         <Link

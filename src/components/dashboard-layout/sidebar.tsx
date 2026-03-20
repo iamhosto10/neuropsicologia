@@ -2,67 +2,53 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useClerk } from "@clerk/nextjs";
 import {
-  LayoutDashboard,
+  Home,
   Users,
   BookOpen,
-  Beaker,
+  Gamepad2,
   Settings,
-  Rocket,
+  ArrowLeftRight,
 } from "lucide-react";
 
-interface SidebarProps {
-  onLinkClick?: () => void;
-}
-
-export default function Sidebar({ onLinkClick }: SidebarProps) {
+export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
-  const { openUserProfile } = useClerk();
 
-  // Función para evaluar si el link es la ruta actual
-  const isActive = (path: string) => pathname === path;
-
-  // Clases dinámicas de Tailwind
-  const linkStyles = (path: string) => `
-    flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold
-    ${
-      isActive(path)
-        ? "bg-cyan-50 text-cyan-600 shadow-sm border border-cyan-100"
-        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent"
-    }
-  `;
+  const linkStyles = (path: string) =>
+    `flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all duration-200 ${
+      pathname === path
+        ? "bg-cyan-50 text-cyan-600 shadow-sm"
+        : "text-slate-500 hover:text-cyan-600 hover:bg-cyan-50/50"
+    }`;
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      {/* LOGO */}
-      <div className="p-6 mb-4">
+    <aside className="w-full md:w-72 h-full bg-white border-r border-slate-200 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      {/* Logo */}
+      <div className="h-20 flex items-center px-8 border-b border-slate-100">
         <Link
-          href="/"
-          className="flex items-center gap-2 group"
+          href="/dashboard"
+          className="flex items-center gap-2"
           onClick={onLinkClick}
         >
-          <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <Rocket className="w-6 h-6 text-white" />
+          <div className="w-8 h-8 rounded-xl bg-linear-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+            <span className="text-white font-black text-xl leading-none">
+              N
+            </span>
           </div>
-          <span className="font-black text-xl tracking-tight text-slate-900">
-            Neuro<span className="text-cyan-500">Espacial</span>
+          <span className="text-xl font-black bg-clip-text text-transparent bg-linear-to-r from-slate-900 to-slate-700 tracking-tight">
+            NeuroPlay
           </span>
         </Link>
       </div>
 
-      {/* ENLACES DE NAVEGACIÓN */}
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">
-          Principal
-        </p>
-
+      {/* Navegación */}
+      <nav className="p-4 space-y-2 grow">
         <Link
           href="/dashboard"
           className={linkStyles("/dashboard")}
           onClick={onLinkClick}
         >
-          <LayoutDashboard className="w-5 h-5" />
+          <Home className="w-5 h-5" />
           Panel Principal
         </Link>
 
@@ -75,42 +61,48 @@ export default function Sidebar({ onLinkClick }: SidebarProps) {
           Pacientes / Cadetes
         </Link>
 
-        <div className="pt-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4 mb-2">
-            Contenido
-          </p>
+        {/* 🔥 LA PUERTA DE TELETRANSPORTACIÓN (ADULTO) */}
+        <div className="pb-2 border-b border-slate-100 mb-2">
           <Link
-            href="/dashboard/cursos"
-            className={linkStyles("/dashboard/cursos")}
+            href="/select-profile"
+            className={linkStyles("/select-profile")}
             onClick={onLinkClick}
           >
-            <BookOpen className="w-5 h-5" />
-            Mis Cursos
-          </Link>
-          <Link
-            href="/dashboard/actividades"
-            className={linkStyles("/dashboard/actividades")}
-            onClick={onLinkClick}
-          >
-            <Beaker className="w-5 h-5" />
-            Mis Actividades
+            <ArrowLeftRight className="w-5 h-5" />
+            Cambiar de Perfil
           </Link>
         </div>
+
+        <Link
+          href="/dashboard/cursos"
+          className={linkStyles("/dashboard/cursos")}
+          onClick={onLinkClick}
+        >
+          <BookOpen className="w-5 h-5" />
+          Mis Cursos
+        </Link>
+
+        <Link
+          href="/dashboard/actividades"
+          className={linkStyles("/dashboard/actividades")}
+          onClick={onLinkClick}
+        >
+          <Gamepad2 className="w-5 h-5" />
+          Mis Actividades
+        </Link>
       </nav>
 
-      {/* BOTÓN DE CONFIGURACIÓN (CLERK) */}
-      <div className="p-4 mt-auto border-t border-slate-100">
-        <button
-          onClick={() => {
-            openUserProfile();
-            if (onLinkClick) onLinkClick();
-          }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold text-slate-500 hover:bg-slate-50 hover:text-slate-900 text-left"
+      {/* Ajustes al final */}
+      <div className="p-4 border-t border-slate-100">
+        <Link
+          href="/dashboard/ajustes"
+          className={linkStyles("/dashboard/ajustes")}
+          onClick={onLinkClick}
         >
           <Settings className="w-5 h-5" />
-          Configuración
-        </button>
+          Ajustes
+        </Link>
       </div>
-    </div>
+    </aside>
   );
 }

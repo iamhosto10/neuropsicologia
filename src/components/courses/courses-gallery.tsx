@@ -42,7 +42,7 @@ export default function CoursesGallery({
               key={course._id}
               title={course.title}
               description={course.description}
-              image={course.imageUrl || "/placeholder-image.jpg"}
+              image={course.image || "/placeholder-image.jpg"}
               href={`/cursos/${course.slug}`}
               duration={course.duration}
               level={course.level}

@@ -1,9 +1,9 @@
-// src/components/lesson-detail/complete-lesson-button.tsx
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, Zap } from "lucide-react";
 import { markLessonCompleted } from "@/app/actions/course.actions";
 
 interface Props {
@@ -20,39 +20,42 @@ export default function CompleteLessonButton({
   currentPath,
 }: Props) {
   const [isPending, startTransition] = useTransition();
-  // Usamos estado optimista para que cambie a verde apenas el usuario hace clic
   const [optimisticComplete, setOptimisticComplete] = useState(isCompleted);
+  const router = useRouter();
 
-  // Si no hay un niño seleccionado (ej. un visitante público)
   if (!kidId) {
     return (
       <Button
         disabled
         variant="outline"
-        className="rounded-xl h-12 px-6 font-bold bg-slate-100 text-slate-400"
+        className="rounded-xl h-12 px-6 font-bold bg-slate-50 text-slate-400 border-slate-200"
       >
-        Inicia sesión para guardar tu progreso
+        Modo Explorador: Progreso no guardado
       </Button>
     );
   }
 
-  // Si la lección ya está terminada
   if (optimisticComplete) {
     return (
-      <Button
-        disabled
-        className="rounded-xl h-12 px-6 font-bold bg-green-500 text-white flex items-center gap-2 opacity-100"
-      >
-        <CheckCircle className="w-5 h-5" /> Lección Completada
-      </Button>
+      <div className="flex flex-col items-center gap-2 animate-in zoom-in duration-300">
+        <Button
+          disabled
+          className="rounded-xl h-12 px-6 font-bold bg-green-500 text-white flex items-center gap-2 opacity-100 shadow-lg shadow-green-500/20"
+        >
+          <CheckCircle className="w-5 h-5" /> Lección Completada
+        </Button>
+        <p className="text-xs font-black text-yellow-600 flex items-center gap-1 uppercase tracking-widest">
+          <Zap className="w-3 h-3 fill-yellow-500 text-yellow-500" /> +10
+          Cristales Obtenidos
+        </p>
+      </div>
     );
   }
-
-  // Función al hacer clic
   const handleComplete = () => {
     startTransition(async () => {
-      setOptimisticComplete(true); // Se pone verde al instante (UX fluida)
+      setOptimisticComplete(true); // Se pone verde al instante
       await markLessonCompleted(kidId, lessonId, currentPath);
+      router.refresh(); // Actualiza la página silenciosamente
     });
   };
 
@@ -60,14 +63,14 @@ export default function CompleteLessonButton({
     <Button
       onClick={handleComplete}
       disabled={isPending}
-      className="rounded-xl h-12 px-6 font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2"
+      className="rounded-xl h-12 px-8 font-bold bg-cyan-500 hover:bg-cyan-600 text-white shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2 text-lg"
     >
       {isPending ? (
         <Loader2 className="w-5 h-5 animate-spin" />
       ) : (
         <CheckCircle className="w-5 h-5" />
       )}
-      Marcar como Completada
+      {isPending ? "Guardando progreso..." : "Marcar como Completada"}
     </Button>
   );
 }

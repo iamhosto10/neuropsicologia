@@ -1,4 +1,4 @@
-// src/components/courses/courses-card.tsx
+"use client";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, ArrowRight, CheckCircle2 } from "lucide-react";
@@ -14,6 +14,7 @@ interface CoursesCardProps {
   level?: string;
   progress?: number;
   asButton?: boolean; // 🔥 Nuevo superpoder
+  actionSlot?: React.ReactNode;
 }
 
 export default function CoursesCard({
@@ -25,6 +26,7 @@ export default function CoursesCard({
   level,
   progress = 0,
   asButton = false, // Por defecto sigue siendo un Link
+  actionSlot,
 }: CoursesCardProps) {
   const isCompleted = progress === 100;
   const isStarted = progress > 0 && progress < 100;
@@ -94,6 +96,17 @@ export default function CoursesCard({
             <ArrowRight className="w-4 h-4 ml-1" />
           </span>
         </div>
+        {actionSlot && (
+          <div
+            className="mt-4 pt-4 border-t border-slate-100"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }} // Evita que al hacer clic en el botón se abra el curso
+          >
+            {actionSlot}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -66,6 +66,21 @@ export const kidProfile = defineType({
         "IDs de las lecciones educativas que este cadete ha terminado.",
       initialValue: [],
     }),
+    defineField({
+      name: "assignedCourses",
+      title: "Cursos Asignados",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "course" }] }],
+      description: "Cursos recomendados por el terapeuta para este cadete.",
+    }),
+    defineField({
+      name: "assignedActivities",
+      title: "Actividades Asignadas",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "activity" }] }],
+      description:
+        "Actividades recomendadas por el terapeuta para este cadete.",
+    }),
   ],
   preview: {
     select: {

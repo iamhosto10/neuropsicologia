@@ -1,3 +1,4 @@
+// src/app/actions/course.actions.ts
 "use server";
 
 import { client } from "@/sanity/lib/client";
@@ -14,7 +15,7 @@ export async function markLessonCompleted(
       useCdn: false,
     });
 
-    // 1. Buscamos al niño para ver sus lecciones previas y sus cristales actuales
+    // 1. Buscamos los datos actuales del niño
     const kid = await writeClient.fetch(
       `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons, energyCrystals}`,
       { kidId },
@@ -22,23 +23,31 @@ export async function markLessonCompleted(
     const completed = kid?.completedLessons || [];
     const currentCrystals = kid?.energyCrystals || 0;
 
-    // 2. Si no ha completado esta lección, la guardamos y le damos su recompensa
+    const courseOwner = await writeClient.fetch(
+      `*[_type == "course" && $lessonId in lessons[]._ref][0]{_id}`,
+      { lessonId },
+    );
+
+    const patch = writeClient.patch(kidId);
+
     if (!completed.includes(lessonId)) {
-      await writeClient
-        .patch(kidId)
+      patch
         .setIfMissing({ completedLessons: [] })
         .append("completedLessons", [lessonId])
-        .set({ energyCrystals: currentCrystals + 10 }) // 🔥 LA RECOMPENSA
-        .commit();
+        .set({ energyCrystals: currentCrystals + 10 });
     }
 
-    // 3. Freno de mano para la consistencia eventual de Sanity
+    if (courseOwner && courseOwner._id) {
+      patch.unset([`assignedCourses[_ref == "${courseOwner._id}"]`]);
+    }
+    await patch.commit();
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // 4. Limpiamos la caché de la lección actual y de los paneles de control
     revalidatePath(currentPath);
     revalidatePath("/dashboard");
     revalidatePath(`/dashboard/kid/${kidId}`);
+    revalidatePath("/cursos"); // Para que desaparezca de la zona azul de asignados
 
     return { success: true };
   } catch (error) {

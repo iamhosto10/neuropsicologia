@@ -86,26 +86,48 @@ export async function assignDailySession(kidId: string, missionIds: string[]) {
 
     const today = new Date().toISOString().split("T")[0];
 
-    await writeClient.create({
-      _type: "dailySession",
-      kidProfile: {
-        _type: "reference",
-        _ref: kidId,
-      },
-      date: today,
-      missions: missionIds.map((id) => ({
-        _key: Math.random().toString(36).substring(7),
-        _type: "reference",
-        _ref: id,
-      })),
-      completedMissions: [],
-      isCompleted: false,
-    });
+    // 1. Preparamos las referencias como las pide Sanity
+    const formattedMissions = missionIds.map((id) => ({
+      _key: Math.random().toString(36).substring(7),
+      _type: "reference",
+      _ref: id,
+    }));
+
+    // 2. Buscamos si el niño YA tiene una sesión creada para el día de hoy
+    const existingSession = await writeClient.fetch(
+      `*[_type == "dailySession" && kidProfile._ref == $kidId && date == $today][0]`,
+      { kidId, today },
+    );
+
+    if (existingSession) {
+      // 3A. Si ya existe, simplemente la actualizamos (PATCH)
+      await writeClient
+        .patch(existingSession._id)
+        .set({
+          missions: formattedMissions,
+          isCompleted: false, // Reiniciamos por si agregaron más misiones
+        })
+        .commit();
+    } else {
+      // 3B. Si no existe, creamos una nueva (CREATE)
+      await writeClient.create({
+        _type: "dailySession",
+        kidProfile: {
+          _type: "reference",
+          _ref: kidId,
+        },
+        date: today,
+        missions: formattedMissions,
+        completedMissions: [],
+        isCompleted: false,
+      });
+    }
   } catch (error) {
     console.error("❌ Error asignando misiones:", error);
     return { error: "Hubo un error al asignar las misiones." };
   }
 
+  // Freno de mano anti-caché
   await new Promise((resolve) => setTimeout(resolve, 1500));
 
   revalidatePath("/hq");

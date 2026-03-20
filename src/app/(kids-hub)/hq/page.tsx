@@ -44,7 +44,7 @@ export default async function HeadquartersPage() {
   }
 
   return (
-    <div className="w-full max-w-4xl flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16">
+    <div className="w-full max-w-4xl flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16 overflow-auto [scrollbar-width:none]">
       {/* Cabecera dinámica */}
       <div className="text-center space-y-4 w-full">
         <h1 className="text-5xl font-black text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-600 tracking-tight mb-6">

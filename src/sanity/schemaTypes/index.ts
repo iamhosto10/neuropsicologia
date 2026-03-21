@@ -6,6 +6,7 @@ import { gameModule } from "./gameModule";
 import { kidProfile } from "./kidProfile";
 import { mission } from "./mission";
 import { dailySession } from "./dailySession";
+import { storeAvatar } from "./storeAvatar";
 
 export const schema = {
   types: [
@@ -17,5 +18,6 @@ export const schema = {
     kidProfile,
     mission,
     dailySession,
+    storeAvatar,
   ],
 };

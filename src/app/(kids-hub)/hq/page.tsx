@@ -68,9 +68,17 @@ export default async function HeadquartersPage() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           {/* Identificación del Cadete */}
           <div className="flex items-center gap-4 bg-slate-900 border-2 border-slate-800 p-4 rounded-3xl w-full max-w-sm justify-center">
-            <div className="w-16 h-16 bg-slate-800 rounded-full border-2 border-slate-700 flex items-center justify-center text-4xl shadow-lg relative">
-              {getAvatarIcon(dashboardData.activeAvatar)}
-              <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-slate-900"></div>
+            <div className="w-16 h-16 bg-slate-800 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg relative overflow-hidden group">
+              {dashboardData.activeAvatarDetails?.imageUrl ? (
+                <img
+                  src={dashboardData.activeAvatarDetails.imageUrl}
+                  alt="Avatar del Cadete"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+              ) : (
+                <span className="text-3xl">👨‍🚀</span> // Fallback por si acaso
+              )}
+              <div className="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-slate-900 z-10"></div>
             </div>
             <div className="text-left">
               <p className="text-slate-400 font-mono text-sm uppercase tracking-wider">

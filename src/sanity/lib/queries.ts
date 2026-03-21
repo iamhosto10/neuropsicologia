@@ -108,6 +108,10 @@ export const getKidDashboardQuery = `
     avatarStatus,
     unlockedAvatars,
     activeAvatar,
+    "activeAvatarDetails": *[_type == "storeAvatar" && slug.current == ^.activeAvatar][0]{
+      title,
+      "imageUrl": image.asset->url
+    },
     "todaySession": *[_type == "dailySession" && references(^._id) && date == $todayDate][0]{
       _id,
       isCompleted,

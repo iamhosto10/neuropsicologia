@@ -101,6 +101,9 @@ importers:
       use-sound:
         specifier: ^5.0.0
         version: 5.0.0(react@19.2.3)
+      wavesurfer.js:
+        specifier: ^7.12.4
+        version: 7.12.4
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -6452,6 +6455,9 @@ packages:
   w3c-xmlserializer@5.0.0:
     resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
     engines: {node: '>=18'}
+
+  wavesurfer.js@7.12.4:
+    resolution: {integrity: sha512-b/+XnWfJejNdvNUmtm4M5QzQepHhUbTo+62wYybwdV1B/Sn9vHhgb1xckRm0rGY2ZefJwLkE7lYcKnLfIia4cQ==}
 
   webidl-conversions@7.0.0:
     resolution: {integrity: sha512-VwddBukDzu71offAQR975unBIGqfKZpM+8ZX6ySk8nYhVoo5CYaZyzt3YBvYtRtO+aoGlqxPg/B87NGVZ/fu6g==}
@@ -13743,6 +13749,8 @@ snapshots:
   w3c-xmlserializer@5.0.0:
     dependencies:
       xml-name-validator: 5.0.0
+
+  wavesurfer.js@7.12.4: {}
 
   webidl-conversions@7.0.0: {}
 

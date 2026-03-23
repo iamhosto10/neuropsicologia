@@ -16,8 +16,18 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ptComponents } from "@/components/lesson-detail/portable-text-components";
+import InteractiveQuiz from "@/components/lesson-detail/interactive-quiz";
+import InteractiveOpenQuestion from "@/components/lesson-detail/interactive-open-question";
+import AudioPlayerBlock from "@/components/lesson-detail/audio-player-block";
 
 export const dynamic = "force-dynamic";
+
+const getSanityFileUrl = (ref: string) => {
+  if (!ref) return "";
+  const { projectId, dataset } = client.config();
+  const [_file, id, extension] = ref.split("-");
+  return `https://cdn.sanity.io/files/${projectId}/${dataset}/${id}.${extension}`;
+};
 
 export default async function LessonPage({
   params,
@@ -31,6 +41,7 @@ export default async function LessonPage({
     courseSlug,
     lessonSlug,
   });
+
   if (!data || !data.currentLesson) notFound();
 
   const { currentLesson, syllabus, title: courseTitle } = data;
@@ -38,6 +49,8 @@ export default async function LessonPage({
   // 2. Buscamos quién está viendo esto y su progreso
   const kidId = await getActiveKidId();
   let completedLessons: string[] = [];
+  let completedQuizzes: string[] = [];
+  let completedOpenQuestions: string[] = [];
 
   if (kidId) {
     // 🔥 Corregido el await que faltaba aquí
@@ -47,6 +60,21 @@ export default async function LessonPage({
         kidId,
       });
     completedLessons = kidData?.completedLessons || [];
+  }
+
+  if (kidId) {
+    const kidData = await client
+      .withConfig({ useCdn: false })
+      .fetch(
+        `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons, completedQuizzes,completedOpenQuestions}`,
+        {
+          kidId,
+        },
+      );
+    completedLessons = kidData?.completedLessons || [];
+    completedQuizzes = kidData?.completedQuizzes || [];
+    completedOpenQuestions = kidData?.completedOpenQuestions || [];
+    console.log("completedeOpenQuestions", completedOpenQuestions);
   }
 
   const isCurrentCompleted = completedLessons.includes(currentLesson._id);
@@ -142,7 +170,49 @@ export default async function LessonPage({
             {currentLesson.content ? (
               <PortableText
                 value={currentLesson.content}
-                components={ptComponents}
+                // 🔥 Inyectamos el componente InteractiveQuiz dinámicamente
+                components={{
+                  ...ptComponents,
+                  types: {
+                    ...ptComponents.types,
+                    lessonQuestion: ({ value }: any) => (
+                      <InteractiveQuiz
+                        question={value.question}
+                        options={value.options}
+                        correctOptionIndex={value.correctOptionIndex}
+                        reward={value.reward || 10}
+                        lessonId={currentLesson._id}
+                        isAlreadyCompleted={completedQuizzes?.includes(
+                          currentLesson._id,
+                        )}
+                        currentPath={currentPath}
+                      />
+                    ),
+                    lessonOpenQuestion: ({ value }: any) => (
+                      <InteractiveOpenQuestion
+                        question={value.question}
+                        reward={value.reward || 15}
+                        lessonId={currentLesson._id}
+                        isAlreadyCompleted={completedOpenQuestions?.includes(
+                          currentLesson._id,
+                        )}
+                        currentPath={currentPath}
+                      />
+                    ),
+                    lessonAudio: ({ value }: any) => {
+                      if (!value?.audioFile?.asset?._ref) return null;
+                      const audioUrl = getSanityFileUrl(
+                        value.audioFile.asset._ref,
+                      );
+                      return (
+                        <AudioPlayerBlock
+                          title={value.title}
+                          audioUrl={audioUrl}
+                        />
+                      );
+                    },
+                  },
+                }}
               />
             ) : (
               <p className="text-slate-500 italic">

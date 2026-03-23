@@ -287,6 +287,12 @@ export default async function KidReportPage({
               Supervisa el avance de sus módulos educativos individuales.
             </p>
           </div>
+          <Link href={`/dashboard/kid/${id}/academico`}>
+            <Button className="rounded-xl bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold border-0 shadow-sm transition-colors gap-2">
+              <BookOpen className="w-4 h-4" />
+              Ver Boletín Académico
+            </Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

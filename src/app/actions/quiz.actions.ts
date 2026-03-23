@@ -9,7 +9,7 @@ export async function submitQuizAnswer(
   isCorrect: boolean,
   reward: number,
   currentPath: string,
-  selected: number,
+  selected: string,
 ) {
   try {
     const cookieStore = await cookies();
@@ -35,7 +35,7 @@ export async function submitQuizAnswer(
       _key: crypto.randomUUID(),
       lessonId,
       isCorrect,
-      selected: selected + "",
+      selected,
       timestamp: new Date().toISOString(),
     };
 

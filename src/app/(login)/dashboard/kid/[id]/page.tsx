@@ -1,4 +1,5 @@
 // src/app/(login)/dashboard/kid/[id]/page.tsx
+
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { client } from "@/sanity/lib/client";
@@ -21,6 +22,12 @@ import AccuracyChart from "@/components/dashboard/accuracy-chart";
 import CoursesCard from "@/components/courses/courses-card";
 import { selectKidAndRedirect } from "@/app/actions/profile.actions";
 
+// 🔥 IMPORTAMOS NUESTRO MOTOR CLÍNICO
+import {
+  parseTelemetryHistory,
+  generateAccuracyChartData,
+} from "@/lib/telemetry-engine";
+
 export default async function KidReportPage({
   params,
 }: {
@@ -35,10 +42,14 @@ export default async function KidReportPage({
   const sanityUserId = `user-${userClerk?.id}`;
 
   // 1. Buscamos los datos clínicos principales
-  const kidData = await client.fetch(getKidClinicalReportQuery, {
-    kidId: id,
-    parentSanityId: sanityUserId,
-  });
+  const kidData = await client.withConfig({ useCdn: false }).fetch(
+    getKidClinicalReportQuery,
+    {
+      kidId: id,
+      parentSanityId: sanityUserId,
+    },
+    { cache: "no-store" },
+  );
 
   if (!kidData) {
     return (
@@ -60,7 +71,7 @@ export default async function KidReportPage({
 
   console.log(completedLessons, "completed lesson");
 
-  // 3. 🔥 LA CONSULTA CORREGIDA: Entramos al syllabus y sacamos las referencias de las lecciones
+  // 3. LA CONSULTA CORREGIDA: Entramos al syllabus y sacamos las referencias de las lecciones
   const coursesQuery = `*[_type == "course"] {
     _id, title, "slug": slug.current, description, level, "image": image.asset->url,
     "syllabus": syllabus[]{
@@ -70,16 +81,14 @@ export default async function KidReportPage({
 
   const allCourses = await client.fetch(coursesQuery);
 
-  // 4. 🔥 LA MATEMÁTICA CORREGIDA
+  // 4. LA MATEMÁTICA CORREGIDA
   const coursesWithProgress = allCourses.map((course: any) => {
-    // Aplanamos (flatten) todas las lecciones de todos los módulos en una sola lista
     const courseLessonIds =
       course.syllabus?.flatMap((mod: any) => mod.lessonIds || []) || [];
     const total = courseLessonIds.length;
 
     if (total === 0) return { ...course, progress: 0 };
 
-    // Contamos cuántas de las lecciones de este curso están en el array del cadete
     const completed = courseLessonIds.filter((lessonId: string) =>
       completedLessons.includes(lessonId),
     ).length;
@@ -99,6 +108,17 @@ export default async function KidReportPage({
   const totalSessions = kidData.sessionsHistory?.length || 0;
   const completedSessions =
     kidData.sessionsHistory?.filter((s: any) => s.isCompleted).length || 0;
+
+  // 🔥 6. EL MOTOR DE TELEMETRÍA EN ACCIÓN
+  const sessionsHistory = kidData.sessionsHistory || [];
+  console.log(
+    "1. SESSIONS HISTORY CRUDA:",
+    JSON.stringify(sessionsHistory, null, 2),
+  );
+  const rawEvents = parseTelemetryHistory(sessionsHistory);
+  console.log("2. RAW EVENTS EXTRAIDOS:", rawEvents);
+  const accuracyData = generateAccuracyChartData(rawEvents);
+  console.log("3. DATA FINAL PARA LA GRÁFICA:", accuracyData);
 
   return (
     <div className="max-w-6xl mx-auto md:p-8 space-y-8 font-sans animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -206,7 +226,8 @@ export default async function KidReportPage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <AccuracyChart sessions={kidData.sessionsHistory || []} />
+            {/* 🔥 LE PASAMOS LA DATA MATEMÁTICA PROCESADA */}
+            <AccuracyChart data={accuracyData} />
           </CardContent>
         </Card>
 
@@ -224,11 +245,14 @@ export default async function KidReportPage({
                   >
                     <div>
                       <p className="font-bold text-sm text-slate-800">
-                        {new Date(session.date).toLocaleDateString("es-ES", {
+                        {new Date(
+                          `${session.date}T12:00:00`,
+                        ).toLocaleDateString("es-ES", {
                           day: "numeric",
                           month: "long",
                         })}
                       </p>
+
                       <p className="text-xs text-slate-500">
                         Misiones: {session.completedCount || 0} /{" "}
                         {session.assignedCount || 0}
@@ -268,7 +292,6 @@ export default async function KidReportPage({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedCourses.length > 0 ? (
             sortedCourses.map((course: any) => (
-              // 🔥 EL TÚNEL DE TELETRANSPORTACIÓN:
               <form
                 key={course._id}
                 action={async () => {
@@ -282,7 +305,7 @@ export default async function KidReportPage({
                   image={course.image}
                   level={course.level}
                   progress={course.progress}
-                  asButton={true} // Le decimos que sea un botón de formulario, no un Link
+                  asButton={true}
                 />
               </form>
             ))

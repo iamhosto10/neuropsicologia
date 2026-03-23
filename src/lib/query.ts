@@ -345,3 +345,25 @@ export const getActivityBySlugQuery = `
     }
   }
 `;
+
+export const getKidAcademicReportQuery = `
+  *[_type == "kidProfile" && _id == $kidId][0]{
+    _id,
+    alias,
+    // Traemos todo el historial académico
+    academicTelemetry[]{
+      _key,
+      _type,
+      lessonId,
+      isCorrect,
+      responseText,
+      selected,
+      timestamp,
+      // Hacemos un JOIN para buscar la lección correspondiente y traer su contenido
+      "lesson": *[_type == "lesson" && _id == ^.lessonId][0]{
+        title,
+        content
+      }
+    }
+  }
+`;

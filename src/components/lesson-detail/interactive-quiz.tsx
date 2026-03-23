@@ -53,7 +53,13 @@ export default function InteractiveQuiz({
     audio.play().catch((e) => console.log("Audio play failed:", e));
 
     startTransition(async () => {
-      await submitQuizAnswer(lessonId, isCorrect, reward, currentPath, index);
+      await submitQuizAnswer(
+        lessonId,
+        isCorrect,
+        reward,
+        currentPath,
+        options[index],
+      );
       setHasAnswered(true);
     });
   };

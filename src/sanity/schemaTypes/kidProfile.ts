@@ -90,17 +90,68 @@ export const kidProfile = defineType({
         "IDs de las actividades de laboratorio que este cadete ha terminado.",
       initialValue: [],
     }),
+    defineField({
+      name: "completedQuizzes",
+      title: "Quizzes de Lecciones Completados",
+      type: "array",
+      of: [{ type: "string" }],
+      description: "IDs de las lecciones donde el cadete ya respondió el quiz.",
+      initialValue: [],
+    }),
+    defineField({
+      name: "completedOpenQuestions",
+      title: "Preguntas Abiertas Completadas",
+      type: "array",
+      of: [{ type: "string" }],
+      initialValue: [],
+    }),
+    defineField({
+      name: "academicTelemetry",
+      title: "Telemetría Académica (Historial de Quizzes)",
+      type: "array",
+      of: [
+        {
+          type: "object",
+          name: "quizRecord",
+          fields: [
+            { name: "lessonId", type: "string", title: "ID de la Lección" },
+            { name: "isCorrect", type: "boolean", title: "¿Fue correcta?" },
+            {
+              name: "selected",
+              type: "string",
+              title: "Seleccionada por el niño",
+            },
+            { name: "timestamp", type: "datetime", title: "Fecha y Hora" },
+          ],
+        },
+        {
+          type: "object",
+          name: "openQuestionRecord",
+          fields: [
+            { name: "lessonId", type: "string", title: "ID de la Lección" },
+            {
+              name: "responseText",
+              type: "string",
+              title: "Respuesta del Cadete",
+            },
+            { name: "timestamp", type: "datetime", title: "Fecha y Hora" },
+          ],
+        },
+      ],
+      description:
+        "Registro independiente de todos los intentos del cadete en las lecciones.",
+      initialValue: [],
+    }),
   ],
   preview: {
     select: {
       title: "alias",
-      subtitle: "energyCrystals",
+      crystals: "energyCrystals", // <-- Corregido el nombre de la variable
     },
-    prepare(selection) {
-      const { title, subtitle } = selection;
+    prepare({ title, crystals }) {
       return {
         title: title,
-        subtitle: `${subtitle} Cristales`,
+        subtitle: `${crystals || 0} Cristales ⚡`, // <-- Manejo de nulos por seguridad
       };
     },
   },

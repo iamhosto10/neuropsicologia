@@ -7,6 +7,9 @@ import { kidProfile } from "./kidProfile";
 import { mission } from "./mission";
 import { dailySession } from "./dailySession";
 import { storeAvatar } from "./storeAvatar";
+import { lessonQuestion } from "./lessonQuestion";
+import { lessonOpenQuestion } from "./lessonOpenQuestion";
+import { lessonAudio } from "./lessonAudio";
 
 export const schema = {
   types: [
@@ -19,5 +22,8 @@ export const schema = {
     mission,
     dailySession,
     storeAvatar,
+    lessonQuestion,
+    lessonOpenQuestion,
+    lessonAudio,
   ],
 };

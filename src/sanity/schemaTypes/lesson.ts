@@ -25,7 +25,14 @@ export const lesson = defineType({
       name: "content",
       title: "Contenido de la Lección",
       type: "array",
-      of: [{ type: "block" }, { type: "image" }, { type: "gameModule" }],
+      of: [
+        { type: "block" },
+        { type: "image" },
+        { type: "gameModule" },
+        { type: "lessonQuestion" },
+        { type: "lessonOpenQuestion" },
+        { type: "lessonAudio" },
+      ],
     }),
   ],
 });

@@ -39,7 +39,8 @@
     "styled-components": "^6.2.0",
     "svix": "^1.85.0",
     "tailwind-merge": "^3.4.0",
-    "use-sound": "^5.0.0"
+    "use-sound": "^5.0.0",
+    "wavesurfer.js": "^7.12.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

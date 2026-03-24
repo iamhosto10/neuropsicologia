@@ -53,28 +53,15 @@ export default async function LessonPage({
   let completedOpenQuestions: string[] = [];
 
   if (kidId) {
-    // 🔥 Corregido el await que faltaba aquí
-    const kidData = await client
-      .withConfig({ useCdn: false })
-      .fetch(`*[_type == "kidProfile" && _id == $kidId][0]{completedLessons}`, {
-        kidId,
-      });
-    completedLessons = kidData?.completedLessons || [];
-  }
-
-  if (kidId) {
     const kidData = await client
       .withConfig({ useCdn: false })
       .fetch(
-        `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons, completedQuizzes,completedOpenQuestions}`,
-        {
-          kidId,
-        },
+        `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons, completedQuizzes, completedOpenQuestions}`,
+        { kidId },
       );
     completedLessons = kidData?.completedLessons || [];
     completedQuizzes = kidData?.completedQuizzes || [];
     completedOpenQuestions = kidData?.completedOpenQuestions || [];
-    console.log("completedeOpenQuestions", completedOpenQuestions);
   }
 
   const isCurrentCompleted = completedLessons.includes(currentLesson._id);
@@ -175,30 +162,38 @@ export default async function LessonPage({
                   ...ptComponents,
                   types: {
                     ...ptComponents.types,
-                    lessonQuestion: ({ value }: any) => (
-                      <InteractiveQuiz
-                        question={value.question}
-                        options={value.options}
-                        correctOptionIndex={value.correctOptionIndex}
-                        reward={value.reward || 10}
-                        lessonId={currentLesson._id}
-                        isAlreadyCompleted={completedQuizzes?.includes(
-                          currentLesson._id,
-                        )}
-                        currentPath={currentPath}
-                      />
-                    ),
-                    lessonOpenQuestion: ({ value }: any) => (
-                      <InteractiveOpenQuestion
-                        question={value.question}
-                        reward={value.reward || 15}
-                        lessonId={currentLesson._id}
-                        isAlreadyCompleted={completedOpenQuestions?.includes(
-                          currentLesson._id,
-                        )}
-                        currentPath={currentPath}
-                      />
-                    ),
+                    lessonQuestion: ({ value }: any) => {
+                      const uniqueId = `${currentLesson._id}-${value._key}`;
+                      return (
+                        <InteractiveQuiz
+                          question={value.question}
+                          options={value.options}
+                          correctOptionIndex={value.correctOptionIndex}
+                          reward={value.reward || 10}
+                          lessonId={currentLesson._id}
+                          isAlreadyCompleted={completedQuizzes?.includes(
+                            uniqueId,
+                          )}
+                          currentPath={currentPath}
+                          blockKey={value._key}
+                        />
+                      );
+                    },
+                    lessonOpenQuestion: ({ value }: any) => {
+                      const uniqueId = `${currentLesson._id}-${value._key}`;
+                      return (
+                        <InteractiveOpenQuestion
+                          question={value.question}
+                          reward={value.reward || 15}
+                          lessonId={currentLesson._id}
+                          isAlreadyCompleted={completedOpenQuestions?.includes(
+                            uniqueId,
+                          )}
+                          currentPath={currentPath}
+                          blockKey={value._key}
+                        />
+                      );
+                    },
                     lessonAudio: ({ value }: any) => {
                       if (!value?.audioFile?.asset?._ref) return null;
                       const audioUrl = getSanityFileUrl(

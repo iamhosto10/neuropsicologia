@@ -10,6 +10,7 @@ export async function submitQuizAnswer(
   reward: number,
   currentPath: string,
   selected: string,
+  blockKey: string,
 ) {
   try {
     const cookieStore = await cookies();
@@ -23,30 +24,39 @@ export async function submitQuizAnswer(
     });
 
     const kid = await writeClient.fetch(
-      `*[_type == "kidProfile" && _id == $kidId][0]{completedQuizzes, energyCrystals}`,
+      `*[_type == "kidProfile" && _id == $kidId][0]{completedQuizzes, energyCrystals, academicTelemetry}`,
       { kidId },
     );
 
     const completed = kid?.completedQuizzes || [];
     const currentCrystals = kid?.energyCrystals || 0;
+    const currentTelemetry = kid?.academicTelemetry || [];
+
+    const uniqueId = `${lessonId}-${blockKey}`;
 
     const telemetryRecord = {
       _type: "quizRecord",
       _key: crypto.randomUUID(),
       lessonId,
+      blockKey,
       isCorrect,
       selected,
       timestamp: new Date().toISOString(),
     };
 
+    // 🔥 MÉTODO INFALIBLE: Unimos la telemetría vieja con la nueva en JavaScript
+    const updatedTelemetry = [...currentTelemetry, telemetryRecord];
+
+    // Iniciamos el parche sobrescribiendo la telemetría directamente
     const patch = writeClient
       .patch(kidId)
-      .setIfMissing({ academicTelemetry: [], completedQuizzes: [] })
-      .append("academicTelemetry", [telemetryRecord]);
+      .set({ academicTelemetry: updatedTelemetry });
 
-    if (isCorrect && !completed.includes(lessonId)) {
+    // Si es correcta y no estaba completada, unimos también el arreglo de completados
+    if (isCorrect && !completed.includes(uniqueId)) {
+      const updatedCompleted = [...completed, uniqueId];
       patch
-        .append("completedQuizzes", [lessonId])
+        .set({ completedQuizzes: updatedCompleted })
         .set({ energyCrystals: currentCrystals + reward });
     }
 

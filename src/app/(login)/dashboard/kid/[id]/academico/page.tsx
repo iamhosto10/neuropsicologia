@@ -48,7 +48,7 @@ export default async function AcademicReportPage({
     .filter((t: any) => t._type === "quizRecord")
     .map((record: any) => {
       const questionBlock = record.lesson?.content?.find(
-        (b: any) => b._type === "lessonQuestion",
+        (b: any) => b._key === record.blockKey,
       );
 
       const options = questionBlock?.options || [];
@@ -76,7 +76,7 @@ export default async function AcademicReportPage({
     .filter((t: any) => t._type === "openQuestionRecord")
     .map((record: any) => {
       const questionBlock = record.lesson?.content?.find(
-        (b: any) => b._type === "lessonOpenQuestion",
+        (b: any) => b._key === record.blockKey,
       );
       return {
         ...record,

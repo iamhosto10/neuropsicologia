@@ -9,6 +9,7 @@ export async function submitOpenAnswer(
   responseText: string,
   reward: number,
   currentPath: string,
+  blockKey: string,
 ) {
   try {
     const cookieStore = await cookies();
@@ -34,12 +35,14 @@ export async function submitOpenAnswer(
     const currentCrystals = kid?.energyCrystals || 0;
 
     const currentTelemetry = kid?.academicTelemetry || [];
+    const uniqueId = `${lessonId}-${blockKey}`;
 
     const telemetryRecord = {
       _type: "openQuestionRecord",
       _key:
         Math.random().toString(36).substring(2, 10) + Date.now().toString(36),
       lessonId: lessonId,
+      blockKey,
       responseText: responseText,
       timestamp: new Date().toISOString(),
     };
@@ -50,10 +53,10 @@ export async function submitOpenAnswer(
       .patch(kidId)
       .set({ academicTelemetry: updatedTelemetry });
 
-    if (!completed.includes(lessonId)) {
+    if (!completed.includes(uniqueId)) {
       patch
         .setIfMissing({ completedOpenQuestions: [] })
-        .append("completedOpenQuestions", [lessonId])
+        .append("completedOpenQuestions", [uniqueId])
         .set({ energyCrystals: currentCrystals + reward });
     }
 

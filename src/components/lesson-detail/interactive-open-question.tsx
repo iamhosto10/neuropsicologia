@@ -24,6 +24,7 @@ interface InteractiveOpenQuestionProps {
   lessonId: string;
   isAlreadyCompleted: boolean;
   currentPath: string;
+  blockKey: string;
 }
 
 export default function InteractiveOpenQuestion({
@@ -32,6 +33,7 @@ export default function InteractiveOpenQuestion({
   lessonId,
   isAlreadyCompleted,
   currentPath,
+  blockKey,
 }: InteractiveOpenQuestionProps) {
   const [text, setText] = useState("");
   const [hasAnswered, setHasAnswered] = useState(isAlreadyCompleted);
@@ -47,7 +49,7 @@ export default function InteractiveOpenQuestion({
     audio.play().catch((e) => console.log("Audio play failed:", e));
 
     startTransition(async () => {
-      await submitOpenAnswer(lessonId, text, reward, currentPath);
+      await submitOpenAnswer(lessonId, text, reward, currentPath, blockKey);
       setHasAnswered(true);
     });
   };

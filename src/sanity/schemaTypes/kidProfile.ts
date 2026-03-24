@@ -115,6 +115,7 @@ export const kidProfile = defineType({
           name: "quizRecord",
           fields: [
             { name: "lessonId", type: "string", title: "ID de la Lección" },
+            { name: "blockKey", type: "string", title: "ID Único del Bloque" },
             { name: "isCorrect", type: "boolean", title: "¿Fue correcta?" },
             {
               name: "selected",
@@ -129,6 +130,7 @@ export const kidProfile = defineType({
           name: "openQuestionRecord",
           fields: [
             { name: "lessonId", type: "string", title: "ID de la Lección" },
+            { name: "blockKey", type: "string", title: "ID Único del Bloque" },
             {
               name: "responseText",
               type: "string",

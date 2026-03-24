@@ -25,6 +25,7 @@ interface InteractiveQuizProps {
   lessonId: string;
   isAlreadyCompleted: boolean;
   currentPath: string;
+  blockKey: string;
 }
 
 export default function InteractiveQuiz({
@@ -35,6 +36,7 @@ export default function InteractiveQuiz({
   lessonId,
   isAlreadyCompleted,
   currentPath,
+  blockKey,
 }: InteractiveQuizProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [hasAnswered, setHasAnswered] = useState(isAlreadyCompleted);
@@ -59,6 +61,7 @@ export default function InteractiveQuiz({
         reward,
         currentPath,
         options[index],
+        blockKey,
       );
       setHasAnswered(true);
     });

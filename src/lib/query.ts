@@ -355,6 +355,7 @@ export const getKidAcademicReportQuery = `
       _key,
       _type,
       lessonId,
+      blockKey,
       isCorrect,
       responseText,
       selected,

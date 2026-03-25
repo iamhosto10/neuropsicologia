@@ -5,6 +5,19 @@ import CoursesGallery from "@/components/courses/courses-gallery";
 import CoursesCard from "@/components/courses/courses-card";
 import { Target, Compass, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cursos Cognitivos | Academia Espacial",
+  description:
+    "Explora cursos diseñados para mejorar la atención, memoria, control inhibitorio y habilidades cognitivas. Aprende a tu ritmo con misiones interactivas.",
+  openGraph: {
+    title: "Academia Espacial - Cursos Cognitivos",
+    description:
+      "Cursos interactivos para desarrollar habilidades cognitivas clave como memoria, atención y flexibilidad mental.",
+    type: "website",
+  },
+};
 
 export const dynamic = "force-dynamic";
 
@@ -83,14 +96,6 @@ export default async function CursosPage() {
           </div>
         </div>
       )}
-
-      {/* <div>
-        <h2 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-          <Compass className="w-8 h-8 text-slate-400" />
-          Exploración Libre
-        </h2>
-        <CoursesGallery initialCourses={allCourses} />
-      </div> */}
     </div>
   );
 }

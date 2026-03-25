@@ -1,5 +1,15 @@
 import InlineGameWrapper from "@/components/lesson-detail/inline-game-wrapper";
+import type { Metadata } from "next";
 
+export const metadata: Metadata = {
+  title: "Test de Juegos Cognitivos | Sandbox",
+  description:
+    "Página de prueba para visualizar juegos cognitivos en diferentes niveles de dificultad: atención, memoria, control inhibitorio y más.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 const Page = () => {
   return (
     <div className="flex flex-col gap-1 max-w-4xl px-11 pt-17 mx-auto bg-background">

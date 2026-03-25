@@ -22,6 +22,54 @@ import AudioPlayerBlock from "@/components/lesson-detail/audio-player-block";
 
 export const dynamic = "force-dynamic";
 
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { courseSlug: string; lessonSlug: string };
+}): Promise<Metadata> {
+  const { courseSlug, lessonSlug } = await params;
+
+  const data = await client
+    .withConfig({ useCdn: true })
+    .fetch(
+      getCourseAndLessonQuery,
+      { courseSlug, lessonSlug },
+      { cache: "force-cache" },
+    );
+
+  if (!data || !data.currentLesson) {
+    return {
+      title: "Lección no encontrada | Academia Espacial",
+    };
+  }
+
+  const { currentLesson, title: courseTitle } = data;
+
+  return {
+    title: `${currentLesson.title} | ${courseTitle}`,
+    description:
+      currentLesson?.excerpt ||
+      currentLesson?.description ||
+      "Lección interactiva para entrenar habilidades cognitivas dentro de la Academia Espacial.",
+    openGraph: {
+      title: currentLesson.title,
+      description:
+        currentLesson?.excerpt ||
+        "Aprende y entrena tu mente con esta lección interactiva.",
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: currentLesson.title,
+      description:
+        currentLesson?.excerpt ||
+        "Lección interactiva dentro de la Academia Espacial.",
+    },
+  };
+}
+
 const getSanityFileUrl = (ref: string) => {
   if (!ref) return "";
   const { projectId, dataset } = client.config();

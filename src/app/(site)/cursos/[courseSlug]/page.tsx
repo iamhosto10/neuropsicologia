@@ -4,6 +4,42 @@ import { getCourseBySlugQuery } from "@/lib/query";
 import { notFound } from "next/navigation";
 import CourseDetailView from "@/components/course-detail/course-detail-view";
 import { cookies } from "next/headers"; // 🔥 Importante
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { courseSlug: string };
+}): Promise<Metadata> {
+  const { courseSlug } = await params;
+
+  const course = await client
+    .withConfig({ useCdn: false })
+    .fetch(getCourseBySlugQuery, { slug: courseSlug }, { cache: "no-store" });
+
+  if (!course) {
+    return {
+      title: "Curso no encontrado | Academia Espacial",
+    };
+  }
+
+  return {
+    title: `${course?.title} | Academia Espacial`,
+    description: course?.description,
+    openGraph: {
+      title: course?.title,
+      description: course?.description,
+      images: course?.image ? [{ url: course?.image }] : [],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: course?.title,
+      description: course?.description,
+      images: course?.image ? [course?.image] : [],
+    },
+  };
+}
 
 export const dynamic = "force-dynamic";
 

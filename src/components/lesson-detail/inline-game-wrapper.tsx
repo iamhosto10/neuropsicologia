@@ -9,6 +9,9 @@ import AsteroidFieldGame from "@/components/games/asteroid-field-game";
 import ReverseCommunicatorGame from "@/components/games/reverse-communicator-game";
 import MemoryMatrixGame from "@/components/games/memory-matrix-game";
 import MultitaskEvasionGame from "@/components/games/multitask-evasion-game";
+import CargoLaboratoryGame from "../games/cargo-laboratory-game";
+import NebulaStormGame from "../games/nebula-storm-game";
+import SignalDecoderGame from "../games/signal-decoder-game";
 
 export default function InlineGameWrapper({ value }: { value: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -43,8 +46,8 @@ export default function InlineGameWrapper({ value }: { value: any }) {
   const gameConfig = {
     title: title || "Laboratorio",
     difficulty: difficulty || "easy",
-    duration: duration || 60,
-    kidId: "practice-mode", // Evita guardar telemetría falsa en la base de datos
+    duration: 30,
+    kidId: "practice-mode",
     missionId: `practice-${Math.random()}`,
     energyReward: 0,
     isPractice: true,
@@ -64,6 +67,12 @@ export default function InlineGameWrapper({ value }: { value: any }) {
         return <MemoryMatrixGame config={gameConfig} />;
       case "multitask":
         return <MultitaskEvasionGame config={gameConfig} />;
+      case "cargo_n_back":
+        return <CargoLaboratoryGame config={gameConfig} />;
+      case "nebula_storm":
+        return <NebulaStormGame config={gameConfig} />;
+      case "signal_decoder":
+        return <SignalDecoderGame config={gameConfig} />;
       default:
         return <SpaceCleanupGame config={gameConfig} />;
     }

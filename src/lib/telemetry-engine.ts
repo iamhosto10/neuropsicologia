@@ -66,3 +66,61 @@ export function generateAccuracyChartData(events: any[]) {
     }))
     .reverse();
 }
+
+// Esta interfaz asume que en el Paso 3 le pasaremos el historial de sesiones y
+// un mapeo de las misiones para saber qué ID corresponde a qué juego.
+export interface ProcessedGameSession {
+  date: string; // Fecha de la sesión
+  missionId: string; // ID de la misión jugada
+  metrics: any; // El JSON crudo de la telemetría de ese día
+}
+
+/**
+ * Filtra el historial general de sesiones del niño y extrae ÚNICAMENTE
+ * la telemetría que corresponde a un `gameType` específico (Ej: "asteroids_go_nogo").
+ * Lo ordena desde el más reciente al más antiguo.
+ */
+export function extractGameTelemetryByDate(
+  sessionsHistory: any[],
+  targetGameType: string,
+  missionsMap: Record<string, string>, // Mapeo: { "missionId_123": "asteroids_go_nogo" }
+): ProcessedGameSession[] {
+  if (!sessionsHistory || sessionsHistory.length === 0) return [];
+
+  const extractedData: ProcessedGameSession[] = [];
+
+  // Recorremos cada día de sesión
+  sessionsHistory.forEach((session) => {
+    if (!session.telemetryData || session.telemetryData.length === 0) return;
+
+    // Recorremos la telemetría guardada en ese día
+    session.telemetryData.forEach((telemetryString: string) => {
+      try {
+        const parsedData = JSON.parse(telemetryString);
+        const missionId = parsedData.missionId;
+
+        // Verificamos si esta misión es del tipo de juego que estamos buscando
+        const gameTypeOfThisMission = missionsMap[missionId];
+
+        if (gameTypeOfThisMission === targetGameType) {
+          extractedData.push({
+            date: session.date,
+            missionId: missionId,
+            metrics: parsedData.metrics, // Aquí vienen los milisegundos y errores
+          });
+        }
+      } catch (error) {
+        console.error(
+          "Error parseando telemetría clínica en la fecha",
+          session.date,
+          error,
+        );
+      }
+    });
+  });
+
+  // Ordenamos cronológicamente: Las más recientes primero
+  return extractedData.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+}

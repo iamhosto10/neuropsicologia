@@ -38,7 +38,7 @@ export default function CourseSyllabus({
                         </div>
                         <div>
                           <p className="font-bold text-slate-800 group-hover:text-cyan-700 transition-colors">
-                            Lección {lessonIndex + 1}: {lesson.title}
+                            {lesson.title}
                           </p>
                         </div>
                       </div>

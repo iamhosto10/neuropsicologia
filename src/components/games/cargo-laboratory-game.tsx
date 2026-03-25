@@ -55,7 +55,7 @@ export default function CargoLaboratoryGame({ config }: CargoLabProps) {
     customSymbols.length > 2 ? customSymbols : DEFAULT_SYMBOLS;
 
   const engine = useNBackEngine({
-    duration: config.duration || 60,
+    duration: 40,
     difficulty: config.difficulty || "medium",
     symbols: finalSymbols,
     onPlayGood: () => {

@@ -32,6 +32,15 @@ export const mission = defineType({
             title: "Limpieza Espacial (Atención Dividida)",
             value: "space_cleanup",
           },
+          {
+            title: "Laboratorio de Carga (Memoria N-Back)",
+            value: "cargo_n_back",
+          },
+          {
+            title: "Tormenta de Nebulosa (Flanker Task)",
+            value: "nebula_storm",
+          },
+          { title: "Decodificador de Señales (SDMT)", value: "signal_decoder" },
         ],
       },
       validation: (Rule) => Rule.required(),

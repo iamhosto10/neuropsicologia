@@ -63,14 +63,21 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
     onFinish: async (finalScore, telemetry) => {
       stopBg();
       if (config.isPractice) return;
+
+      // Bloqueamos la UI inmediatamente
       setIsSaving(true);
+
       console.log("Telemetría Radar Satelital:", telemetry);
+
+      // Enviamos a la BD
       await saveMissionProgress(
         config.kidId,
         config.missionId,
         config.energyReward,
         telemetry,
       );
+
+      // Redirigimos sin quitar el isSaving para evitar destellos
       router.push("/hq");
     },
   });
@@ -141,29 +148,40 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
       </div>
 
       {/* VIEWPORT */}
-      <div className="relative h-[500px] w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair">
-        {isSaving && (
-          <div className="absolute inset-0 z-50 bg-black/80 flex items-center justify-center backdrop-blur-sm">
-            <p className="text-cyan-400 font-bold text-2xl animate-pulse">
-              Transfiriendo Datos al HQ...
-            </p>
-          </div>
-        )}
-
-        {/* Fondo Decorativo */}
+      <div
+        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair"
+        onPointerDown={engine.handleFalsePositive}
+      >
+        {/* Fondo Decorativo SIEMPRE visible de fondo */}
         <div
-          className="absolute inset-0 opacity-40 pointer-events-none"
+          className="absolute inset-0 opacity-40 pointer-events-none z-0"
           style={{
             backgroundImage: "radial-gradient(white 1px, transparent 1px)",
             backgroundSize: "30px 30px",
           }}
         />
 
-        {/* PANTALLAS DE INICIO / FIN */}
-        {engine.gameState !== "playing" && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md text-white p-8 text-center">
+        {/* 🔥 LA LÓGICA DE RENDERIZADO EXCLUSIVO (Candado Visual)
+            1. Si está guardando, bloquea TODO.
+            2. Si no está guardando, y no está jugando, muestra menú.
+            3. Si está jugando, dibuja el satélite.
+        */}
+        {isSaving ? (
+          <div className="absolute inset-0 z-100 bg-black/90 flex flex-col items-center justify-center backdrop-blur-md animate-in fade-in duration-300">
+            <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mb-6 border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+              <Radar className="w-12 h-12 text-cyan-400 animate-spin" />
+            </div>
+            <p className="text-cyan-400 font-bold text-3xl animate-pulse tracking-widest">
+              Transfiriendo Datos al HQ...
+            </p>
+            <p className="text-slate-400 mt-4 text-sm font-mono uppercase">
+              Por favor espere. Sincronizando Bitácora Clínica.
+            </p>
+          </div>
+        ) : engine.gameState !== "playing" ? (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md text-white p-8 text-center animate-in fade-in duration-300">
             {engine.gameState === "finished" ? (
-              <div className="space-y-6 animate-in fade-in zoom-in duration-300">
+              <div className="space-y-6 animate-in zoom-in duration-300">
                 <h2 className="text-4xl font-bold text-green-400">
                   ¡Rastreo Completado!
                 </h2>
@@ -175,15 +193,17 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
                     {engine.score} MB
                   </p>
                 </div>
+                {/* Ocultamos el botón si el isSaving va a entrar (aunque la lógica de arriba ya lo previene, es una doble capa de seguridad) */}
                 <Button
                   onClick={handleStart}
-                  className="bg-cyan-600 hover:bg-cyan-500 text-lg px-8 py-6 rounded-xl"
+                  disabled={isSaving}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-lg px-8 py-6 rounded-xl disabled:opacity-50"
                 >
                   <RotateCcw className="mr-2 h-5 w-5" /> Iniciar Nuevo Rastreo
                 </Button>
               </div>
             ) : (
-              <div className="space-y-6 max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-6 max-w-lg animate-in slide-in-from-bottom-4 duration-500">
                 <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto border-2 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
                   <Radar className="w-12 h-12 text-cyan-400 animate-spin-slow" />
                 </div>
@@ -196,80 +216,84 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
                 </p>
                 <Button
                   onClick={handleStart}
-                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl shadow-lg shadow-green-900/20 transform hover:scale-105 transition-all"
+                  disabled={isSaving}
+                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl shadow-lg shadow-green-900/20 transform hover:scale-105 transition-all disabled:opacity-50"
                 >
                   <Play className="mr-2 h-5 w-5" /> CONECTAR RADAR
                 </Button>
               </div>
             )}
           </div>
-        )}
-
-        {/* --- SATÉLITE (OBJETO PRINCIPAL) --- */}
-        {engine.gameState === "playing" && (
-          <motion.div
-            className="absolute z-30"
-            animate={{
-              top: `${engine.position.y}%`,
-              left: `${engine.position.x}%`,
-            }}
-            transition={{ duration: engine.settings.speed, ease: "easeInOut" }}
-            onAnimationComplete={engine.moveToNewPosition}
-            onMouseEnter={() => engine.setHovering(true)}
-            onMouseLeave={() => engine.setHovering(false)}
-            onPointerDown={engine.handleCriticalClick}
-          >
-            <div
-              className={`relative w-32 h-32 flex items-center justify-center transition-all duration-200 ${engine.isCriticalEvent ? "scale-110 cursor-pointer" : "scale-100"}`}
+        ) : (
+          <>
+            {/* --- SATÉLITE (OBJETO PRINCIPAL) --- */}
+            <motion.div
+              className="absolute z-30"
+              animate={{
+                top: `${engine.position.y}%`,
+                left: `${engine.position.x}%`,
+              }}
+              transition={{
+                duration: engine.settings.speed,
+                ease: "easeInOut",
+              }}
+              onAnimationComplete={engine.moveToNewPosition}
+              onMouseEnter={() => engine.setHovering(true)}
+              onMouseLeave={() => engine.setHovering(false)}
+              onPointerDown={(e) => engine.handleCriticalClick(e)}
             >
-              {engine.isHovering && !engine.isCriticalEvent && (
-                <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
-              )}
-              {engine.isCriticalEvent && (
-                <div className="absolute inset-0 bg-red-500/40 rounded-full animate-ping duration-100" />
-              )}
-
               <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center shadow-2xl relative z-10 overflow-hidden bg-slate-900 ${engine.isCriticalEvent ? "border-4 border-red-500 shadow-red-500/50" : "border-2 border-slate-500"} ${engine.isHovering ? "border-green-400 shadow-[0_0_20px_rgba(74,222,128,0.6)]" : ""}`}
+                className={`relative w-32 h-32 flex items-center justify-center transition-all duration-200 ${engine.isCriticalEvent ? "scale-110 cursor-pointer" : "scale-100"}`}
               >
-                {config.targetImage ? (
-                  <img
-                    src={config.targetImage}
-                    alt="Satélite"
-                    className="w-full h-full object-cover"
-                    draggable={false}
-                  />
-                ) : (
-                  <Satellite
-                    className={`w-10 h-10 ${engine.isCriticalEvent ? "text-red-400 animate-pulse" : "text-cyan-200"}`}
-                  />
+                {engine.isHovering && !engine.isCriticalEvent && (
+                  <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" />
                 )}
-              </div>
-            </div>
-          </motion.div>
-        )}
+                {engine.isCriticalEvent && (
+                  <div className="absolute inset-0 bg-red-500/40 rounded-full animate-ping duration-100" />
+                )}
 
-        {/* Nubes / Distractores */}
-        {config.distractorImages?.map((img, index) => (
-          <motion.div
-            key={`cloud-${index}`}
-            className="absolute z-40 pointer-events-none"
-            initial={{ left: "-20%", top: `${Math.random() * 80}%` }}
-            animate={{ left: "120%" }}
-            transition={{
-              duration: 20 + Math.random() * 10,
-              repeat: Infinity,
-              ease: "linear",
-              delay: index * 2,
-            }}
-          >
-            <img
-              src={img}
-              alt="Nube"
-              className="w-48 h-48 object-contain opacity-50 blur-sm"
-            />
-          </motion.div>
-        ))}
+                <div
+                  className={`w-20 h-20 rounded-full flex items-center justify-center shadow-2xl relative z-10 overflow-hidden bg-slate-900 ${engine.isCriticalEvent ? "border-4 border-red-500 shadow-red-500/50" : "border-2 border-slate-500"} ${engine.isHovering ? "border-green-400 shadow-[0_0_20px_rgba(74,222,128,0.6)]" : ""}`}
+                >
+                  {config.targetImage ? (
+                    <img
+                      src={config.targetImage}
+                      alt="Satélite"
+                      className="w-full h-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <Satellite
+                      className={`w-10 h-10 ${engine.isCriticalEvent ? "text-red-400 animate-pulse" : "text-cyan-200"}`}
+                    />
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Nubes / Distractores */}
+            {config.distractorImages?.map((img, index) => (
+              <motion.div
+                key={`cloud-${index}`}
+                className="absolute z-40 pointer-events-none"
+                initial={{ left: "-20%", top: `${Math.random() * 80}%` }}
+                animate={{ left: "120%" }}
+                transition={{
+                  duration: 20 + Math.random() * 10,
+                  repeat: Infinity,
+                  ease: "linear",
+                  delay: index * 2,
+                }}
+              >
+                <img
+                  src={img}
+                  alt="Nube"
+                  className="w-48 h-48 object-contain opacity-50 blur-sm"
+                />
+              </motion.div>
+            ))}
+          </>
+        )}
       </div>
     </div>
   );

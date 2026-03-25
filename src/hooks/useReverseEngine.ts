@@ -5,11 +5,24 @@ export type Direction = "up" | "down" | "left" | "right";
 export type RuleType = "direct" | "reverse";
 export type GameState = "start" | "playing" | "finished";
 
-export type ReverseTelemetry = {
+// Telemetría interna de cada turno
+type TurnRecord = {
   rule: RuleType;
   success: boolean;
   reactionTimeMs: number;
   isTimeout: boolean;
+};
+
+// 🔥 NUEVO: Telemetría Consolidada para el Terapeuta
+export type ReverseTelemetryConsolidated = {
+  finalScore: number;
+  maxCombo: number;
+  totalAttempts: number;
+  totalOmissions: number; // Veces que se quedó congelado (timeout)
+  accuracyDirectPercent: number;
+  accuracyReversePercent: number;
+  avgReactionTimeDirectMs: number;
+  avgReactionTimeReverseMs: number;
 };
 
 interface ReverseConfig {
@@ -19,7 +32,7 @@ interface ReverseConfig {
   onPlayCorrect?: () => void;
   onPlayError?: () => void;
   onTriggerShake?: () => void;
-  onFinish?: (score: number, telemetry: ReverseTelemetry[]) => void;
+  onFinish?: (score: number, telemetry: ReverseTelemetryConsolidated[]) => void;
 }
 
 const opposites: Record<Direction, Direction> = {
@@ -60,7 +73,10 @@ export function useReverseEngine({
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const turnStartTime = useRef<number>(0);
   const timeLimit = useRef(settings.timePerTurn);
-  const telemetryRef = useRef<ReverseTelemetry[]>([]);
+
+  // 🔥 Almacenamos el combo máximo alcanzado
+  const maxComboRef = useRef(0);
+  const telemetryRef = useRef<TurnRecord[]>([]);
 
   const clearTurnTimers = useCallback(() => {
     if (turnTimerRef.current) clearTimeout(turnTimerRef.current);
@@ -70,7 +86,42 @@ export function useReverseEngine({
   const finishGame = useCallback(() => {
     clearTurnTimers();
     setGameState("finished");
-    if (onFinish) onFinish(score, telemetryRef.current);
+
+    // 🔥 PROCESAMIENTO CLÍNICO: Consolidamos el arreglo gigante en un solo objeto resumen
+    const records = telemetryRef.current;
+
+    const directRecords = records.filter((r) => r.rule === "direct");
+    const reverseRecords = records.filter((r) => r.rule === "reverse");
+
+    const getAccuracy = (arr: TurnRecord[]) =>
+      arr.length > 0
+        ? Math.round((arr.filter((r) => r.success).length / arr.length) * 100)
+        : 0;
+
+    const getAvgReaction = (arr: TurnRecord[]) => {
+      const hits = arr.filter((r) => r.success && !r.isTimeout); // Solo medimos tiempo de aciertos
+      return hits.length > 0
+        ? Math.round(
+            hits.reduce((acc, curr) => acc + curr.reactionTimeMs, 0) /
+              hits.length,
+          )
+        : 0;
+    };
+
+    const consolidatedTelemetry: ReverseTelemetryConsolidated[] = [
+      {
+        finalScore: score,
+        maxCombo: maxComboRef.current,
+        totalAttempts: records.length,
+        totalOmissions: records.filter((r) => r.isTimeout).length,
+        accuracyDirectPercent: getAccuracy(directRecords),
+        accuracyReversePercent: getAccuracy(reverseRecords),
+        avgReactionTimeDirectMs: getAvgReaction(directRecords),
+        avgReactionTimeReverseMs: getAvgReaction(reverseRecords),
+      },
+    ];
+
+    if (onFinish) onFinish(score, consolidatedTelemetry);
   }, [clearTurnTimers, score, onFinish]);
 
   const handleMiss = useCallback(() => {
@@ -79,7 +130,7 @@ export function useReverseEngine({
     setCombo(0);
     if (onPlayError) onPlayError();
 
-    // Guardar telemetría de fallo por tiempo
+    // Guardar telemetría de fallo por tiempo (Omisión)
     telemetryRef.current.push({
       rule: currentRule,
       success: false,
@@ -145,12 +196,14 @@ export function useReverseEngine({
         );
         setCombo((prev) => {
           const newCombo = prev + 1;
+          // Actualizamos el combo máximo
+          if (newCombo > maxComboRef.current) maxComboRef.current = newCombo;
           setScore((s) => s + 100 + speedBonus + newCombo * 20);
           return newCombo;
         });
         setFeedback("hit");
         if (onPlayCorrect) onPlayCorrect();
-        timeLimit.current = Math.max(800, timeLimit.current - 50); // Acelerar el juego
+        timeLimit.current = Math.max(800, timeLimit.current - 50); // Acelerar
       } else {
         setFeedback("miss");
         setCombo(0);
@@ -179,17 +232,19 @@ export function useReverseEngine({
       onPlayError,
       onTriggerShake,
       settings.timePerTurn,
+      nextTurn,
     ],
   );
 
   const startGame = useCallback(() => {
     telemetryRef.current = [];
+    maxComboRef.current = 0; // Reiniciamos el récord
     setScore(0);
     setCombo(0);
     setTimeLeft(duration);
     timeLimit.current = settings.timePerTurn;
     setGameState("playing");
-    setTimeout(nextTurn, 500); // Pequeño delay inicial
+    setTimeout(nextTurn, 500);
   }, [duration, settings.timePerTurn, nextTurn]);
 
   useEffect(() => {

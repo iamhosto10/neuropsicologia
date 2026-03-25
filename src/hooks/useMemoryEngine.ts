@@ -6,12 +6,24 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export type GameState = "start" | "playing" | "finished";
 export type Phase = "idle" | "showing" | "waiting" | "input" | "feedback";
 
-export type MemoryTelemetry = {
+// Telemetría interna por ronda
+type RoundRecord = {
   level: number;
   sequenceLength: number;
   isReverse: boolean;
   success: boolean;
   reactionTimeMs: number;
+};
+
+// 🔥 NUEVO: Telemetría Consolidada (Lo que le interesa al Terapeuta)
+export type MemoryTelemetryConsolidated = {
+  finalScore: number;
+  highestLevelReached: number;
+  totalRounds: number;
+  maxSequenceDirect: number; // Corsi Span Directo
+  maxSequenceReverse: number; // Corsi Span Inverso
+  accuracyDirectPercent: number;
+  accuracyReversePercent: number;
 };
 
 interface MemoryConfig {
@@ -21,7 +33,7 @@ interface MemoryConfig {
   onPlayVoice?: (isReverse: boolean) => void;
   onPress?: () => void;
   onFeedback?: (success: boolean) => void;
-  onFinish?: (score: number, telemetry: MemoryTelemetry[]) => void;
+  onFinish?: (score: number, telemetry: MemoryTelemetryConsolidated[]) => void;
 }
 
 export function useMemoryEngine({
@@ -51,11 +63,10 @@ export function useMemoryEngine({
   const [securityLevel, setSecurityLevel] = useState(1);
   const [currentLengthUI, setCurrentLengthUI] = useState(settings.startLength);
 
-  // Referencias mutables
   const gameActiveRef = useRef(false);
   const currentLengthRef = useRef(settings.startLength);
-  const telemetryRef = useRef<MemoryTelemetry[]>([]);
-  const roundStartTimeRef = useRef<number>(0); // Para medir tiempo de reacción
+  const telemetryRef = useRef<RoundRecord[]>([]);
+  const roundStartTimeRef = useRef<number>(0);
 
   const generateSequence = useCallback((length: number) => {
     const newSeq = [];
@@ -92,7 +103,7 @@ export function useMemoryEngine({
 
       if (gameActiveRef.current) {
         setPhase("input");
-        roundStartTimeRef.current = Date.now(); // Empezamos a medir el tiempo aquí
+        roundStartTimeRef.current = Date.now();
       }
     },
     [settings.speed, onLightUp, onPlayVoice],
@@ -191,8 +202,39 @@ export function useMemoryEngine({
     gameActiveRef.current = false;
     setPhase("idle");
     setGameState("finished");
-    if (onFinish) onFinish(score, telemetryRef.current);
-  }, [score, onFinish]);
+
+    // 🔥 PROCESAMIENTO CLÍNICO: Consolidar datos
+    const records = telemetryRef.current;
+
+    const directRecords = records.filter((r) => !r.isReverse);
+    const reverseRecords = records.filter((r) => r.isReverse);
+
+    const getAccuracy = (arr: RoundRecord[]) =>
+      arr.length > 0
+        ? Math.round((arr.filter((r) => r.success).length / arr.length) * 100)
+        : 0;
+
+    // Calcular el Span (Longitud máxima lograda con éxito)
+    const getMaxSpan = (arr: RoundRecord[]) => {
+      const successes = arr.filter((r) => r.success);
+      if (successes.length === 0) return 0;
+      return Math.max(...successes.map((r) => r.sequenceLength));
+    };
+
+    const consolidatedTelemetry: MemoryTelemetryConsolidated[] = [
+      {
+        finalScore: score,
+        highestLevelReached: securityLevel,
+        totalRounds: records.length,
+        maxSequenceDirect: getMaxSpan(directRecords),
+        maxSequenceReverse: getMaxSpan(reverseRecords),
+        accuracyDirectPercent: getAccuracy(directRecords),
+        accuracyReversePercent: getAccuracy(reverseRecords),
+      },
+    ];
+
+    if (onFinish) onFinish(score, consolidatedTelemetry);
+  }, [score, securityLevel, onFinish]);
 
   useEffect(() => {
     if (gameState === "playing" && timeLeft <= 0) finishGame();

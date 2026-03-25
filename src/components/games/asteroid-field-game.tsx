@@ -15,36 +15,35 @@ import {
   Flame,
   Volume2,
   VolumeX,
+  ServerCrash,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useGoNoGoEngine } from "@/hooks/useGoNoGoEngine"; // Importamos nuestro cerebro
+import { useGoNoGoEngine } from "@/hooks/useGoNoGoEngine";
 
 interface AsteroidGameProps {
   config: {
     duration?: number;
     difficulty?: "easy" | "medium" | "hard";
-    kidId: string; // NUEVO
+    kidId: string;
     missionId: string;
-    energyReward: number; // NUEVO
+    energyReward: number;
     isPractice?: boolean;
   };
 }
 
 export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isSaving, setIsSaving] = useState(false); // NUEVO ESTADO
-  const router = useRouter(); // NUEVO ROUTER
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
-  // Sonidos
   const [playBackground, { stop: stopBackground }] = useSound(
     "/sounds/ambient-space.mp3",
     { loop: true, volume: 0.3 },
   );
   const [playHit] = useSound("/sounds/laser-shoot.mp3", { volume: 0.5 });
-  const [playCrash] = useSound("/sounds/error-buzz.mp3", { volume: 0.4 }); // Volumen más bajo por recomendación clínica
+  const [playCrash] = useSound("/sounds/error-buzz.mp3", { volume: 0.4 });
   const [playCombo] = useSound("/sounds/combo-powerup.mp3", { volume: 0.7 });
 
-  // Instanciamos el Motor (Cerebro)
   const engine = useGoNoGoEngine({
     duration: config.duration || 60,
     onHit: (combo) => {
@@ -54,19 +53,16 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
     },
     onCrash: () => {
       if (soundEnabled) playCrash();
-      // En lugar de inyectar clases al DOM, podríamos usar un estado de 'shake' manejado por framer-motion,
-      // pero por ahora mantenemos el visual neutro y sin temblores fuertes.
     },
     onFinish: async (finalScore, telemetry) => {
       stopBackground();
       if (config.isPractice) return;
-      console.log(
-        "Misión Terminada. Datos Clínicos listos para enviar:",
-        telemetry,
-      );
-      setIsSaving(true); // Mostramos estado de carga
 
-      // 1. Enviamos a la base de datos de Sanity
+      // 🔥 Candado Visual INMEDIATO
+      setIsSaving(true);
+
+      console.log("Telemetría Resumida Go/No-Go:", telemetry);
+
       await saveMissionProgress(
         config.kidId,
         config.missionId,
@@ -74,9 +70,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
         telemetry,
       );
 
-      // 2. Redirigimos al cuartel general para ver los cristales!
       router.push("/hq");
-      // AQUÍ enviaremos los datos a la Base de Datos en el siguiente paso
     },
   });
 
@@ -88,11 +82,15 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
   return (
     <div className="w-full max-w-4xl mx-auto font-sans select-none relative">
       {/* HUD DASHBOARD */}
-      <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center z-20 relative">
+      <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center z-20 relative shadow-lg">
         <div className="flex items-center gap-4 w-1/3">
           <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 bg-slate-800 rounded-full"
+            onClick={() => {
+              setSoundEnabled(!soundEnabled);
+              if (soundEnabled) stopBackground();
+              else if (engine.gameState === "playing") playBackground();
+            }}
+            className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors"
           >
             {soundEnabled ? (
               <Volume2 className="w-5 h-5 text-cyan-400" />
@@ -101,7 +99,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
             )}
           </button>
           {engine.combo > 1 && (
-            <div className="flex items-center gap-2 text-yellow-400 font-bold bg-yellow-900/30 px-3 py-1 rounded-lg">
+            <div className="flex items-center gap-2 text-yellow-400 font-bold bg-yellow-900/30 px-3 py-1 rounded-lg border border-yellow-600/50">
               <Flame className="w-5 h-5 fill-yellow-500" />{" "}
               <span>x{engine.combo}</span>
             </div>
@@ -111,16 +109,16 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
           00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
         </div>
         <div className="text-right w-1/3">
-          <p className="text-2xl font-mono text-cyan-400">{engine.score}</p>
+          <p className="text-2xl font-mono text-cyan-400">{engine.score} PTS</p>
         </div>
       </div>
 
       {/* VIEWPORT DEL JUEGO */}
       <div
         onClick={engine.handleAction}
-        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-4 border-t-0 border-slate-800 cursor-pointer"
+        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 cursor-pointer shadow-2xl"
       >
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
           <AnimatePresence mode="wait">
             {engine.currentStimulus === "go" && (
               <motion.div
@@ -171,42 +169,74 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
           </AnimatePresence>
         </div>
 
-        {/* PANTALLAS DE INICIO Y FIN */}
-        {engine.gameState !== "playing" && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 text-white p-8 text-center">
+        {/* 🔥 LA LÓGICA DE RENDERIZADO EXCLUSIVO (Candado Visual) */}
+        {isSaving ? (
+          <div className="absolute inset-0 z-100 bg-black/90 flex flex-col items-center justify-center backdrop-blur-md animate-in fade-in duration-300 pointer-events-auto">
+            <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mb-6 border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+              <ServerCrash className="w-12 h-12 text-cyan-400 animate-pulse" />
+            </div>
+            <p className="text-cyan-400 font-bold text-3xl animate-pulse tracking-widest text-center">
+              Guardando Progreso...
+            </p>
+            <p className="text-slate-400 mt-4 text-sm font-mono uppercase text-center">
+              Sincronizando Bitácora Clínica.
+            </p>
+          </div>
+        ) : engine.gameState !== "playing" ? (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 text-white p-8 text-center animate-in fade-in duration-300 pointer-events-auto">
             {engine.gameState === "finished" ? (
-              <div className="space-y-6">
-                <h2 className="text-4xl font-bold text-yellow-400">
+              <div className="space-y-6 animate-in zoom-in duration-300">
+                <h2 className="text-4xl font-bold text-cyan-400">
                   ¡Trayecto Finalizado!
                 </h2>
-                <p className="text-5xl font-mono text-cyan-300">
-                  {engine.score} PTS
-                </p>
+                <div className="bg-slate-800/80 p-6 rounded-2xl border border-cyan-500/30">
+                  <p className="text-slate-400 mb-2">Puntaje Final</p>
+                  <p className="text-5xl font-mono text-cyan-300">
+                    {engine.score}
+                  </p>
+                </div>
                 <Button
-                  onClick={handleStart}
-                  className="bg-cyan-600 hover:bg-cyan-500 px-8 py-6 rounded-xl text-lg"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStart();
+                  }}
+                  disabled={isSaving}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-lg px-8 py-6 rounded-xl disabled:opacity-50"
                 >
-                  <RotateCcw className="mr-2" /> Reintentar
+                  <RotateCcw className="mr-2 h-5 w-5" /> Reintentar
                 </Button>
               </div>
             ) : (
-              <div className="space-y-6">
-                <h2 className="text-3xl font-bold">Campo de Asteroides</h2>
-                <p className="text-slate-300 text-lg max-w-sm mx-auto">
-                  Toca rápido si ves{" "}
-                  <strong className="text-green-400">VERDE</strong>. <br /> No
-                  toques si ves <strong className="text-red-400">ROJO</strong>.
-                </p>
+              <div className="space-y-6 max-w-lg animate-in slide-in-from-bottom-4 duration-500">
+                <h2 className="text-3xl font-bold text-white">
+                  Campo de Asteroides
+                </h2>
+                <div className="bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                  <p className="text-slate-300 text-lg mx-auto">
+                    Toca rápido si ves{" "}
+                    <strong className="text-green-400">VERDE</strong>.<br />
+                    <br />
+                    No toques si ves{" "}
+                    <strong className="text-red-400">ROJO</strong>.
+                  </p>
+                </div>
                 <Button
-                  onClick={handleStart}
-                  className="bg-green-600 hover:bg-green-500 px-10 py-6 rounded-xl text-lg w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStart();
+                  }}
+                  disabled={isSaving}
+                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl shadow-lg w-full transform hover:scale-105 transition-all disabled:opacity-50"
                 >
-                  <Play className="mr-2" /> DESPEGAR
+                  <Play className="mr-2 h-5 w-5" /> DESPEGAR
                 </Button>
+                <p className="text-xs text-slate-500">
+                  Puedes usar el mouse, pantalla táctil o la barra espaciadora.
+                </p>
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

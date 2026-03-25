@@ -13,6 +13,7 @@ import {
   Volume2,
   VolumeX,
   Grid3X3,
+  ServerCrash,
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
@@ -24,9 +25,9 @@ interface MemoryGameProps {
     title?: string;
     duration?: number;
     difficulty?: "easy" | "medium" | "hard";
-    kidId: string; // Requerido para guardar datos
-    missionId: string; // Requerido para marcar completada
-    energyReward: number; // Requerido para la recompensa
+    kidId: string;
+    missionId: string;
+    energyReward: number;
     isPractice?: boolean;
   };
 }
@@ -37,7 +38,6 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
   const [feedbackSuccess, setFeedbackSuccess] = useState(true);
   const router = useRouter();
 
-  // Sonidos
   const [playBg, { stop: stopBg }] = useSound("/sounds/bg-tech.mp3", {
     loop: true,
     volume: 0.2,
@@ -74,8 +74,10 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       stopBg();
       if (config.isPractice) return;
 
+      // 🔥 Candado Visual INMEDIATO
       setIsSaving(true);
-      console.log("Telemetría Clínica (Memoria):", telemetry);
+
+      console.log("Telemetría Resumida (Memoria):", telemetry);
       await saveMissionProgress(
         config.kidId,
         config.missionId,
@@ -108,7 +110,11 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            onClick={() => {
+              setSoundEnabled(!soundEnabled);
+              if (soundEnabled) stopBg();
+              else if (engine.gameState === "playing") playBg();
+            }}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full"
           >
             {soundEnabled ? (
@@ -139,16 +145,73 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
         id="security-panel"
         className="relative min-h-150 w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl flex flex-col items-center justify-center p-4"
       >
-        {isSaving && (
-          <div className="absolute inset-0 z-50 bg-black/80 flex items-center justify-center backdrop-blur-sm">
-            <p className="text-cyan-400 font-bold text-2xl animate-pulse">
+        {/* Fondo Decorativo SIEMPRE visible de fondo */}
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none z-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at center, #0f172a 0%, #020617 100%)",
+          }}
+        />
+
+        {/* 🔥 LA LÓGICA DE RENDERIZADO EXCLUSIVO (Candado Visual) */}
+        {isSaving ? (
+          <div className="absolute inset-0 z-100 bg-black/90 flex flex-col items-center justify-center backdrop-blur-md animate-in fade-in duration-300">
+            <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mb-6 border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+              <ServerCrash className="w-12 h-12 text-cyan-400 animate-pulse" />
+            </div>
+            <p className="text-cyan-400 font-bold text-3xl animate-pulse tracking-widest text-center">
               Guardando Progreso...
             </p>
+            <p className="text-slate-400 mt-4 text-sm font-mono uppercase text-center">
+              Sincronizando Bitácora Clínica.
+            </p>
           </div>
-        )}
-
-        {engine.gameState === "playing" ? (
-          <div className="w-full flex flex-col items-center">
+        ) : engine.gameState !== "playing" ? (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-8 text-center text-white animate-in fade-in duration-300">
+            {engine.gameState === "finished" ? (
+              <div className="space-y-6 animate-in zoom-in duration-300">
+                <h2 className="text-4xl font-bold text-cyan-400">
+                  ¡Hackeo Finalizado!
+                </h2>
+                <div className="bg-slate-800/80 p-6 rounded-2xl border border-cyan-500/30">
+                  <p className="text-slate-400 mb-2">Puntaje Final</p>
+                  <p className="text-5xl font-mono text-cyan-300">
+                    {engine.score}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleStart}
+                  disabled={isSaving}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-lg px-8 py-6 rounded-xl disabled:opacity-50"
+                >
+                  <RotateCcw className="mr-2 h-5 w-5" /> Reintentar
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6 max-w-lg animate-in slide-in-from-bottom-4 duration-500">
+                <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto border-2 border-cyan-500/50">
+                  <Grid3X3 className="w-12 h-12 text-cyan-400" />
+                </div>
+                <h2 className="text-3xl font-bold">
+                  {config.title || "Panel de Seguridad"}
+                </h2>
+                <p className="text-slate-300">
+                  Observa la secuencia y repítela. ¡Cuidado si te piden
+                  ingresarla al revés!
+                </p>
+                <Button
+                  onClick={handleStart}
+                  disabled={isSaving}
+                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 w-full rounded-xl shadow-lg shadow-green-900/20 transform hover:scale-105 transition-all disabled:opacity-50"
+                >
+                  <Play className="mr-2 h-5 w-5" /> HACKEAR PANEL
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="w-full flex flex-col items-center z-10">
             {/* INSTRUCCIÓN DINÁMICA */}
             <div className="h-16 mb-8 flex items-center justify-center">
               <AnimatePresence mode="wait">
@@ -213,7 +276,6 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center"
                   >
-                    {/* 👇 AQUÍ USAMOS NUESTRO NUEVO ESTADO 👇 */}
                     {feedbackSuccess ? (
                       <p className="text-3xl font-bold text-green-400 flex items-center gap-2">
                         <Unlock className="w-8 h-8" /> ACCESO CONCEDIDO
@@ -248,27 +310,6 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
                   />
                 );
               })}
-            </div>
-          </div>
-        ) : (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-8 text-center text-white">
-            <div className="space-y-6 max-w-lg">
-              <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto border-2 border-cyan-500/50">
-                <Grid3X3 className="w-12 h-12 text-cyan-400" />
-              </div>
-              <h2 className="text-3xl font-bold">
-                {config.title || "Panel de Seguridad"}
-              </h2>
-              <p className="text-slate-300">
-                Observa la secuencia y repítela. ¡Cuidado si te piden ingresarla
-                al revés!
-              </p>
-              <Button
-                onClick={handleStart}
-                className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 w-full rounded-xl"
-              >
-                <Play className="mr-2" /> HACKEAR PANEL
-              </Button>
             </div>
           </div>
         )}

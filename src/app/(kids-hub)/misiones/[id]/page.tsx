@@ -12,6 +12,9 @@ import MultitaskEvasionGame from "@/components/games/multitask-evasion-game";
 import ReverseCommunicatorGame from "@/components/games/reverse-communicator-game";
 import SatelliteTrackerGame from "@/components/games/satellite-tracker-game";
 import SpaceCleanupGame from "@/components/games/space-cleanup-game";
+import CargoLaboratoryGame from "@/components/games/cargo-laboratory-game";
+import NebulaStormGame from "@/components/games/nebula-storm-game";
+import SignalDecoderGame from "@/components/games/signal-decoder-game";
 
 const getMissionQuery = `*[_type == "mission" && _id == $id][0]`;
 
@@ -75,9 +78,9 @@ export default async function MissionPage({
               title: mission.title,
               difficulty: mission.difficulty,
               duration: mission.timeLimit ?? 10,
-              // kidId: TEST_KID_ID,
-              // missionId: id,
-              // energyReward: mission.energyReward,
+              kidId: kidId,
+              missionId: id,
+              energyReward: mission.energyReward,
             }}
           />
         )}
@@ -118,18 +121,41 @@ export default async function MissionPage({
             }}
           />
         )}
-        {/* Aquí en el futuro añadirás los otros juegos */}
-        {/* {mission.gameType === "emotion_faces" && (
-          <div className="text-white text-2xl">
-            Constructor de Caras (Próximamente)
-          </div>
+        {mission.gameType === "cargo_n_back" && (
+          <CargoLaboratoryGame
+            config={{
+              title: mission.title,
+              difficulty: mission.difficulty,
+              duration: mission.timeLimit ?? 10,
+              kidId: kidId,
+              missionId: id,
+              energyReward: mission.energyReward,
+            }}
+          />
         )}
-
-        {mission.gameType === "simon_says_reverse" && (
-          <div className="text-white text-2xl">
-            Secuencia Inversa (Próximamente)
-          </div>
-        )} */}
+        {mission.gameType === "nebula_storm" && (
+          <NebulaStormGame
+            config={{
+              title: mission.title,
+              difficulty: mission.difficulty,
+              duration: mission.timeLimit ?? 30,
+              kidId: kidId,
+              missionId: id,
+              energyReward: mission.energyReward,
+            }}
+          />
+        )}
+        {mission.gameType === "signal_decoder" && (
+          <SignalDecoderGame
+            config={{
+              title: mission.title,
+              duration: mission.timeLimit ?? 10,
+              kidId: kidId,
+              missionId: id,
+              energyReward: mission.energyReward,
+            }}
+          />
+        )}
       </div>
     </div>
   );

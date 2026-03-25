@@ -1,56 +1,3 @@
-// import { defineField, defineType } from "sanity";
-
-// export const gameModule = defineType({
-//   name: "gameModule",
-//   title: "Módulo de Juego (Atención)",
-//   type: "object",
-//   fields: [
-//     defineField({
-//       name: "title",
-//       title: "Título del Juego",
-//       type: "string",
-//     }),
-//     defineField({
-//       name: "instruction",
-//       title: "Instrucción (Voz/Texto)",
-//       type: "string",
-//       description: "Ej: Haz clic solo en los cristales azules",
-//     }),
-//     defineField({
-//       name: "targetObject",
-//       title: "Objeto Objetivo (Target)",
-//       type: "image",
-//       description: "El objeto que el niño debe atrapar (ej. Cristal Azul)",
-//       options: { hotspot: true },
-//     }),
-//     defineField({
-//       name: "distractorObjects",
-//       title: "Objetos Distractores",
-//       type: "array",
-//       of: [{ type: "image" }],
-//       description: "Basura espacial, asteroides, etc.",
-//     }),
-//     defineField({
-//       name: "difficulty",
-//       title: "Nivel de Dificultad",
-//       type: "string",
-//       options: {
-//         list: [
-//           { title: "Fácil (Lento, pocos distractores)", value: "easy" },
-//           { title: "Medio (Velocidad normal)", value: "medium" },
-//           { title: "Difícil (Rápido, alta interferencia)", value: "hard" },
-//         ],
-//       },
-//     }),
-//     defineField({
-//       name: "duration",
-//       title: "Duración (segundos)",
-//       type: "number",
-//       initialValue: 60,
-//     }),
-//   ],
-// });
-
 import { defineField, defineType } from "sanity";
 
 export const gameModule = defineType({
@@ -58,7 +5,6 @@ export const gameModule = defineType({
   title: "Módulo de Juego",
   type: "object",
   fields: [
-    // 1. NUEVO CAMPO: SELECTOR DE TIPO DE JUEGO
     defineField({
       name: "gameType",
       title: "Tipo de Juego",
@@ -83,6 +29,15 @@ export const gameModule = defineType({
             title: "Gran Evasión (Multitarea y Atención Dividida)",
             value: "multitask",
           },
+          { title: "Laboratorio de Carga (Memoria N-Back)", value: "n_back" },
+          {
+            title: "Tormenta de Nebulosa (Control de Interferencia)",
+            value: "nebula",
+          },
+          {
+            title: "Decodificador de Señales (Velocidad Procesamiento)",
+            value: "symbol_digit",
+          },
         ],
         layout: "dropdown",
       },
@@ -100,25 +55,6 @@ export const gameModule = defineType({
       title: "Instrucción",
       type: "string",
     }),
-
-    // // Usaremos este campo para el "Satélite" o para el "Cristal Azul"
-    // defineField({
-    //   name: "targetObject",
-    //   title: "Objeto Principal (Target)",
-    //   type: "image",
-    //   description:
-    //     "En Satélite: Es la imagen del satélite. En Limpieza: Es el objeto a atrapar.",
-    //   options: { hotspot: true },
-    // }),
-
-    // // Usaremos este campo para los "Planetas/Nubes" que tapan la visión
-    // defineField({
-    //   name: "distractorObjects",
-    //   title: "Objetos Secundarios / Distractores",
-    //   type: "array",
-    //   of: [{ type: "image" }],
-    //   description: "En Satélite: Planetas o nubes que ocultan al satélite.",
-    // }),
 
     defineField({
       name: "targetObject",

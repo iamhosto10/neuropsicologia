@@ -3,11 +3,15 @@ import { useState, useRef, useCallback, useEffect } from "react";
 
 export type GameState = "start" | "playing" | "finished";
 
+// 🔥 ACTUALIZADO: Las nuevas métricas clínicas de alto valor
 export type SatelliteTelemetry = {
   durationSeconds: number;
   finalScore: number;
   criticalEventsTriggered: number;
   criticalEventsCaught: number;
+  falsePositives: number; // Impulsividad
+  averageReactionTimeMs: number; // Procesamiento cognitivo
+  timeOnTargetPercentage: number; // Atención sostenida
 };
 
 interface SatelliteConfig {
@@ -38,13 +42,21 @@ export function useSatelliteEngine({
   const [isCriticalEvent, setIsCriticalEvent] = useState(false);
   const [position, setPosition] = useState({ x: 50, y: 50 });
 
-  // Refs de rendimiento
   const gameActiveRef = useRef(false);
   const requestRef = useRef<number>(0);
-  const statsRef = useRef({ triggered: 0, caught: 0 });
-  const startTimeRef = useRef(0); // NUEVO: Para calcular el tiempo jugado sin depender del estado
+  const startTimeRef = useRef(0);
+  const lastFrameTimeRef = useRef(0); // Para calcular ms exactos
 
-  // Refs para asegurar que las funciones no cambien en cada render
+  // 🔥 NUEVO: Objeto de estadísticas clínicas ampliado
+  const statsRef = useRef({
+    triggered: 0,
+    caught: 0,
+    falsePositives: 0,
+    reactionTimes: [] as number[],
+    hoverTimeMs: 0,
+    currentEventStartTime: 0,
+  });
+
   const callbacksRef = useRef({
     onCriticalEventTrigger,
     onCriticalEventCatch,
@@ -74,6 +86,9 @@ export function useSatelliteEngine({
     setIsCriticalEvent(true);
     statsRef.current.triggered++;
 
+    // 🔥 Registramos el momento exacto en que se pone rojo
+    statsRef.current.currentEventStartTime = Date.now();
+
     if (callbacksRef.current.onCriticalEventTrigger)
       callbacksRef.current.onCriticalEventTrigger();
 
@@ -85,17 +100,40 @@ export function useSatelliteEngine({
     }, 2000);
   }, []);
 
-  const handleCriticalClick = useCallback(() => {
-    if (stateRefs.current.isCritical) {
-      statsRef.current.caught++;
-      stateRefs.current.score += 1000;
-      stateRefs.current.signal = 100;
-      stateRefs.current.isCritical = false;
-      setIsCriticalEvent(false);
-      if (callbacksRef.current.onCriticalEventCatch)
-        callbacksRef.current.onCriticalEventCatch();
-    }
+  // 🔥 NUEVO: Función para clics fuera del objetivo o a destiempo
+  const handleFalsePositive = useCallback(() => {
+    if (!gameActiveRef.current) return;
+    statsRef.current.falsePositives++;
   }, []);
+
+  const handleCriticalClick = useCallback(
+    (e?: React.PointerEvent) => {
+      if (!gameActiveRef.current) return;
+
+      // Evitamos que el clic se propague al fondo (viewport)
+      if (e) e.stopPropagation();
+
+      if (stateRefs.current.isCritical) {
+        // ✅ ACIERTO: Calculamos el tiempo de reacción en ms
+        const reactionTime =
+          Date.now() - statsRef.current.currentEventStartTime;
+        statsRef.current.reactionTimes.push(reactionTime);
+
+        statsRef.current.caught++;
+        stateRefs.current.score += 1000;
+        stateRefs.current.signal = 100;
+        stateRefs.current.isCritical = false;
+        setIsCriticalEvent(false);
+
+        if (callbacksRef.current.onCriticalEventCatch)
+          callbacksRef.current.onCriticalEventCatch();
+      } else {
+        // ❌ ERROR: Hizo clic en el satélite pero NO estaba rojo (Impulsividad)
+        handleFalsePositive();
+      }
+    },
+    [handleFalsePositive],
+  );
 
   const moveToNewPosition = useCallback(() => {
     if (!gameActiveRef.current) return;
@@ -107,12 +145,30 @@ export function useSatelliteEngine({
     cancelAnimationFrame(requestRef.current);
     setGameState("finished");
 
+    const totalTimeMs = Date.now() - startTimeRef.current;
+
+    // Cálculos clínicos
+    const avgReactionTime =
+      statsRef.current.reactionTimes.length > 0
+        ? Math.round(
+            statsRef.current.reactionTimes.reduce((a, b) => a + b, 0) /
+              statsRef.current.reactionTimes.length,
+          )
+        : 0;
+
+    const hoverPercentage = Math.round(
+      (statsRef.current.hoverTimeMs / totalTimeMs) * 100,
+    );
+
     const telemetry: SatelliteTelemetry[] = [
       {
-        durationSeconds: Math.floor((Date.now() - startTimeRef.current) / 1000),
+        durationSeconds: Math.floor(totalTimeMs / 1000),
         finalScore: stateRefs.current.score,
         criticalEventsTriggered: statsRef.current.triggered,
         criticalEventsCaught: statsRef.current.caught,
+        falsePositives: statsRef.current.falsePositives,
+        averageReactionTimeMs: avgReactionTime,
+        timeOnTargetPercentage: Math.min(hoverPercentage, 100), // Tope del 100% por seguridad
       },
     ];
 
@@ -123,7 +179,14 @@ export function useSatelliteEngine({
   const gameLoop = useCallback(() => {
     if (!gameActiveRef.current) return;
 
+    const now = Date.now();
+    const dt = now - lastFrameTimeRef.current;
+    lastFrameTimeRef.current = now;
+
     if (stateRefs.current.isHovering) {
+      // 🔥 Sumamos los ms reales que ha pasado haciendo hover
+      statsRef.current.hoverTimeMs += dt;
+
       const boost = stateRefs.current.signal < 100 ? 0.5 : 0;
       if (stateRefs.current.signal >= 100) stateRefs.current.score += 5;
       stateRefs.current.signal = Math.min(
@@ -154,8 +217,18 @@ export function useSatelliteEngine({
       isHovering: false,
       isCritical: false,
     };
-    statsRef.current = { triggered: 0, caught: 0 };
-    startTimeRef.current = Date.now();
+    statsRef.current = {
+      triggered: 0,
+      caught: 0,
+      falsePositives: 0,
+      reactionTimes: [],
+      hoverTimeMs: 0,
+      currentEventStartTime: 0,
+    };
+
+    const now = Date.now();
+    startTimeRef.current = now;
+    lastFrameTimeRef.current = now;
 
     setScore(0);
     setSignalQuality(50);
@@ -167,7 +240,6 @@ export function useSatelliteEngine({
     setTimeout(() => moveToNewPosition(), 100);
   }, [duration, moveToNewPosition]);
 
-  // 🔴 CORRECCIÓN 1: El Game Loop tiene su propio useEffect aislado
   useEffect(() => {
     if (gameState === "playing") {
       requestRef.current = requestAnimationFrame(gameLoop);
@@ -175,7 +247,6 @@ export function useSatelliteEngine({
     return () => cancelAnimationFrame(requestRef.current);
   }, [gameState, gameLoop]);
 
-  // 🔴 CORRECCIÓN 2: El Cronómetro corre de forma totalmente independiente
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (gameState === "playing") {
@@ -210,6 +281,7 @@ export function useSatelliteEngine({
     isHovering: stateRefs.current.isHovering,
     setHovering,
     handleCriticalClick,
+    handleFalsePositive, // 🔥 Exportamos esta función a la UI
     moveToNewPosition,
   };
 }

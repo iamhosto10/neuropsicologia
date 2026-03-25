@@ -108,8 +108,11 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
       stopBg();
       stopAllVoices();
       if (config.isPractice) return;
+
+      // 🔥 Bloqueamos la UI inmediatamente al terminar
       setIsSaving(true);
-      console.log("Telemetría Comunicador Inverso:", telemetry);
+
+      console.log("Telemetría Resumida Comunicador Inverso:", telemetry);
       await saveMissionProgress(
         config.kidId,
         config.missionId,
@@ -224,23 +227,88 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
         className="relative min-h-150 w-full bg-slate-950 overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl flex flex-col items-center justify-between p-4 sm:p-6"
         style={{ touchAction: "none" }}
       >
-        {isSaving && (
-          <div className="absolute inset-0 z-50 bg-black/80 flex items-center justify-center backdrop-blur-sm">
-            <p className="text-cyan-400 font-bold text-2xl animate-pulse">
-              Cerrando Canal Seguro...
-            </p>
-          </div>
-        )}
-
         <div
-          className="absolute inset-0 opacity-20 pointer-events-none"
+          className="absolute inset-0 opacity-20 pointer-events-none z-0"
           style={{
             backgroundImage:
               "radial-gradient(circle at center, #334155 0%, #020617 100%)",
           }}
         />
 
-        {engine.gameState === "playing" ? (
+        {/* 🔥 LA LÓGICA DE RENDERIZADO EXCLUSIVO (Candado Visual) */}
+        {isSaving ? (
+          <div className="absolute inset-0 z-100 bg-black/90 flex flex-col items-center justify-center backdrop-blur-md animate-in fade-in duration-300">
+            <div className="w-24 h-24 bg-cyan-900/30 rounded-full flex items-center justify-center mb-6 border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.5)]">
+              <ShieldAlert className="w-12 h-12 text-cyan-400 animate-pulse" />
+            </div>
+            <p className="text-cyan-400 font-bold text-3xl animate-pulse tracking-widest text-center">
+              Cerrando Canal Seguro...
+            </p>
+            <p className="text-slate-400 mt-4 text-sm font-mono uppercase text-center">
+              Sincronizando Bitácora Clínica.
+            </p>
+          </div>
+        ) : engine.gameState !== "playing" ? (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md text-white p-8 text-center animate-in fade-in duration-300">
+            {engine.gameState === "finished" ? (
+              <div className="space-y-6 animate-in zoom-in duration-300">
+                <h2 className="text-4xl font-bold text-cyan-400">
+                  ¡Transmisión Finalizada!
+                </h2>
+                <div className="bg-slate-800/80 p-6 rounded-2xl border border-cyan-500/30">
+                  <p className="text-slate-400 mb-2">Puntaje Final</p>
+                  <p className="text-5xl font-mono text-cyan-300">
+                    {engine.score}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleStart}
+                  disabled={isSaving}
+                  className="bg-cyan-600 hover:bg-cyan-500 text-lg px-8 py-6 rounded-xl disabled:opacity-50"
+                >
+                  <RotateCcw className="mr-2 h-5 w-5" /> Reintentar
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6 max-w-lg animate-in slide-in-from-bottom-4 duration-500">
+                <div className="w-24 h-24 bg-red-900/30 rounded-full flex items-center justify-center mx-auto border-2 border-red-500/50">
+                  <ShieldAlert className="w-12 h-12 text-red-400" />
+                </div>
+                <h2 className="text-3xl font-bold text-white">
+                  {config.title || "Comunicador Inverso"}
+                </h2>
+                <div className="text-left bg-slate-800/50 p-6 rounded-xl space-y-4 border border-slate-700">
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shrink-0">
+                      <ArrowUp className="w-5 h-5 text-white transform rotate-180" />
+                    </div>
+                    <span className="text-slate-300">
+                      Flecha <strong>ROJA</strong> = ¡Haz lo CONTRARIO!
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                      <ArrowUp className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-slate-300">
+                      Flecha <strong>VERDE</strong> = Haz lo mismo.
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleStart}
+                  disabled={isSaving}
+                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl shadow-lg w-full transform hover:scale-105 transition-all disabled:opacity-50"
+                >
+                  <Play className="mr-2 h-5 w-5" /> ABRIR COMUNICADOR
+                </Button>
+                <p className="text-xs text-slate-500">
+                  Usa los botones o las flechas de tu teclado.
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
           <>
             <div className="w-full max-w-md h-2 bg-slate-800 rounded-full overflow-hidden mt-2 z-10 shrink-0">
               <div
@@ -330,64 +398,6 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
               </Button>
             </div>
           </>
-        ) : (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md text-white p-8 text-center">
-            {engine.gameState === "finished" ? (
-              <div className="space-y-6 animate-in fade-in zoom-in duration-300">
-                <h2 className="text-4xl font-bold text-cyan-400">
-                  ¡Transmisión Finalizada!
-                </h2>
-                <div className="bg-slate-800/80 p-6 rounded-2xl border border-cyan-500/30">
-                  <p className="text-slate-400 mb-2">Puntaje Final</p>
-                  <p className="text-5xl font-mono text-cyan-300">
-                    {engine.score}
-                  </p>
-                </div>
-                <Button
-                  onClick={handleStart}
-                  className="bg-cyan-600 hover:bg-cyan-500 text-lg px-8 py-6 rounded-xl"
-                >
-                  <RotateCcw className="mr-2 h-5 w-5" /> Reintentar
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-6 max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="w-24 h-24 bg-red-900/30 rounded-full flex items-center justify-center mx-auto border-2 border-red-500/50">
-                  <ShieldAlert className="w-12 h-12 text-red-400" />
-                </div>
-                <h2 className="text-3xl font-bold text-white">
-                  {config.title || "Comunicador Inverso"}
-                </h2>
-                <div className="text-left bg-slate-800/50 p-6 rounded-xl space-y-4 border border-slate-700">
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shrink-0">
-                      <ArrowUp className="w-5 h-5 text-white transform rotate-180" />
-                    </div>
-                    <span className="text-slate-300">
-                      Flecha <strong>ROJA</strong> = ¡Haz lo CONTRARIO!
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shrink-0">
-                      <ArrowUp className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="text-slate-300">
-                      Flecha <strong>VERDE</strong> = Haz lo mismo.
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  onClick={handleStart}
-                  className="bg-green-600 hover:bg-green-500 text-lg px-10 py-6 rounded-xl shadow-lg w-full transform hover:scale-105 transition-all"
-                >
-                  <Play className="mr-2 h-5 w-5" /> ABRIR COMUNICADOR
-                </Button>
-                <p className="text-xs text-slate-500">
-                  Usa los botones o las flechas de tu teclado.
-                </p>
-              </div>
-            )}
-          </div>
         )}
       </div>
     </div>

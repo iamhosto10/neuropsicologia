@@ -9,10 +9,24 @@ export type StimulusType =
   | "feedback-hit"
   | "feedback-crash";
 
-export type TelemetryEvent = {
+// Telemetría interna por evento
+type TelemetryEvent = {
   stimulus: "go" | "no-go";
   reactionTimeMs: number;
   success: boolean;
+  type: "hit" | "commission_error" | "correct_rejection" | "omission_error"; // Clasificación clínica
+};
+
+// 🔥 NUEVO: Telemetría Consolidada (Lo que le interesa al Terapeuta)
+export type GoNoGoTelemetryConsolidated = {
+  finalScore: number;
+  maxCombo: number;
+  totalStimuli: number;
+  correctHits: number; // Clics correctos en GO
+  correctRejections: number; // No hizo clic en NO-GO
+  commissionErrors: number; // Impulsividad: Clic en NO-GO
+  omissionErrors: number; // Inatención: No hizo clic en GO
+  avgReactionTimeMs: number; // Velocidad de procesamiento en aciertos
 };
 
 interface EngineConfig {
@@ -22,7 +36,7 @@ interface EngineConfig {
   speedIncrement?: number;
   onHit?: (combo: number) => void;
   onCrash?: () => void;
-  onFinish?: (score: number, telemetry: TelemetryEvent[]) => void;
+  onFinish?: (score: number, telemetry: GoNoGoTelemetryConsolidated[]) => void;
 }
 
 export function useGoNoGoEngine({
@@ -34,7 +48,6 @@ export function useGoNoGoEngine({
   onCrash,
   onFinish,
 }: EngineConfig) {
-  // Estados visuales y de progreso
   const [gameState, setGameState] = useState<GameState>("start");
   const [currentStimulus, setCurrentStimulus] =
     useState<StimulusType>("waiting");
@@ -42,82 +55,108 @@ export function useGoNoGoEngine({
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
 
-  // Referencias mutables (no causan re-renders)
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(0);
   const reactionWindowRef = useRef(initialWindow);
   const speedLevelRef = useRef(1);
   const telemetryRef = useRef<TelemetryEvent[]>([]);
+  const maxComboRef = useRef(0);
+  const currentActualStimulusRef = useRef<"go" | "no-go" | null>(null);
 
-  const clearGameTimer = () => {
+  const clearGameTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
-  };
+  }, []);
 
   const scheduleNextStimulus = useCallback(() => {
     setCurrentStimulus("waiting");
+    currentActualStimulusRef.current = null;
     const baseDelay = Math.max(500, 1500 - speedLevelRef.current * 200);
     const finalDelay = baseDelay + Math.random() * 1000;
 
     clearGameTimer();
     timerRef.current = setTimeout(spawnStimulus, finalDelay);
-  }, []);
+  }, [clearGameTimer]);
 
-  const spawnStimulus = () => {
-    const isGo = Math.random() < 0.7; // 70% de probabilidad de que sea GO (estándar clínico)
-    setCurrentStimulus(isGo ? "go" : "no-go");
+  const spawnStimulus = useCallback(() => {
+    const isGo = Math.random() < 0.7;
+    const stim = isGo ? "go" : "no-go";
+    setCurrentStimulus(stim);
+    currentActualStimulusRef.current = stim;
     startTimeRef.current = Date.now();
 
     clearGameTimer();
     timerRef.current = setTimeout(() => {
+      // Si se acaba el tiempo y no hizo nada
       handleFeedback(isGo ? "crash" : "hit", !isGo, true);
     }, reactionWindowRef.current);
-  };
+  }, [clearGameTimer]);
 
-  const handleFeedback = (
-    type: "hit" | "crash",
-    success: boolean,
-    isTimeout: boolean = false,
-  ) => {
-    setCurrentStimulus(type === "hit" ? "feedback-hit" : "feedback-crash");
+  const handleFeedback = useCallback(
+    (type: "hit" | "crash", success: boolean, isTimeout: boolean = false) => {
+      const actualStimulus = currentActualStimulusRef.current;
+      if (!actualStimulus) return;
 
-    const reactionTime = isTimeout
-      ? reactionWindowRef.current
-      : Date.now() - startTimeRef.current;
+      setCurrentStimulus(type === "hit" ? "feedback-hit" : "feedback-crash");
 
-    // Guardar telemetría clínica
-    telemetryRef.current.push({
-      stimulus: type === "hit" && success ? "go" : "no-go", // simplificado para el log
-      reactionTimeMs: reactionTime,
-      success,
-    });
+      const reactionTime = isTimeout
+        ? reactionWindowRef.current
+        : Date.now() - startTimeRef.current;
 
-    if (success) {
-      setCombo((c) => {
-        const newCombo = c + 1;
-        if (onHit) onHit(newCombo);
-        setScore((s) => s + 100 * Math.min(newCombo, 5));
-        return newCombo;
+      // Clasificación clínica del evento
+      let eventType: TelemetryEvent["type"] = "hit";
+      if (actualStimulus === "go" && success) eventType = "hit";
+      else if (actualStimulus === "no-go" && success)
+        eventType = "correct_rejection"; // (Timeout exitoso en rojo)
+      else if (actualStimulus === "no-go" && !success)
+        eventType = "commission_error"; // Clic impulsivo en rojo
+      else if (actualStimulus === "go" && !success)
+        eventType = "omission_error"; // Faltó hacer clic en verde
+
+      telemetryRef.current.push({
+        stimulus: actualStimulus,
+        reactionTimeMs: reactionTime,
+        success,
+        type: eventType,
       });
-      speedLevelRef.current = Math.min(speedLevelRef.current + 0.2, 5);
-      reactionWindowRef.current = Math.max(
-        reactionWindowRef.current - speedIncrement,
-        minWindow,
-      );
-    } else {
-      if (onCrash) onCrash();
-      setCombo(0);
-      speedLevelRef.current = Math.max(1, speedLevelRef.current - 0.5);
-      reactionWindowRef.current = Math.min(
-        reactionWindowRef.current + 200,
-        initialWindow,
-      );
-    }
 
-    clearGameTimer();
-    timerRef.current = setTimeout(scheduleNextStimulus, 1000);
-  };
+      if (success) {
+        setCombo((c) => {
+          const newCombo = c + 1;
+          if (newCombo > maxComboRef.current) maxComboRef.current = newCombo;
+          if (onHit) onHit(newCombo);
+          setScore((s) => s + 100 * Math.min(newCombo, 5));
+          return newCombo;
+        });
+        speedLevelRef.current = Math.min(speedLevelRef.current + 0.2, 5);
+        reactionWindowRef.current = Math.max(
+          reactionWindowRef.current - speedIncrement,
+          minWindow,
+        );
+      } else {
+        if (onCrash) onCrash();
+        setCombo(0);
+        speedLevelRef.current = Math.max(1, speedLevelRef.current - 0.5);
+        reactionWindowRef.current = Math.min(
+          reactionWindowRef.current + 200,
+          initialWindow,
+        );
+      }
 
-  const handleAction = () => {
+      clearGameTimer();
+      timerRef.current = setTimeout(scheduleNextStimulus, 1000);
+    },
+    [
+      clearGameTimer,
+      minWindow,
+      onCrash,
+      onHit,
+      scheduleNextStimulus,
+      speedIncrement,
+      initialWindow,
+    ],
+  );
+
+  const handleAction = useCallback(() => {
     if (gameState !== "playing") return;
     if (currentStimulus !== "go" && currentStimulus !== "no-go") return;
 
@@ -125,13 +164,14 @@ export function useGoNoGoEngine({
     if (currentStimulus === "go") {
       handleFeedback("hit", true);
     } else if (currentStimulus === "no-go") {
-      handleFeedback("crash", false);
+      handleFeedback("crash", false); // Error de comisión (Impulsividad)
     }
-  };
+  }, [gameState, currentStimulus, clearGameTimer, handleFeedback]);
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     clearGameTimer();
     telemetryRef.current = [];
+    maxComboRef.current = 0;
     setScore(0);
     setCombo(0);
     setTimeLeft(duration);
@@ -139,16 +179,44 @@ export function useGoNoGoEngine({
     reactionWindowRef.current = initialWindow;
     setGameState("playing");
     scheduleNextStimulus();
-  };
+  }, [clearGameTimer, duration, initialWindow, scheduleNextStimulus]);
 
   const finishGame = useCallback(() => {
     clearGameTimer();
     setGameState("finished");
     setCurrentStimulus("waiting");
-    if (onFinish) onFinish(score, telemetryRef.current);
-  }, [score, onFinish]);
 
-  // Cronómetro del juego
+    // 🔥 PROCESAMIENTO CLÍNICO: Consolidar datos
+    const records = telemetryRef.current;
+    const hits = records.filter((r) => r.type === "hit");
+
+    const avgReaction =
+      hits.length > 0
+        ? Math.round(
+            hits.reduce((acc, curr) => acc + curr.reactionTimeMs, 0) /
+              hits.length,
+          )
+        : 0;
+
+    const consolidatedTelemetry: GoNoGoTelemetryConsolidated[] = [
+      {
+        finalScore: score,
+        maxCombo: maxComboRef.current,
+        totalStimuli: records.length,
+        correctHits: hits.length,
+        correctRejections: records.filter((r) => r.type === "correct_rejection")
+          .length,
+        commissionErrors: records.filter((r) => r.type === "commission_error")
+          .length, // Impulsividad
+        omissionErrors: records.filter((r) => r.type === "omission_error")
+          .length, // Inatención
+        avgReactionTimeMs: avgReaction,
+      },
+    ];
+
+    if (onFinish) onFinish(score, consolidatedTelemetry);
+  }, [clearGameTimer, score, onFinish]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (gameState === "playing" && timeLeft > 0) {
@@ -165,7 +233,6 @@ export function useGoNoGoEngine({
     return () => clearInterval(interval);
   }, [gameState, timeLeft, finishGame]);
 
-  // Teclado (Barra espaciadora)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === "Space" && gameState === "playing") {
@@ -175,12 +242,11 @@ export function useGoNoGoEngine({
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameState, currentStimulus]);
+  }, [gameState, handleAction]);
 
-  // Limpieza al desmontar
   useEffect(() => {
     return () => clearGameTimer();
-  }, []);
+  }, [clearGameTimer]);
 
   return {
     gameState,

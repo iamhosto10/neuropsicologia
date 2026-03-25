@@ -1,3 +1,4 @@
+// src/hooks/useSpaceCleanupEngine.ts
 import { useState, useRef, useCallback, useEffect } from "react";
 
 export type GameState = "start" | "playing" | "finished";
@@ -12,12 +13,15 @@ export type GameObject = {
   imageUrl?: string;
 };
 
+// 🔥 TELEMETRÍA CLÍNICA ENRIQUECIDA (Búsqueda Visual y Atención Selectiva)
 export type SpaceCleanupTelemetry = {
   durationSeconds: number;
   finalScore: number;
   finalEnergy: number;
-  correctClicks: number;
-  incorrectClicks: number;
+  correctClicks: number; // Atención selectiva exitosa
+  incorrectClicks: number; // Impulsividad (Clic en distractores)
+  missedTargets: number; // Inatención (Dejó pasar objetivos)
+  accuracyPercent: number; // Precisión general de clics
   result: "win" | "lose";
 };
 
@@ -58,8 +62,14 @@ export function useSpaceCleanupEngine({
   const gameActiveRef = useRef(false);
   const startTimeRef = useRef(0);
 
-  // Usamos refs para mantener la verdad absoluta y evitar bugs de asincronía en React
-  const stateRefs = useRef({ score: 0, energy: 100, correct: 0, incorrect: 0 });
+  // 🔥 NUEVO: Refs para estadísticas clínicas ampliadas
+  const stateRefs = useRef({
+    score: 0,
+    energy: 100,
+    correct: 0,
+    incorrect: 0,
+    missedTargets: 0, // Objetivos que cruzaron la pantalla sin ser clickeados
+  });
 
   const onFinishRef = useRef(onFinish);
   useEffect(() => {
@@ -76,6 +86,13 @@ export function useSpaceCleanupEngine({
 
     const timePlayed = Math.floor((Date.now() - startTimeRef.current) / 1000);
 
+    // Cálculos Clínicos
+    const totalClicks = stateRefs.current.correct + stateRefs.current.incorrect;
+    const accuracy =
+      totalClicks > 0
+        ? Math.round((stateRefs.current.correct / totalClicks) * 100)
+        : 0;
+
     const telemetry: SpaceCleanupTelemetry[] = [
       {
         durationSeconds: timePlayed,
@@ -83,6 +100,8 @@ export function useSpaceCleanupEngine({
         finalEnergy: stateRefs.current.energy,
         correctClicks: stateRefs.current.correct,
         incorrectClicks: stateRefs.current.incorrect,
+        missedTargets: stateRefs.current.missedTargets,
+        accuracyPercent: accuracy,
         result,
       },
     ];
@@ -93,7 +112,14 @@ export function useSpaceCleanupEngine({
   }, []);
 
   const removeItem = useCallback((id: number) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
+    // 🔥 NUEVO: Si un "target" es removido sin hacerle clic (sale de la pantalla), lo contamos como Omitido
+    setItems((prev) => {
+      const itemToRemove = prev.find((i) => i.id === id);
+      if (itemToRemove && itemToRemove.type === "target") {
+        stateRefs.current.missedTargets++;
+      }
+      return prev.filter((i) => i.id !== id);
+    });
   }, []);
 
   const handleInteraction = useCallback(
@@ -110,31 +136,35 @@ export function useSpaceCleanupEngine({
         if (onMiss) onMiss();
         if (onTriggerGlitch) onTriggerGlitch();
 
-        // Restamos la energía
         stateRefs.current.energy = Math.max(
           stateRefs.current.energy - settings.damage,
           0,
         );
 
-        // SOLUCIÓN 1: Restamos 50 puntos como penalización
         stateRefs.current.score = Math.max(stateRefs.current.score - 50, 0);
       }
 
-      // Forzamos actualización visual segura
       setScore(stateRefs.current.score);
       setEnergy(stateRefs.current.energy);
-      removeItem(item.id);
 
-      // SOLUCIÓN 2: Verificamos el fin del juego fuera del ciclo de actualización del estado
+      // La removemos directamente para que no sume a missedTargets al salir de pantalla
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+
       if (stateRefs.current.energy <= 0) {
         finishGame("lose");
       }
     },
-    [settings.damage, onHit, onMiss, onTriggerGlitch, removeItem, finishGame],
+    [settings.damage, onHit, onMiss, onTriggerGlitch, finishGame],
   );
 
   const startGame = useCallback(() => {
-    stateRefs.current = { score: 0, energy: 100, correct: 0, incorrect: 0 };
+    stateRefs.current = {
+      score: 0,
+      energy: 100,
+      correct: 0,
+      incorrect: 0,
+      missedTargets: 0,
+    };
     startTimeRef.current = Date.now();
 
     setGameState("playing");

@@ -3,8 +3,7 @@ import { Beaker } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { auth } from "@clerk/nextjs/server";
 import AssignButton from "@/components/dashboard/assign-button";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import CoursesCard from "@/components/courses/courses-card"; // 🔥 Importamos nuestra tarjeta unificada
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +11,7 @@ export default async function MisActividadesPage() {
   const { userId } = await auth();
   const sanityUserId = `user-${userId}`;
 
-  // 1. Traemos todas las actividades reales de Sanity
+  // 1. Traemos todas las actividades reales de Sanity (Query intacto)
   const queryActivities = `*[_type == "activity"] | order(_createdAt desc) {
     _id,
     title,
@@ -26,7 +25,7 @@ export default async function MisActividadesPage() {
     .withConfig({ useCdn: false })
     .fetch(queryActivities);
 
-  // 2. Traemos a los cadetes (pacientes/hijos) que pertenecen a este adulto
+  // 2. Traemos a los cadetes (pacientes/hijos) que pertenecen a este adulto (Query intacto)
   const queryKids = `*[_type == "kidProfile" && parent._ref == $sanityUserId] {
     _id, 
     alias
@@ -57,64 +56,24 @@ export default async function MisActividadesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {activities.map((activity: any) => (
-            <div
+            <CoursesCard
               key={activity._id}
-              className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-all"
-            >
-              <div className="aspect-video bg-slate-100 relative overflow-hidden">
-                {activity.image ? (
-                  <img
-                    src={activity.image}
-                    alt={activity.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              title={activity.title}
+              description={activity.description}
+              image={activity.image}
+              href={`/actividades/${activity.slug}`}
+              level={activity.level || "General"}
+              duration={activity.duration}
+              actionSlot={
+                kids.length > 0 ? (
+                  <AssignButton
+                    kids={kids}
+                    itemId={activity._id}
+                    itemType="activity"
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-emerald-50">
-                    <Beaker className="w-12 h-12 text-emerald-200" />
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6 flex flex-col grow">
-                <div className="flex items-center justify-between mb-3">
-                  <Badge
-                    variant="secondary"
-                    className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-none font-bold"
-                  >
-                    {activity.level || "General"}
-                  </Badge>
-                  <span className="text-xs font-bold text-slate-400">
-                    {activity.duration
-                      ? `${activity.duration} min`
-                      : "Variable"}
-                  </span>
-                </div>
-
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  {activity.title}
-                </h3>
-                <p className="text-slate-500 text-sm line-clamp-2 mb-6 grow">
-                  {activity.description}
-                </p>
-
-                {/* 🔥 EL BOTÓN DE ASIGNAR Y EL LINK AL DETALLE */}
-                <div className="mt-auto pt-4 border-t border-slate-100 space-y-3">
-                  <Link
-                    href={`/actividades/${activity.slug}`}
-                    className="text-emerald-600 hover:text-emerald-700 text-sm font-bold block text-center mb-3"
-                  >
-                    Ver instrucciones completas
-                  </Link>
-                  {kids.length > 0 && (
-                    <AssignButton
-                      kids={kids}
-                      itemId={activity._id}
-                      itemType="activity" // 👈 Clave para que vaya al array correcto
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
+                ) : undefined
+              }
+            />
           ))}
         </div>
       )}

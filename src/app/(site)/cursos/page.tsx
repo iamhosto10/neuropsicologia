@@ -54,10 +54,13 @@ export default async function CursosPage() {
         <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
           Academia Espacial
         </h1>
-        <p className="text-lg text-slate-500 font-medium">
-          Aprende nuevas habilidades para tu misión intergaláctica.
+        <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
+          {activeKidId
+            ? "Aprende nuevas habilidades para tu misión intergaláctica."
+            : "Explora nuestro catálogo de entrenamiento cognitivo diseñado para desarrollar atención, memoria y flexibilidad mental."}
         </p>
       </div>
+
       {activeKidId && (
         <Link
           href="/hq"
@@ -68,8 +71,8 @@ export default async function CursosPage() {
         </Link>
       )}
 
-      {/* 🔥 LA MAGIA: Sección exclusiva solo si el cadete tiene tareas pendientes */}
-      {assignedCourses.length > 0 && (
+      {/* SECCIÓN 1: Cursos asignados por el terapeuta (Solo si tiene tareas) */}
+      {assignedCourses.length > 0 ? (
         <div className="mb-16 bg-linear-to-br from-cyan-50 to-blue-50/50 p-6 md:p-8 rounded-[2rem] border-2 border-cyan-100 shadow-sm relative overflow-hidden">
           {/* Decoración de fondo */}
           <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
@@ -95,7 +98,38 @@ export default async function CursosPage() {
             ))}
           </div>
         </div>
-      )}
+      ) : activeKidId ? (
+        /* Empty State amigable si el niño entró pero no tiene tareas hoy */
+        <div className="mb-16 text-center p-8 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl">
+          <Compass className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-slate-700 mb-2">
+            ¡Todo despejado, Cadete!
+          </h3>
+          <p className="text-slate-500 max-w-md mx-auto">
+            No tienes misiones asignadas por hoy. Puedes descansar o explorar el
+            catálogo libremente.
+          </p>
+        </div>
+      ) : null}
+
+      {/* 🔥 SECCIÓN 2: EL CATÁLOGO GENERAL (ESTO ES LO QUE FALTABA) 🔥 */}
+      <div className="mt-8 pt-8">
+        <h2 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
+          <Compass className="w-8 h-8 text-indigo-500" />
+          Catálogo de Exploración Libre
+        </h2>
+
+        {/* Aquí finalmente usamos la variable allCourses que extrajiste arriba */}
+        {allCourses && allCourses.length > 0 ? (
+          <CoursesGallery initialCourses={allCourses} />
+        ) : (
+          <div className="text-center p-12 bg-slate-50 rounded-3xl border border-slate-100">
+            <p className="text-slate-500 font-medium">
+              No hay cursos disponibles en este momento. Vuelve pronto.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

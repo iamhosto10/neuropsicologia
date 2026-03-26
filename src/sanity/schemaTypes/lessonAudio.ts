@@ -10,6 +10,7 @@ export const lessonAudio = defineType({
       title: "Título o Instrucción",
       type: "string",
       description: "Ejemplo: 'Escucha atentamente el mensaje del Comandante'",
+      initialValue: "Escucha atentamente el mensaje del Comandante",
       validation: (Rule) => Rule.required(),
     }),
     defineField({

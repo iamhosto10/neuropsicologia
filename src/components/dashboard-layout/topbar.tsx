@@ -39,13 +39,13 @@ export default function Topbar() {
         </Sheet>
 
         {/* BARRA DE BÚSQUEDA (Desktop) */}
-        <div className="relative max-w-md w-full hidden md:block">
+        {/* <div className="relative max-w-md w-full hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
             placeholder="Buscar paciente o curso..."
             className="pl-10 bg-slate-50 border-none rounded-xl focus-visible:ring-cyan-500"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* CONTROLES DE LA DERECHA */}

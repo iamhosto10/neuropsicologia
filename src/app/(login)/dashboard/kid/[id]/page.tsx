@@ -26,12 +26,12 @@ import AccuracyChart from "@/components/dashboard/accuracy-chart";
 import CoursesCard from "@/components/courses/courses-card";
 import { selectKidAndRedirect } from "@/app/actions/profile.actions";
 
-// IMPORTAMOS NUESTRO MOTOR CLÍNICO
 import {
   parseTelemetryHistory,
   generateAccuracyChartData,
 } from "@/lib/telemetry-engine";
 import { CLINICAL_DICTIONARY } from "@/lib/clinical-dictionary";
+import PrintReportButton from "@/components/dashboard/print-report-button";
 
 export default async function KidReportPage({
   params,
@@ -117,6 +117,35 @@ export default async function KidReportPage({
   const rawEvents = parseTelemetryHistory(sessionsHistory);
   const accuracyData = generateAccuracyChartData(rawEvents);
 
+  const missionsQueryForPDF = `*[_type == "mission"]{ _id, gameType }`;
+  const allMissionsForPDF = await client
+    .withConfig({ useCdn: false })
+    .fetch(missionsQueryForPDF);
+  const missionsMap: Record<string, string> = {};
+  allMissionsForPDF.forEach((m: any) => {
+    if (m._id && m.gameType) missionsMap[m._id] = m.gameType;
+  });
+
+  const latestStatsPerGame: Record<string, { date: string; metrics: any }> = {};
+
+  // Recorremos el historial (que ya viene ordenado del más reciente al más antiguo)
+  sessionsHistory.forEach((session: any) => {
+    if (!session.telemetryData) return;
+    session.telemetryData.forEach((telemetryString: string) => {
+      try {
+        const parsed = JSON.parse(telemetryString);
+        const gameType = missionsMap[parsed.missionId];
+        // Si encontramos un juego y aún no lo hemos guardado, es el más reciente
+        if (gameType && !latestStatsPerGame[gameType]) {
+          latestStatsPerGame[gameType] = {
+            date: session.date,
+            metrics: parsed.metrics,
+          };
+        }
+      } catch (e) {}
+    });
+  });
+
   // 🔥 DEFINIMOS LAS CATEGORÍAS CLÍNICAS PARA LAS PESTAÑAS
   const categories = {
     atencion: [
@@ -174,6 +203,8 @@ export default async function KidReportPage({
     );
   };
 
+  console.log("3. DATA FINAL PARA LA GRÁFICA:", accuracyData);
+
   return (
     <div className="max-w-6xl mx-auto md:p-8 space-y-8 font-sans animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* CABECERA */}
@@ -197,11 +228,20 @@ export default async function KidReportPage({
             </p>
           </div>
         </div>
-        <Link href={`/dashboard/kid/${id}/assign`}>
-          <Button className="rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-md shadow-cyan-900/20">
-            Asignar Nuevas Misiones
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <PrintReportButton
+            kidData={kidData}
+            totalSessions={totalSessions}
+            completedSessions={completedSessions}
+            accuracyData={accuracyData}
+            detailedStats={latestStatsPerGame}
+          />
+          <Link href={`/dashboard/kid/${id}/assign`}>
+            <Button className="rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold shadow-md shadow-cyan-900/20">
+              Asignar Nuevas Misiones
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* 🔥 TABS PRINCIPALES */}

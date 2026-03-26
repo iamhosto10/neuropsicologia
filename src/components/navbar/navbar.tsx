@@ -17,6 +17,8 @@ import {
   SignInButton,
   SignUpButton,
   UserButton,
+  ClerkLoading, // 🔥 NUEVO
+  ClerkLoaded,
 } from "@clerk/nextjs";
 
 export default function Navbar() {
@@ -75,42 +77,56 @@ export default function Navbar() {
               </Link>
             );
           })}
-          <div className="flex items-center gap-4 border-l border-slate-700 pl-8">
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="text-sm font-bold text-slate-300 hover:text-white transition-colors hover:cursor-pointer">
-                  Iniciar Sesión
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button className="rounded-xl font-bold bg-cyan-500 hover:bg-cyan-600 text-white border-0 shadow-lg shadow-cyan-500/20 transition-transform hover:scale-105">
-                  Empezar Gratis
-                </Button>
-              </SignUpButton>
-            </SignedOut>
-
-            <SignedIn>
-              <Link href="/select-profile">
-                <Button
-                  variant="ghost"
-                  className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800 font-bold gap-2 rounded-xl transition-colors"
-                >
-                  <LayoutDashboard className="w-4 h-4" /> Mi Panel
-                </Button>
-              </Link>
-              <div className="ml-2 w-8 h-8 rounded-full border-2 border-cyan-500 flex items-center justify-center bg-slate-800 hover:scale-110 transition-transform">
-                <UserButton afterSignOutUrl="/" />
+          <div className="flex items-center gap-4 border-l border-slate-700 pl-8 h-10">
+            {/* 🔥 ESTADO DE CARGA DE CLERK */}
+            <ClerkLoading>
+              <div className="flex items-center gap-4">
+                <div className="h-4 w-24 bg-slate-800 animate-pulse rounded"></div>
+                <div className="h-10 w-32 bg-slate-800 animate-pulse rounded-xl"></div>
               </div>
-            </SignedIn>
+            </ClerkLoading>
+            <ClerkLoaded>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="text-sm font-bold text-slate-300 hover:text-white transition-colors hover:cursor-pointer">
+                    Iniciar Sesión
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button className="rounded-xl font-bold bg-cyan-500 hover:bg-cyan-600 text-white border-0 shadow-lg shadow-cyan-500/20 transition-transform hover:scale-105">
+                    Empezar Gratis
+                  </Button>
+                </SignUpButton>
+              </SignedOut>
+
+              <SignedIn>
+                <Link href="/select-profile">
+                  <Button
+                    variant="ghost"
+                    className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800 font-bold gap-2 rounded-xl transition-colors"
+                  >
+                    <LayoutDashboard className="w-4 h-4" /> Mi Panel
+                  </Button>
+                </Link>
+                <div className="ml-2 w-8 h-8 rounded-full border-2 border-cyan-500 flex items-center justify-center bg-slate-800 hover:scale-110 transition-transform">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+              </SignedIn>
+            </ClerkLoaded>
           </div>
         </nav>
 
         <div className="md:hidden flex items-center gap-4">
-          <SignedIn>
-            <div className="w-8 h-8 rounded-full border-2 border-cyan-500 flex items-center justify-center bg-slate-800">
-              <UserButton afterSignOutUrl="/" />
-            </div>
-          </SignedIn>
+          <ClerkLoading>
+            <div className="w-8 h-8 rounded-full bg-slate-800 animate-pulse"></div>
+          </ClerkLoading>
+          <ClerkLoaded>
+            <SignedIn>
+              <div className="w-8 h-8 rounded-full border-2 border-cyan-500 flex items-center justify-center bg-slate-800">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </SignedIn>
+          </ClerkLoaded>
 
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>

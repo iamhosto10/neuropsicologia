@@ -56,8 +56,8 @@ export default function Navbar() {
           <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/20">
             <Rocket className="w-6 h-6 text-white" />
           </div>
-          <span className="font-black text-xl tracking-tight text-white">
-            Neuro<span className="text-cyan-400">Espacial</span>
+          <span className="font-black text-xl tracking-tight text-cyan-400">
+            Neuro Espacial
           </span>
         </Link>
 

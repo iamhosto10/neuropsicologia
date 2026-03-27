@@ -22,6 +22,12 @@ export const lessonAudio = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
+    defineField({
+      name: "scriptText",
+      title: "Guion de Narración",
+      type: "text",
+      description: "El texto original que la IA convirtió en audio.",
+    }),
   ],
   preview: {
     select: {

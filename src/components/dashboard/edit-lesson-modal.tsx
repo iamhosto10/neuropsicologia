@@ -10,7 +10,6 @@ import {
   HelpCircle,
   Trash2,
   Image as ImageIcon,
-  Music,
   AlignLeft,
   Bot,
   ArrowUp,
@@ -31,6 +30,7 @@ import {
 import {
   getLessonForEditAction,
   updateLessonAction,
+  uploadAssetAction, // 🔥 Importamos la acción de subida directa
 } from "@/app/actions/builder.actions";
 
 export default function EditLessonModal({
@@ -46,19 +46,14 @@ export default function EditLessonModal({
   const [isOpen, setIsOpen] = useState(false);
 
   // ESTADOS DE CARGA Y DATOS
-  const [isLoading, setIsLoading] = useState(false); // Carga inicial de datos
-  const [isSubmitting, setIsSubmitting] = useState(false); // Guardado de cambios
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // ESTADOS DEL FORMULARIO
   const [lessonTitle, setLessonTitle] = useState("");
   const [blocks, setBlocks] = useState<any[]>([]);
 
-  // ESTADOS DEL COMBOBOX DE MÓDULO (Esto por ahora no lo editaremos,
-  // asumiremos que la lección ya pertenece a su módulo y no se mueve de ahí en este MVP.
-  // Pero sí necesitamos recibir existingModules para pasarlo al backend si quisiéramos).
-
-  // 1. Efecto para cargar los datos de la lección al abrir el modal
   useEffect(() => {
     async function loadLessonData() {
       if (isOpen && lessonId) {
@@ -69,10 +64,11 @@ export default function EditLessonModal({
 
         if (result.success) {
           setLessonTitle(result.lessonTitle || "");
+          // Inicializamos los bloques. Si ya tienen imagen, vendrán con imageUrl desde Sanity
           setBlocks(result.blocks || []);
         } else {
           setError(result.error || "Error al cargar la lección.");
-          setIsOpen(false); // Cerramos el modal si hay error crítico
+          setIsOpen(false);
         }
         setIsLoading(false);
       }
@@ -81,7 +77,6 @@ export default function EditLessonModal({
     loadLessonData();
   }, [isOpen, lessonId]);
 
-  // Funciones para gestionar bloques (idénticas a LessonBuilderModal)
   const addBlock = (type: string) => {
     const newId = Date.now().toString();
     const baseBlock = { id: newId, type };
@@ -101,7 +96,10 @@ export default function EditLessonModal({
     } else if (type === "text") {
       setBlocks([...blocks, { ...baseBlock, text: "" }]);
     } else if (type === "image") {
-      setBlocks([...blocks, { ...baseBlock }]);
+      setBlocks([
+        ...blocks,
+        { ...baseBlock, assetId: null, imageUrl: null, isUploading: false },
+      ]);
     } else if (type === "lessonAudio") {
       setBlocks([...blocks, { ...baseBlock, title: "", scriptText: "" }]);
     }
@@ -126,12 +124,47 @@ export default function EditLessonModal({
     setBlocks(newBlocks);
   };
 
+  // 🔥 ESTADO FUNCIONAL PARA EVITAR STALE STATE
   const handleBlockChange = (id: string, field: string, value: any) => {
-    setBlocks(
-      blocks.map((block) =>
+    setBlocks((prev) =>
+      prev.map((block) =>
         block.id === id ? { ...block, [field]: value } : block,
       ),
     );
+  };
+
+  // 🔥 SUBIDA ASÍNCRONA DE IMAGEN
+  const handleImageUpload = async (blockId: string, file: File) => {
+    if (!file) return;
+
+    setBlocks((prev) =>
+      prev.map((b) => (b.id === blockId ? { ...b, isUploading: true } : b)),
+    );
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const result = await uploadAssetAction(formData);
+
+    if (result.success) {
+      setBlocks((prev) =>
+        prev.map((b) =>
+          b.id === blockId
+            ? {
+                ...b,
+                assetId: result.assetId,
+                imageUrl: result.url,
+                isUploading: false,
+              }
+            : b,
+        ),
+      );
+    } else {
+      alert(result.error || "Error al subir la imagen");
+      setBlocks((prev) =>
+        prev.map((b) => (b.id === blockId ? { ...b, isUploading: false } : b)),
+      );
+    }
   };
 
   const handleOptionChange = (
@@ -139,8 +172,8 @@ export default function EditLessonModal({
     optionIndex: number,
     value: string,
   ) => {
-    setBlocks(
-      blocks.map((block) => {
+    setBlocks((prev) =>
+      prev.map((block) => {
         if (block.id === blockId) {
           const newOptions = [...block.options];
           newOptions[optionIndex] = value;
@@ -153,18 +186,27 @@ export default function EditLessonModal({
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    // Validación de carga pendiente
+    const isAnyUploading = blocks.some((b) => b.isUploading);
+    if (isAnyUploading) {
+      alert(
+        "Por favor, espera a que termine de subirse la imagen antes de guardar.",
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
     const formData = new FormData(event.currentTarget);
     formData.append("contentBlocks", JSON.stringify(blocks));
 
-    // 🔥 IMPORTANTE: Pasamos el lessonId al updateLessonAction
     const result = await updateLessonAction(lessonId, courseId, formData);
 
     if (result.success) {
       setIsOpen(false);
-      router.refresh(); // Recargamos para ver los cambios en el syllabus
+      setTimeout(() => router.refresh(), 800);
     } else {
       setError(result.error);
     }
@@ -174,7 +216,6 @@ export default function EditLessonModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {/* 🔥 Botón siempre visible, con sombra y borde sutil */}
         <Button
           size="icon"
           variant="outline"
@@ -216,8 +257,8 @@ export default function EditLessonModal({
                 <Input
                   id="lessonTitle"
                   name="lessonTitle"
-                  value={lessonTitle} // Estado controlado
-                  onChange={(e) => setLessonTitle(e.target.value)} // Estado controlado
+                  value={lessonTitle}
+                  onChange={(e) => setLessonTitle(e.target.value)}
                   placeholder="Ej. Técnicas de Respiración"
                   required
                   className="h-12"
@@ -285,34 +326,59 @@ export default function EditLessonModal({
                       </div>
                     )}
 
-                    {/* IMAGEN */}
+                    {/* IMAGEN: Ahora con interfaz asíncrona */}
                     {block.type === "image" && (
                       <div className="space-y-4 pr-32">
                         <div className="flex items-center gap-2 text-sky-600 font-bold mb-4">
                           <ImageIcon className="w-5 h-5" /> Imagen Visual
                         </div>
-                        {block.imageUrl && (
-                          <div className="aspect-video max-w-sm rounded-xl overflow-hidden border border-slate-100 mb-4 bg-slate-50">
-                            <img
-                              src={block.imageUrl}
-                              alt="Imagen actual"
-                              className="w-full h-full object-cover"
+
+                        {block.isUploading ? (
+                          <div className="flex items-center justify-center p-8 bg-sky-50 border-2 border-dashed border-sky-200 rounded-xl">
+                            <Loader2 className="w-6 h-6 animate-spin text-sky-600 mr-3" />
+                            <span className="text-sky-700 font-medium">
+                              Subiendo imagen...
+                            </span>
+                          </div>
+                        ) : block.imageUrl ? (
+                          <div className="space-y-3">
+                            <div className="relative w-48 aspect-video rounded-xl overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+                              <img
+                                src={block.imageUrl}
+                                alt="Preview"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                handleBlockChange(block.id, "assetId", null);
+                                handleBlockChange(block.id, "imageUrl", null);
+                              }}
+                            >
+                              Cambiar Imagen
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              required
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(block.id, file);
+                              }}
+                              className="cursor-pointer file:text-sky-600 h-12 pt-3"
                             />
-                            <p className="text-xs text-slate-500 p-2 text-center">
-                              Imagen actual
+                            <p className="text-xs text-slate-500 italic">
+                              Sube un archivo nuevo para reemplazar la imagen
+                              actual.
                             </p>
                           </div>
                         )}
-                        <Input
-                          type="file"
-                          name={`file_${block.id}`}
-                          accept="image/*"
-                          className="cursor-pointer file:text-sky-600"
-                        />
-                        <p className="text-xs text-slate-500 italic">
-                          Sube un archivo nuevo para reemplazar la imagen
-                          actual.
-                        </p>
                       </div>
                     )}
 
@@ -324,21 +390,6 @@ export default function EditLessonModal({
                           (Voz IA)
                         </div>
                         <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label>Título o Instrucción Visible</Label>
-                            <Input
-                              value={block.title}
-                              onChange={(e) =>
-                                handleBlockChange(
-                                  block.id,
-                                  "title",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Ej. Escucha la misión secreta"
-                              required
-                            />
-                          </div>
                           <div className="space-y-2">
                             <Label>Guion (Lo que la voz leerá)</Label>
                             <Textarea
@@ -359,14 +410,14 @@ export default function EditLessonModal({
                                 href={block.audioUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+                                className="text-xs text-purple-600 hover:text-purple-700 font-medium block"
                               >
                                 🎧 Escuchar audio actual
                               </a>
                             )}
                             <p className="text-xs text-slate-500 italic mt-2">
                               Al guardar, el audio se regenerará si el guion
-                              cambió.
+                              cambió. (Sin límite de texto)
                             </p>
                           </div>
                         </div>

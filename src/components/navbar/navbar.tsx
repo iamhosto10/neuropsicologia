@@ -100,7 +100,7 @@ export default function Navbar() {
               </SignedOut>
 
               <SignedIn>
-                <Link href="/select-profile">
+                <Link href="/dashboard">
                   <Button
                     variant="ghost"
                     className="text-slate-300 hover:text-cyan-400 hover:bg-slate-800 font-bold gap-2 rounded-xl transition-colors"

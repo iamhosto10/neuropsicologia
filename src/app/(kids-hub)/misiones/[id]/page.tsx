@@ -15,6 +15,7 @@ import SpaceCleanupGame from "@/components/games/space-cleanup-game";
 import CargoLaboratoryGame from "@/components/games/cargo-laboratory-game";
 import NebulaStormGame from "@/components/games/nebula-storm-game";
 import SignalDecoderGame from "@/components/games/signal-decoder-game";
+import NavigationGame from "@/components/games/navigation-game";
 
 const getMissionQuery = `*[_type == "mission" && _id == $id][0]`;
 
@@ -150,6 +151,17 @@ export default async function MissionPage({
             config={{
               title: mission.title,
               duration: mission.timeLimit ?? 10,
+              kidId: kidId,
+              missionId: id,
+              energyReward: mission.energyReward,
+            }}
+          />
+        )}
+        {mission.gameType === "navigation" && (
+          <NavigationGame
+            config={{
+              difficulty: mission.difficulty,
+              duration: mission.timeLimit ?? 120, // Le damos 120s por defecto porque requiere pensar
               kidId: kidId,
               missionId: id,
               energyReward: mission.energyReward,

@@ -38,6 +38,10 @@ export const gameModule = defineType({
             title: "Decodificador de Señales (Velocidad Procesamiento)",
             value: "symbol_digit",
           },
+          {
+            title: "Ruta de Navegación (Planificación Ejecutiva)",
+            value: "navigation",
+          },
         ],
         layout: "dropdown",
       },

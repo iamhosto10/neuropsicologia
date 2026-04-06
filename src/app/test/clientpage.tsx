@@ -39,6 +39,10 @@ const games = [
     title: "Decodificador de Señales (Velocidad Procesamiento)",
     gameType: "signal_decoder",
   },
+  {
+    title: "Ruta de Navegación (Planificación Ejecutiva)",
+    gameType: "navigation",
+  },
 ];
 
 const ClientPage = () => {

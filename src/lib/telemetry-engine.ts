@@ -33,8 +33,11 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
           } else if (metrics.success !== undefined) {
             // Juegos basados en acierto/fallo (Ej: Go/No-Go o Reverse Communicator)
             calculatedAccuracy = metrics.success === true ? 100 : 0;
+          } else if (metrics.efficiencyScore !== undefined) {
+            // 🔥 NUEVO: Juegos de Planificación (Ej: Ruta de Navegación)
+            // Usamos el índice de eficiencia de ruta (0-100%) como precisión global
+            calculatedAccuracy = metrics.efficiencyScore;
           }
-
           allEvents.push({ ...data, date: safeDate, calculatedAccuracy });
         } catch (e) {
           console.error("Error parseando telemetría:", e);

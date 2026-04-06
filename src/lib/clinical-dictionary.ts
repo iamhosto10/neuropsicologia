@@ -264,4 +264,40 @@ export const CLINICAL_DICTIONARY: Record<string, GameDictionary> = {
       },
     },
   },
+  // 🔥 NUEVO: RUTA DE NAVEGACIÓN (PLANIFICACIÓN) 🔥
+  navigation: {
+    title: "Ruta de Navegación",
+    domain: "Planificación Ejecutiva y Anticipación",
+    description:
+      "Evaluación basada en laberintos. Entrena la capacidad de planificar secuencias, resolución de problemas y el control de la impulsividad inicial.",
+    metrics: {
+      levelsCompleted: {
+        label: "Sectores Completados",
+        description:
+          "Cantidad de laberintos resueltos con éxito antes de que se agote el tiempo.",
+      },
+      totalCrashes: {
+        label: "Errores de Planificación (Choques)",
+        description:
+          "Indica impulsividad o falla en la anticipación espacial al ejecutar comandos erróneos.",
+      },
+      totalCorrections: {
+        label: "Uso de Autocorrección (Borrado)",
+        description:
+          "Un número alto sugiere buena flexibilidad cognitiva y auto-monitoreo antes de actuar.",
+      },
+      avgPlanningTimeMs: {
+        label: "Tiempo Medio de Planificación",
+        description:
+          "Tiempo que el cadete observó el mapa antes de presionar la primera flecha. Un tiempo muy bajo indica impulsividad severa.",
+        isTime: true,
+      },
+      efficiencyScore: {
+        label: "Índice de Eficiencia de Ruta",
+        description:
+          "100% significa que usó la ruta más corta posible. Porcentajes bajos indican redundancia o desorientación espacial.",
+        isPercentage: true,
+      },
+    },
+  },
 };

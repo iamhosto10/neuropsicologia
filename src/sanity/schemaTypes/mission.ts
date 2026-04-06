@@ -41,6 +41,10 @@ export const mission = defineType({
             value: "nebula_storm",
           },
           { title: "Decodificador de Señales (SDMT)", value: "signal_decoder" },
+          {
+            title: "Ruta de Navegación (Planificación Ejecutiva)",
+            value: "navigation",
+          },
         ],
       },
       validation: (Rule) => Rule.required(),

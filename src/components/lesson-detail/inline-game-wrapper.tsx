@@ -12,6 +12,8 @@ import MultitaskEvasionGame from "@/components/games/multitask-evasion-game";
 import CargoLaboratoryGame from "../games/cargo-laboratory-game";
 import NebulaStormGame from "../games/nebula-storm-game";
 import SignalDecoderGame from "../games/signal-decoder-game";
+import NavigationGame from "../games/navigation-game";
+import config from "../../../sanity.config";
 
 export default function InlineGameWrapper({ value }: { value: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -73,6 +75,8 @@ export default function InlineGameWrapper({ value }: { value: any }) {
         return <NebulaStormGame config={gameConfig} />;
       case "signal_decoder":
         return <SignalDecoderGame config={gameConfig} />;
+      case "navigation":
+        return <NavigationGame config={gameConfig} />;
       default:
         return <SpaceCleanupGame config={gameConfig} />;
     }

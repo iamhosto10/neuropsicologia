@@ -155,7 +155,7 @@ export default async function KidReportPage({
       "multitask_evasion",
     ],
     memoria: ["simon_says_reverse", "cargo_n_back", "reverse_communicator"],
-    procesamiento: ["nebula_storm", "signal_decoder"],
+    procesamiento: ["nebula_storm", "signal_decoder", "navigation"],
   };
 
   // Helper para renderizar las tarjetas de juegos

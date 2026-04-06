@@ -88,12 +88,12 @@ export default async function MisCursosPage() {
               level={course.level}
               // 🔥 EL ACTION SLOT AHORA TIENE 2 BOTONES
               actionSlot={
-                <div className="flex items-center gap-2 w-full mt-2">
+                <div className="flex flex-wrap items-center gap-2 w-full mt-2 max-w-full">
                   {/* Botón de Editar (Constructor) */}
                   <Button
                     asChild
                     variant="outline"
-                    className="flex-1 rounded-xl text-slate-600 border-slate-200 hover:bg-slate-50 font-bold"
+                    className="w-full sm:w-auto rounded-xl text-slate-600 border-slate-200 hover:bg-slate-50 font-bold"
                   >
                     <Link href={`/dashboard/cursos/${course._id}/editar`}>
                       <Pencil className="w-4 h-4 mr-2" />
@@ -103,7 +103,7 @@ export default async function MisCursosPage() {
 
                   {/* Botón de Asignar (Solo si hay cadetes) */}
                   {kids.length > 0 && (
-                    <div className="flex-1">
+                    <div className="w-full sm:w-auto max-w-full">
                       <AssignButton
                         kids={kids}
                         itemId={course._id}

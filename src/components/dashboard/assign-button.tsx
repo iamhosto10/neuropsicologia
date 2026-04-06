@@ -41,15 +41,15 @@ export default function AssignButton({
     <div className="relative w-full">
       <Button
         variant="outline"
-        className="w-full bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 hover:text-cyan-800 rounded-xl font-bold h-10 shadow-sm transition-all"
+        className="w-full bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100 hover:text-cyan-800 rounded-xl font-bold h-10 shadow-sm transition-all gap-1"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
       >
-        <Plus className="w-4 h-4 mr-2" /> Asignar a Cadete{" "}
-        <ChevronDown className="w-4 h-4 ml-auto opacity-50" />
+        <Plus className="w-4 h-4 mr-0" /> Asignar a Cadete{" "}
+        <ChevronDown className="w-4 h-4  opacity-50" />
       </Button>
 
       {isOpen && (

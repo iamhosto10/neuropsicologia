@@ -799,7 +799,7 @@ async function generateRobustAudio(text: string): Promise<Buffer> {
     const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
     const payload = {
       input: { text },
-      voice: { languageCode: "es-US", name: "es-US-Standard-B" },
+      voice: { languageCode: "es-US", name: "es-US-Chirp3-HD-Gacrux" },
       audioConfig: { audioEncoding: "MP3" },
     };
 

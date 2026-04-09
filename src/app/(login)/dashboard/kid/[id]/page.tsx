@@ -19,6 +19,11 @@ import {
   Focus,
   Dna,
   Cpu,
+  Beaker,
+  Star,
+  Smile,
+  Frown,
+  Meh,
 } from "lucide-react";
 import Link from "next/link";
 import CognitiveChart from "@/components/dashboard/cognitive-chart";
@@ -69,10 +74,24 @@ export default async function KidReportPage({
 
   // 2. Buscamos las lecciones completadas de ESTE cadete
   const kidExtraData = await client.fetch(
-    `*[_type == "kidProfile" && _id == $id][0]{completedLessons}`,
+    `*[_type == "kidProfile" && _id == $id][0]{
+      completedLessons,
+      "activityLog": activityLog[]{
+        _key,
+        completedAt,
+        reflection,
+        "activityTitle": activityRef->title,
+        "activityCategory": activityRef->category
+      }
+    }`,
     { id },
   );
   const completedLessons = kidExtraData?.completedLessons || [];
+
+  const activityLog = (kidExtraData?.activityLog || []).sort(
+    (a: any, b: any) =>
+      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime(),
+  );
 
   // 3. Entramos al syllabus y sacamos las referencias de las lecciones
   const coursesQuery = `*[_type == "course"] {
@@ -459,6 +478,99 @@ export default async function KidReportPage({
                 ))
               ) : (
                 <p className="text-slate-500">No hay cursos disponibles.</p>
+              )}
+            </div>
+          </div>
+
+          {/* 🔥 NUEVO: LABORATORIO FÍSICO (VISTA PREVIA) */}
+          <div className="pt-8 border-t border-slate-200 space-y-6">
+            <div className="flex items-center justify-between flex-col md:flex-row gap-4">
+              <div>
+                <h2 className="text-2xl font-black flex items-center gap-2 text-slate-900">
+                  <Beaker className="w-6 h-6 text-emerald-600" />
+                  Laboratorio Físico de {kidData.alias}
+                </h2>
+                <p className="text-slate-500 mt-1">
+                  Supervisa las actividades físicas, de motricidad y atención
+                  plena.
+                </p>
+              </div>
+              <Link href={`/dashboard/kid/${id}/laboratorio`}>
+                <Button className="rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-700 font-bold border-0 shadow-sm transition-colors gap-2">
+                  <Beaker className="w-4 h-4" /> Ver Bitácora Completa
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {activityLog.length > 0 ? (
+                // Solo mostramos las 3 más recientes
+                activityLog.slice(0, 3).map((log: any) => {
+                  const isHappy = log.reflection?.mood === "feliz";
+                  const isSad = log.reflection?.mood === "frustrado";
+                  const emojiColor = isHappy
+                    ? "bg-green-100 text-green-600"
+                    : isSad
+                      ? "bg-red-100 text-red-600"
+                      : "bg-amber-100 text-amber-600";
+
+                  return (
+                    <Card
+                      key={log._key}
+                      className="rounded-2xl border-slate-200 shadow-sm hover:shadow-md transition-shadow bg-white"
+                    >
+                      <CardContent className="p-5 flex flex-col justify-between h-full gap-4">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
+                              {log.activityCategory || "Actividad"}
+                            </span>
+                            <span className="text-slate-400 text-xs font-medium">
+                              {new Date(log.completedAt).toLocaleDateString(
+                                "es-ES",
+                                { day: "numeric", month: "short" },
+                              )}
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-slate-800 leading-tight line-clamp-2">
+                            {log.activityTitle}
+                          </h3>
+                        </div>
+
+                        {log.reflection && (
+                          <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center ${emojiColor}`}
+                              >
+                                {isHappy && <Smile className="w-5 h-5" />}
+                                {isSad && <Frown className="w-5 h-5" />}
+                                {!isHappy && !isSad && (
+                                  <Meh className="w-5 h-5" />
+                                )}
+                              </div>
+                              <span className="text-xs font-bold text-slate-500 uppercase">
+                                Estado
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`w-4 h-4 ${log.reflection.difficulty >= star ? "fill-yellow-400 text-yellow-400" : "text-slate-200"}`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : (
+                <p className="text-slate-500 col-span-3">
+                  No hay registros de actividades físicas aún.
+                </p>
               )}
             </div>
           </div>

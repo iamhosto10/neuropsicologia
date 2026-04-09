@@ -9,7 +9,7 @@ import InstructionsList from "@/components/activity-detail/instructions-list";
 import ActivityAccordion from "@/components/activity-detail/activity-accordion";
 import RelatedActivities from "@/components/activity-detail/related-activities";
 import { cookies } from "next/headers"; // 🔥 Importado
-import CompleteActivityButton from "@/components/activity-detail/complete-activity-button"; // 🔥 Importado
+import ActivityCompletionWizard from "@/components/activity-detail/activity-completion-wizard";
 
 export const dynamic = "force-dynamic";
 
@@ -86,10 +86,11 @@ export default async function ActivityDetailPage({
 
               {/* 🔥 BOTÓN INYECTADO AQUÍ AL FINAL DE LAS INSTRUCCIONES */}
               {activeKidId && (
-                <CompleteActivityButton
+                <ActivityCompletionWizard
                   kidId={activeKidId}
                   activityId={activity._id}
                   isCompleted={isCompleted}
+                  category={activity.category} // 🔥 ¡LE PASAMOS LA CATEGORÍA AQUÍ!
                 />
               )}
             </div>

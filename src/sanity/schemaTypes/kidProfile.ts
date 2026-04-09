@@ -82,13 +82,72 @@ export const kidProfile = defineType({
         "Actividades recomendadas por el terapeuta para este cadete.",
     }),
     defineField({
-      name: "completedActivities",
-      title: "Actividades Completadas",
+      name: "activityLog",
+      title: "Bitácora de Actividades (Reflexiones)",
       type: "array",
-      of: [{ type: "string" }],
       description:
-        "IDs de las actividades de laboratorio que este cadete ha terminado.",
-      initialValue: [],
+        "Registro detallado de las actividades físicas completadas y su evaluación emocional.",
+      of: [
+        {
+          type: "object",
+          fields: [
+            {
+              name: "activityRef",
+              title: "Actividad Realizada",
+              type: "reference",
+              to: [{ type: "activity" }],
+            },
+            {
+              name: "completedAt",
+              title: "Fecha y Hora de Finalización",
+              type: "datetime",
+            },
+            {
+              name: "reflection",
+              title: "Reflexión del Cadete",
+              type: "object",
+              fields: [
+                {
+                  name: "mood",
+                  title: "Estado de Ánimo (Emoji)",
+                  type: "string",
+                  options: {
+                    list: [
+                      { title: "Feliz / Relajado", value: "feliz" },
+                      { title: "Normal / Indiferente", value: "normal" },
+                      { title: "Frustrado / Cansado", value: "frustrado" },
+                    ],
+                  },
+                },
+                {
+                  name: "difficulty",
+                  title: "Dificultad Percibida (1-3)",
+                  type: "number",
+                  description: "1: Fácil, 2: Medio, 3: Difícil",
+                },
+              ],
+            },
+          ],
+          preview: {
+            select: {
+              title: "activityRef.title",
+              subtitle: "completedAt",
+              mood: "reflection.mood",
+            },
+            prepare(selection) {
+              const { title, subtitle, mood } = selection;
+              const emoji =
+                mood === "feliz" ? "😌" : mood === "frustrado" ? "😠" : "😐";
+              return {
+                title: `${emoji} ${title}`,
+                subtitle: subtitle
+                  ? new Date(subtitle).toLocaleDateString()
+                  : "Sin fecha",
+              };
+            },
+          },
+        },
+      ],
     }),
     defineField({
       name: "completedQuizzes",

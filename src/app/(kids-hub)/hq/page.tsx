@@ -135,29 +135,33 @@ export default async function HeadquartersPage() {
                 </p>
               </div>
             )}
-
+            {console.log(dashboardData)}
             {dashboardData.todaySession.missions.map(
               (mission: any, index: number) => {
+                // 🔥 1. Cambiamos mission._id por mission._key
                 const isDone =
                   dashboardData.todaySession.completedMissions?.includes(
-                    mission._id,
+                    mission?._key,
                   );
+
+                console.log("mission: ", mission);
 
                 return (
                   <div
-                    key={mission._id}
+                    // 🔥 2. Cambiamos mission._id por mission._key
+                    key={mission?._key}
                     className={`border-2 p-4 rounded-xl flex items-center justify-between transition-colors ${isDone ? "bg-green-900/20 border-green-500/50" : "bg-slate-800 border-slate-700 hover:border-cyan-500"}`}
                   >
                     <div>
                       <h4
                         className={`font-bold text-lg ${isDone ? "text-green-400" : "text-white"}`}
                       >
-                        Misión {index + 1}: {mission.title}
+                        Misión {index + 1}: {mission?.title}
                       </h4>
                       <p
                         className={`${isDone ? "text-green-500/70" : "text-cyan-400"} text-sm flex items-center gap-1 font-mono mt-1`}
                       >
-                        <Zap className="w-4 h-4" /> +{mission.energyReward}{" "}
+                        <Zap className="w-4 h-4" /> +{mission?.energyReward}{" "}
                         Cristales
                       </p>
                     </div>
@@ -168,7 +172,8 @@ export default async function HeadquartersPage() {
                       </div>
                     ) : (
                       <Link
-                        href={`/misiones/${mission._id}`}
+                        // 🔥 3. Cambiamos mission._id por mission._key para que la URL mande la llave correcta al reproductor
+                        href={`/misiones/${mission?._key}`}
                         className="bg-cyan-600 hover:bg-cyan-500 rounded-full w-12 h-12 flex items-center justify-center transition-transform hover:scale-110 shadow-[0_0_20px_-5px_#06b6d4]"
                       >
                         <Play className="w-6 h-6 ml-1 text-white" />

@@ -24,13 +24,55 @@ export const dailySession = defineType({
       name: "missions",
       title: "Misiones del Día",
       type: "array",
-      of: [{ type: "reference", to: [{ type: "mission" }] }],
-      validation: (Rule) =>
-        Rule.required()
-          .max(10)
-          .error(
-            "Por protocolo terapéutico, un niño no debe tener más de 3 misiones al día.",
-          ),
+      of: [
+        {
+          type: "object",
+          name: "missionConfig",
+          fields: [
+            {
+              name: "gameType",
+              title: "Juego",
+              type: "string",
+              validation: (Rule) => Rule.required(),
+            },
+            {
+              name: "title",
+              title: "Título Personalizado",
+              type: "string",
+              description: "Ej: Práctica de Memoria de Juanito",
+            },
+            {
+              name: "difficulty",
+              title: "Dificultad",
+              type: "string",
+              options: { list: ["easy", "medium", "hard"] },
+              initialValue: "medium",
+            },
+            {
+              name: "timeLimit",
+              title: "Límite de Tiempo (segundos)",
+              type: "number",
+              initialValue: 60,
+            },
+            {
+              name: "energyReward",
+              title: "Cristales",
+              type: "number",
+              initialValue: 50,
+            },
+          ],
+          preview: {
+            select: {
+              title: "title",
+              subtitle: "gameType",
+              diff: "difficulty",
+            },
+            prepare({ title, subtitle, diff }) {
+              return { title: title || subtitle, subtitle: `Nivel: ${diff}` };
+            },
+          },
+        },
+      ],
     }),
     defineField({
       name: "completedMissions",

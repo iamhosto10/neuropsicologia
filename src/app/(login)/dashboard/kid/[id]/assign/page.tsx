@@ -1,7 +1,7 @@
-import { client } from "@/sanity/lib/client";
 import { ArrowLeft, Puzzle } from "lucide-react";
 import Link from "next/link";
 import MissionAssigner from "@/components/dashboard/mission-assigner";
+import { CLINICAL_DICTIONARY } from "@/lib/clinical-dictionary";
 
 export const dynamic = "force-dynamic";
 
@@ -12,13 +12,14 @@ export default async function AssignMissionsPage({
 }) {
   const { id } = await params;
 
-  // Traemos todas las misiones disponibles directamente desde el servidor
-  const missions = await client.withConfig({ useCdn: false }).fetch(
-    `*[_type == "mission"] | order(_createdAt desc) {
-      _id, title, gameType, difficulty
-    }`,
-    {},
-    { cache: "no-store" },
+  // Transformamos el diccionario en un array para que el Assigner lo pueda leer
+  const availableGames = Object.entries(CLINICAL_DICTIONARY).map(
+    ([key, data]) => ({
+      gameType: key,
+      title: data.title,
+      domain: data.domain,
+      description: data.description,
+    }),
   );
 
   return (
@@ -36,21 +37,15 @@ export default async function AssignMissionsPage({
           Entrenamiento
         </h1>
         <p className="text-slate-500 mt-2">
-          Selecciona las misiones terapéuticas que el cadete deberá completar
-          hoy.
+          Selecciona la fecha y configura las misiones que el cadete deberá
+          completar.
         </p>
       </div>
 
-      {/* Aquí inyectamos el componente interactivo que creamos en el Paso 2 */}
-      {missions.length === 0 ? (
-        <div className="bg-white p-12 text-center rounded-3xl border border-slate-200">
-          <p className="text-slate-500">
-            No hay misiones configuradas en la base de datos.
-          </p>
-        </div>
-      ) : (
-        <MissionAssigner kidId={id} missions={missions} />
-      )}
+      {/* Le pasamos el catálogo de juegos. 
+          NOTA: Tu componente MissionAssigner deberá tener un <DatePicker /> para escoger la fecha 
+          y enviar los datos a un Server Action para crear el dailySession. */}
+      <MissionAssigner kidId={id} availableGames={availableGames} />
     </div>
   );
 }

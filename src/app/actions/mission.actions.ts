@@ -152,3 +152,28 @@ export async function assignDailySession(
   revalidatePath(`/dashboard/kid/${kidId}`);
   redirect(`/dashboard/kid/${kidId}`);
 }
+
+export async function deleteDailySession(sessionId: string, kidId: string) {
+  try {
+    const writeClient = client.withConfig({
+      token: process.env.SANITY_API_WRITE_TOKEN,
+      useCdn: false,
+    });
+
+    // 1. Eliminamos el documento completo de la base de datos
+    await writeClient.delete(sessionId);
+    console.log(`🗑️ Sesión ${sessionId} eliminada correctamente.`);
+
+    // 2. Freno anti-caché
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // 3. Invalidamos las rutas para que la Agenda se actualice
+    revalidatePath(`/dashboard/kid/${kidId}/assign`);
+    revalidatePath("/hq");
+
+    return { success: true };
+  } catch (error) {
+    console.error("❌ Error eliminando la sesión:", error);
+    return { error: "No se pudo eliminar el plan de entrenamiento." };
+  }
+}

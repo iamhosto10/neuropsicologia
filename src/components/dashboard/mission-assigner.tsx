@@ -35,17 +35,23 @@ const getDomainIcon = (domain: string) => {
 export default function MissionAssigner({
   kidId,
   availableGames,
+  initialData, // 🔥 Recibimos los datos si estamos editando
 }: {
   kidId: string;
   availableGames: any[];
+  initialData?: any;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  // Estados del Formulario
+  // Estados del Formulario (Inicializados con initialData si existe)
   const todayDate = new Date().toISOString().split("T")[0];
-  const [selectedDate, setSelectedDate] = useState<string>(todayDate);
-  const [configuredMissions, setConfiguredMissions] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>(
+    initialData?.date || todayDate,
+  );
+  const [configuredMissions, setConfiguredMissions] = useState<any[]>(
+    initialData?.missions || [],
+  );
 
   // Estados del Desplegable Rico
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

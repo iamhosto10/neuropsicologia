@@ -116,8 +116,8 @@ export const getKidDashboardQuery = `
       _id,
       isCompleted,
       completedMissions,
-      missions[]->{
-        _id,
+      missions[]{
+        _key,
         title,
         gameType,
         difficulty,

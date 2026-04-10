@@ -1,5 +1,4 @@
 // src/app/(login)/dashboard/kid/[id]/reporte/[gameType]/page.tsx
-
 import { client } from "@/sanity/lib/client";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -7,9 +6,8 @@ import { ArrowLeft, Brain, Calendar, Info, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// Importamos las herramientas clínicas que construimos
+// Importamos las herramientas clínicas
 import { CLINICAL_DICTIONARY } from "@/lib/clinical-dictionary";
-import { extractGameTelemetryByDate } from "@/lib/telemetry-engine";
 
 export default async function GameClinicalReportPage({
   params,
@@ -18,13 +16,11 @@ export default async function GameClinicalReportPage({
 }) {
   const { id, gameType } = await params;
 
-  // 1. Validamos que el juego exista en nuestro diccionario médico
+  // 1. Validamos que el juego exista en nuestro diccionario
   const gameDictionary = CLINICAL_DICTIONARY[gameType];
-  if (!gameDictionary) {
-    notFound();
-  }
+  if (!gameDictionary) notFound();
 
-  // 🔥 2. LA CONSULTA CORREGIDA: Hacemos un "Join" para traer las dailySessions de este cadete
+  // 2. Traemos TODO el historial de sesiones del niño de una sola vez
   const kidQuery = `
     *[_type == "kidProfile" && _id == $id][0]{ 
       alias, 
@@ -41,27 +37,24 @@ export default async function GameClinicalReportPage({
 
   if (!kidData) notFound();
 
-  // 3. Buscamos TODAS las misiones para crear el mapa { missionId: gameType }
-  const missionsQuery = `*[_type == "mission"]{ _id, gameType }`;
-  const allMissions = await client
-    .withConfig({ useCdn: false })
-    .fetch(missionsQuery);
+  // 🔥 3. EL NUEVO COLADOR SUPER VELOZ 🔥
+  // Leemos los JSON y buscamos solo los que tienen la "etiqueta" del juego actual
+  const gameSessions: { date: string; metrics: any }[] = [];
 
-  const missionsMap: Record<string, string> = {};
-  allMissions.forEach((m: any) => {
-    if (m._id && m.gameType) {
-      missionsMap[m._id] = m.gameType;
-    }
+  kidData.sessionsHistory?.forEach((session: any) => {
+    session.telemetryData?.forEach((telemetryString: string) => {
+      try {
+        const parsed = JSON.parse(telemetryString);
+        // Si la telemetría dice que es este juego, la guardamos para las gráficas
+        if (parsed.gameType === gameType) {
+          gameSessions.push({ date: session.date, metrics: parsed.metrics });
+        }
+      } catch (e) {
+        console.error("Error leyendo JSON de telemetría", e);
+      }
+    });
   });
 
-  // 4. PASAMOS POR EL COLADOR: Extraemos solo las sesiones de ESTE juego
-  const gameSessions = extractGameTelemetryByDate(
-    kidData.sessionsHistory || [],
-    gameType,
-    missionsMap,
-  );
-
-  // ... (A PARTIR DE AQUÍ EL RETURN QUEDA EXACTAMENTE IGUAL)
   return (
     <div className="max-w-5xl mx-auto md:p-8 space-y-8 font-sans animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* CABECERA */}
@@ -88,7 +81,7 @@ export default async function GameClinicalReportPage({
         </div>
       </div>
 
-      {/* DICCIONARIO CLÍNICO (Leyenda para el Terapeuta) */}
+      {/* DICCIONARIO CLÍNICO */}
       <Card className="rounded-[2rem] border-none shadow-sm bg-slate-900 text-white overflow-hidden relative">
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <Activity className="w-48 h-48" />
@@ -130,7 +123,6 @@ export default async function GameClinicalReportPage({
         {gameSessions.length > 0 ? (
           <div className="space-y-6">
             {gameSessions.map((session, index) => {
-              // Formateamos la fecha de la sesión
               const dateObj = new Date(`${session.date}T12:00:00`);
               const formattedDate = dateObj.toLocaleDateString("es-ES", {
                 weekday: "long",
@@ -155,16 +147,12 @@ export default async function GameClinicalReportPage({
 
                   <CardContent className="p-6">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                      {/* Recorremos el diccionario para asegurar el orden y pintar solo lo importante */}
                       {Object.entries(gameDictionary.metrics).map(
                         ([metricKey, metricDef]) => {
                           const rawValue = session.metrics[metricKey];
-
-                          // Si la métrica no existe en este JSON, mostramos "N/D"
                           if (rawValue === undefined || rawValue === null)
                             return null;
 
-                          // Formateo visual (Añadir % o ms)
                           let displayValue = rawValue.toString();
                           if (metricDef.isPercentage)
                             displayValue = `${rawValue}%`;
@@ -198,10 +186,8 @@ export default async function GameClinicalReportPage({
               No hay datos clínicos aún
             </h3>
             <p className="text-slate-500 max-w-md mx-auto">
-              El cadete {kidData.alias} aún no ha completado ninguna misión de
-              este tipo. Asigna misiones de{" "}
-              <strong>{gameDictionary.title}</strong> para comenzar a generar
-              métricas.
+              El cadete {kidData.alias} aún no ha completado misiones de{" "}
+              <strong>{gameDictionary.title}</strong> bajo este nuevo sistema.
             </p>
           </div>
         )}

@@ -30,11 +30,9 @@ export default async function DashboardPage() {
     }
   }`;
 
-  const kids = await client.fetch(
-    query,
-    { sanityUserId, today },
-    { cache: "no-store" },
-  );
+  const kids = await client
+    .withConfig({ useCdn: false })
+    .fetch(query, { sanityUserId, today }, { cache: "no-store" });
 
   // 3. Calculamos la data global
   const totalEnergy = kids.reduce(

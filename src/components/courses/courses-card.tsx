@@ -1,7 +1,9 @@
 "use client";
 import Link from "next/link";
+// 🔥 1. Importamos useRef y useEffect
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Clock, ArrowRight, CheckCircle2, ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -28,22 +30,72 @@ export default function CoursesCard({
   asButton = false,
   actionSlot,
 }: CoursesCardProps) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // 🔥 2. Creamos una referencia a la etiqueta <img>
+  const imgRef = useRef<HTMLImageElement>(null);
+
   const isCompleted = progress === 100;
   const isStarted = progress > 0 && progress < 100;
+
+  const safeImage = image || "";
+
+  // 🔥 3. El truco anti-caché: Verificamos si la imagen ya estaba lista
+  useEffect(() => {
+    if (imgRef.current && imgRef.current.complete) {
+      // Si la imagen cargó instantáneamente de la caché, forzamos el estado a true
+      setIsImageLoaded(true);
+    }
+  }, [safeImage]); // Se vuelve a ejecutar si la URL de la imagen cambia
 
   // El diseño visual interior, semánticamente limpio
   const InteriorDesign = (
     <>
       {/* Portada del Curso */}
-      <div className="h-48 relative w-full bg-slate-100 overflow-hidden shrink-0">
-        <img
-          src={image || "/placeholder-image.jpg"}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
+      <div className="h-48 relative w-full bg-slate-100 overflow-hidden shrink-0 group">
+        {/* ESTADO DE CARGA (SKELETON) */}
+        {!isImageLoaded && !imageError && (
+          <div className="absolute inset-0 bg-slate-200 animate-pulse flex items-center justify-center z-0">
+            <div className="w-10 h-10 rounded-full bg-slate-300/50 flex items-center justify-center animate-bounce">
+              <div className="w-4 h-4 bg-slate-400 rounded-full" />
+            </div>
+          </div>
+        )}
+
+        {/* ESTADO DE ERROR (Si la imagen se rompe) */}
+        {imageError && (
+          <div className="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center text-slate-400 z-0">
+            <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+            <span className="text-xs font-medium">Sin portada</span>
+          </div>
+        )}
+
+        {/* LA IMAGEN REAL NATIVA */}
+        {safeImage && !imageError && (
+          <img
+            ref={imgRef} // 🔥 4. Le pasamos la referencia
+            src={safeImage}
+            alt={title}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setIsImageLoaded(true)}
+            onError={() => {
+              setIsImageLoaded(true);
+              setImageError(true);
+            }}
+            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 relative z-10 ${
+              isImageLoaded ? "opacity-100" : "opacity-0 scale-110"
+            }`}
+          />
+        )}
+
+        {/* Overlay sutil para que los badges siempre se lean bien */}
+        <div className="absolute inset-0 bg-linear-to-t from-transparent to-slate-900/10 pointer-events-none z-20" />
+
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-30">
           {level && (
-            <Badge className="bg-white/90 text-slate-800 hover:bg-white border-none shadow-sm font-bold capitalize pointer-events-none">
+            <Badge className="bg-white/95 text-slate-800 hover:bg-white border-none shadow-sm font-bold capitalize pointer-events-none backdrop-blur-sm">
               Nivel: {level}
             </Badge>
           )}
@@ -61,7 +113,6 @@ export default function CoursesCard({
           {title}
         </h3>
 
-        {/* Usamos un div en lugar de p si description viene con HTML rico, pero como es string plano en tu schema, p está bien */}
         <p className="text-slate-500 text-sm mb-6 line-clamp-3 grow leading-relaxed">
           {description}
         </p>

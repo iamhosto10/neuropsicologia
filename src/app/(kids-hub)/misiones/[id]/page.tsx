@@ -1,12 +1,9 @@
-// src/app/(kids-hub)/misiones/[id]/page.tsx
 import { client } from "@/sanity/lib/client";
 import { notFound, redirect } from "next/navigation";
-import AsteroidFieldGame from "@/components/games/asteroid-field-game";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { getActiveKidId } from "@/app/actions/profile.actions";
-
+import AsteroidFieldGame from "@/components/games/asteroid-field-game";
 import MemoryMatrixGame from "@/components/games/memory-matrix-game";
 import MultitaskEvasionGame from "@/components/games/multitask-evasion-game";
 import ReverseCommunicatorGame from "@/components/games/reverse-communicator-game";
@@ -17,23 +14,39 @@ import NebulaStormGame from "@/components/games/nebula-storm-game";
 import SignalDecoderGame from "@/components/games/signal-decoder-game";
 import NavigationGame from "@/components/games/navigation-game";
 
-const getMissionQuery = `*[_type == "mission" && _id == $id][0]`;
+// 🔥 LA MAGIA: Buscamos la sesión que contenga una misión con este _key específico
+const getMissionByKeyQuery = `
+  *[_type == "dailySession" && $id in missions[]._key][0]{
+    "kidId": kidProfile._ref,
+    "mission": missions[_key == $id][0]
+  }
+`;
 
 export default async function MissionPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const kidId = (await getActiveKidId()) + "";
+  const { id } = await params; // id = el _key del objeto
+  const data = await client.fetch(
+    getMissionByKeyQuery,
+    { id },
+    { cache: "no-store" },
+  );
 
-  const { id } = await params;
-  console.log("Cargando misión con ID:", id);
+  if (!data || !data.mission) notFound();
 
-  const mission = await client.fetch(getMissionQuery, { id });
+  const { kidId, mission } = data;
 
-  if (!mission) {
-    notFound();
-  }
+  // Configuramos el objeto maestro que reciben todos los juegos
+  const gameConfig = {
+    title: mission.title || "Misión Terapéutica",
+    difficulty: mission.difficulty || "medium",
+    duration: mission.timeLimit ?? 60,
+    kidId: kidId,
+    missionId: id, // Seguimos pasando el _key para que el Server Action sepa cuál completar
+    energyReward: mission.energyReward ?? 50,
+  };
 
   return (
     <div className="w-full h-full flex flex-col relative animate-in fade-in duration-700">
@@ -51,122 +64,34 @@ export default async function MissionPage({
 
       <div className="flex-1 flex items-center justify-center">
         {mission.gameType === "asteroids_go_nogo" && (
-          <AsteroidFieldGame
-            config={{
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <AsteroidFieldGame config={gameConfig} />
         )}
         {mission.gameType === "simon_says_reverse" && (
-          <MemoryMatrixGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <MemoryMatrixGame config={gameConfig} />
         )}
         {mission.gameType === "multitask_evasion" && (
-          <MultitaskEvasionGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <MultitaskEvasionGame config={gameConfig} />
         )}
         {mission.gameType === "reverse_communicator" && (
-          <ReverseCommunicatorGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <ReverseCommunicatorGame config={gameConfig} />
         )}
         {mission.gameType === "satellite_tracker" && (
-          <SatelliteTrackerGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <SatelliteTrackerGame config={gameConfig} />
         )}
-
         {mission.gameType === "space_cleanup" && (
-          <SpaceCleanupGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <SpaceCleanupGame config={gameConfig} />
         )}
         {mission.gameType === "cargo_n_back" && (
-          <CargoLaboratoryGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <CargoLaboratoryGame config={gameConfig} />
         )}
         {mission.gameType === "nebula_storm" && (
-          <NebulaStormGame
-            config={{
-              title: mission.title,
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 30,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <NebulaStormGame config={gameConfig} />
         )}
         {mission.gameType === "signal_decoder" && (
-          <SignalDecoderGame
-            config={{
-              title: mission.title,
-              duration: mission.timeLimit ?? 10,
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <SignalDecoderGame config={gameConfig} />
         )}
         {mission.gameType === "navigation" && (
-          <NavigationGame
-            config={{
-              difficulty: mission.difficulty,
-              duration: mission.timeLimit ?? 120, // Le damos 120s por defecto porque requiere pensar
-              kidId: kidId,
-              missionId: id,
-              energyReward: mission.energyReward,
-            }}
-          />
+          <NavigationGame config={gameConfig} />
         )}
       </div>
     </div>

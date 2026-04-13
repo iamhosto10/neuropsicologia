@@ -22,7 +22,12 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
           let calculatedAccuracy = 0;
           const metrics = data.metrics || {};
 
-          if (
+          // --- LÓGICA DE DETECCIÓN DE JUEGOS ---
+
+          if (metrics.accuracyRate !== undefined) {
+            // 🔥 NUEVO: Juegos con Tasa de Precisión pre-calculada (Ej: Propulsores Warp / Suma Continua)
+            calculatedAccuracy = metrics.accuracyRate;
+          } else if (
             metrics.correctClicks !== undefined &&
             metrics.incorrectClicks !== undefined
           ) {
@@ -34,10 +39,10 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
             // Juegos basados en acierto/fallo (Ej: Go/No-Go o Reverse Communicator)
             calculatedAccuracy = metrics.success === true ? 100 : 0;
           } else if (metrics.efficiencyScore !== undefined) {
-            // 🔥 NUEVO: Juegos de Planificación (Ej: Ruta de Navegación)
-            // Usamos el índice de eficiencia de ruta (0-100%) como precisión global
+            // Juegos de Planificación (Ej: Ruta de Navegación)
             calculatedAccuracy = metrics.efficiencyScore;
           }
+
           allEvents.push({ ...data, date: safeDate, calculatedAccuracy });
         } catch (e) {
           console.error("Error parseando telemetría:", e);

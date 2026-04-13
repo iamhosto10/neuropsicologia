@@ -13,6 +13,7 @@ import CargoLaboratoryGame from "../games/cargo-laboratory-game";
 import NebulaStormGame from "../games/nebula-storm-game";
 import SignalDecoderGame from "../games/signal-decoder-game";
 import NavigationGame from "../games/navigation-game";
+import WarpDriveGame from "../games/warp-drive-game";
 import config from "../../../sanity.config";
 
 export default function InlineGameWrapper({ value }: { value: any }) {
@@ -77,6 +78,8 @@ export default function InlineGameWrapper({ value }: { value: any }) {
         return <SignalDecoderGame config={gameConfig} />;
       case "navigation":
         return <NavigationGame config={gameConfig} />;
+      case "warp_drive":
+        return <WarpDriveGame config={gameConfig} />;
       default:
         return <SpaceCleanupGame config={gameConfig} />;
     }

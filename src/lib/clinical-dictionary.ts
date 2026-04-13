@@ -300,4 +300,41 @@ export const CLINICAL_DICTIONARY: Record<string, GameDictionary> = {
       },
     },
   },
+  warp_drive: {
+    title: "Propulsores Warp",
+    domain: "Memoria de Trabajo y Velocidad de Procesamiento",
+    description:
+      "Basado en pruebas PASAT (Suma Continua). Evalúa la memoria de trabajo operativa (retener un valor que cambia constantemente) y la velocidad de procesamiento matemático bajo presión de tiempo.",
+    metrics: {
+      accuracyRate: {
+        label: "Precisión Global",
+        description: "Porcentaje de sumas correctas frente a intentos totales.",
+        isPercentage: true,
+      },
+      avgReactionTimeMs: {
+        label: "T. Reacción Promedio",
+        description:
+          "Milisegundos promedio que tarda el cadete en resolver mentalmente y tocar la pantalla.",
+        isTime: true,
+      },
+      correctAnswers: {
+        label: "Sumas Correctas",
+        description: "Total de ecuaciones resueltas exitosamente.",
+      },
+      errorCount: {
+        label: "Errores (Impulsividad)",
+        description:
+          "Toques en opciones incorrectas. Un número alto sugiere respuestas impulsivas.",
+      },
+      maxStreak: {
+        label: "Foco Sostenido (Racha)",
+        description: "Mayor cantidad de aciertos consecutivos sin equivocarse.",
+      },
+      totalEquations: {
+        label: "Volumen de Procesamiento",
+        description:
+          "Total de sumas que el cadete logró procesar en el tiempo límite.",
+      },
+    },
+  },
 };

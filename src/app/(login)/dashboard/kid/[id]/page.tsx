@@ -173,7 +173,12 @@ export default async function KidReportPage({
       "asteroids_go_nogo",
       "multitask_evasion",
     ],
-    memoria: ["simon_says_reverse", "cargo_n_back", "reverse_communicator"],
+    memoria: [
+      "simon_says_reverse",
+      "cargo_n_back",
+      "reverse_communicator",
+      "warp_drive",
+    ],
     procesamiento: ["nebula_storm", "signal_decoder", "navigation"],
   };
 

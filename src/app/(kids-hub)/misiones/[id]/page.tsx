@@ -13,6 +13,7 @@ import CargoLaboratoryGame from "@/components/games/cargo-laboratory-game";
 import NebulaStormGame from "@/components/games/nebula-storm-game";
 import SignalDecoderGame from "@/components/games/signal-decoder-game";
 import NavigationGame from "@/components/games/navigation-game";
+import WarpDriveGame from "@/components/games/warp-drive-game";
 
 // 🔥 LA MAGIA: Buscamos la sesión que contenga una misión con este _key específico
 const getMissionByKeyQuery = `
@@ -92,6 +93,9 @@ export default async function MissionPage({
         )}
         {mission.gameType === "navigation" && (
           <NavigationGame config={gameConfig} />
+        )}
+        {mission.gameType === "warp_drive" && (
+          <WarpDriveGame config={gameConfig} />
         )}
       </div>
     </div>

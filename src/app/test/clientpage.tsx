@@ -43,6 +43,7 @@ const games = [
     title: "Ruta de Navegación (Planificación Ejecutiva)",
     gameType: "navigation",
   },
+  { title: "Propulsores Warp (Suma Continua)", gameType: "warp_drive" },
 ];
 
 const ClientPage = () => {

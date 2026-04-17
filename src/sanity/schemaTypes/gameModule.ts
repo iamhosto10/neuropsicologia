@@ -42,6 +42,7 @@ export const gameModule = defineType({
             title: "Ruta de Navegación (Planificación Ejecutiva)",
             value: "navigation",
           },
+          { title: "Propulsores Warp (Suma Continua)", value: "warp_drive" },
         ],
         layout: "dropdown",
       },

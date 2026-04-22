@@ -30,6 +30,80 @@ interface EngineConfig {
   ) => void;
 }
 
+// // 🔥 BANCO DE MUNDOS (Progresión continua)
+// const LEVEL_BANK = [
+//   {
+//     size: 4,
+//     start: { x: 0, y: 3 },
+//     end: { x: 3, y: 0 },
+//     obstacles: [
+//       { x: 1, y: 2 },
+//       { x: 2, y: 1 },
+//     ],
+//   }, // 0: Muy fácil
+//   {
+//     size: 4,
+//     start: { x: 0, y: 0 },
+//     end: { x: 3, y: 3 },
+//     obstacles: [
+//       { x: 1, y: 0 },
+//       { x: 1, y: 2 },
+//       { x: 2, y: 3 },
+//     ],
+//   }, // 1: Fácil
+//   {
+//     size: 5,
+//     start: { x: 0, y: 4 },
+//     end: { x: 4, y: 0 },
+//     obstacles: [
+//       { x: 1, y: 3 },
+//       { x: 2, y: 2 },
+//       { x: 3, y: 1 },
+//       { x: 4, y: 2 },
+//     ],
+//   }, // 2: Medio diagonal
+//   {
+//     size: 5,
+//     start: { x: 0, y: 0 },
+//     end: { x: 4, y: 4 },
+//     obstacles: [
+//       { x: 1, y: 1 },
+//       { x: 2, y: 1 },
+//       { x: 1, y: 3 },
+//       { x: 3, y: 3 },
+//       { x: 4, y: 2 },
+//       { x: 2, y: 4 },
+//     ],
+//   }, // 3: Medio laberinto
+//   {
+//     size: 6,
+//     start: { x: 0, y: 5 },
+//     end: { x: 5, y: 0 },
+//     obstacles: [
+//       { x: 0, y: 3 },
+//       { x: 1, y: 3 },
+//       { x: 2, y: 3 },
+//       { x: 4, y: 2 },
+//       { x: 4, y: 1 },
+//       { x: 2, y: 5 },
+//     ],
+//   }, // 4: Difícil muro
+//   {
+//     size: 6,
+//     start: { x: 0, y: 0 },
+//     end: { x: 5, y: 5 },
+//     obstacles: [
+//       { x: 1, y: 0 },
+//       { x: 1, y: 1 },
+//       { x: 1, y: 2 },
+//       { x: 3, y: 5 },
+//       { x: 3, y: 4 },
+//       { x: 3, y: 3 },
+//       { x: 5, y: 1 },
+//     ],
+//   }, // 5: Difícil zig zag
+// ];
+
 // 🔥 BANCO DE MUNDOS (Progresión continua)
 const LEVEL_BANK = [
   {
@@ -70,7 +144,7 @@ const LEVEL_BANK = [
       { x: 1, y: 1 },
       { x: 2, y: 1 },
       { x: 1, y: 3 },
-      { x: 3, y: 3 },
+      { x: 3, y: 2 },
       { x: 4, y: 2 },
       { x: 2, y: 4 },
     ],
@@ -102,6 +176,96 @@ const LEVEL_BANK = [
       { x: 5, y: 1 },
     ],
   }, // 5: Difícil zig zag
+  {
+    size: 7,
+    start: { x: 0, y: 6 },
+    end: { x: 6, y: 0 },
+    obstacles: [
+      { x: 0, y: 3 },
+      { x: 1, y: 3 }, // Muro horizontal izquierdo
+      { x: 3, y: 0 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+      { x: 3, y: 4 },
+      { x: 3, y: 5 },
+      { x: 3, y: 6 }, // Muro central (hueco en y=2)
+      { x: 4, y: 1 },
+      { x: 5, y: 1 }, // Muro horizontal derecho
+    ],
+  }, // 6: Experto Var 1 - El Laberinto en Z
+  {
+    size: 7,
+    start: { x: 0, y: 0 },
+    end: { x: 6, y: 6 },
+    obstacles: [
+      { x: 0, y: 2 },
+      { x: 1, y: 2 },
+      { x: 2, y: 2 },
+      { x: 3, y: 2 },
+      { x: 4, y: 2 },
+      { x: 5, y: 2 }, // Muro superior
+      { x: 1, y: 4 },
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+      { x: 4, y: 4 },
+      { x: 5, y: 4 },
+      { x: 6, y: 4 }, // Muro inferior
+    ],
+  }, // 7: Experto Var 2 - La Serpiente S
+  {
+    size: 7,
+    start: { x: 0, y: 6 },
+    end: { x: 6, y: 0 },
+    obstacles: [
+      { x: 1, y: 1 },
+      { x: 1, y: 3 },
+      { x: 1, y: 5 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+      { x: 3, y: 5 },
+      { x: 5, y: 1 },
+      { x: 5, y: 3 },
+      { x: 5, y: 5 },
+      { x: 2, y: 4 },
+      { x: 4, y: 2 }, // Trampas adicionales
+    ],
+  }, // 8: Experto Var 3 - Campo de Pilares
+  {
+    size: 7,
+    start: { x: 3, y: 6 },
+    end: { x: 3, y: 0 },
+    obstacles: [
+      { x: 2, y: 2 },
+      { x: 3, y: 2 },
+      { x: 4, y: 2 }, // Techo central
+      { x: 2, y: 3 },
+      { x: 4, y: 3 }, // Paredes centrales
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+      { x: 4, y: 4 }, // Suelo central
+      { x: 0, y: 3 },
+      { x: 1, y: 3 },
+      { x: 5, y: 3 },
+      { x: 6, y: 3 }, // Brazos laterales
+    ],
+  }, // 9: Experto Var 4 - Cruce Peligroso
+  {
+    size: 7,
+    start: { x: 0, y: 6 },
+    end: { x: 6, y: 0 },
+    obstacles: [
+      { x: 1, y: 5 },
+      { x: 2, y: 5 },
+      { x: 2, y: 4 },
+      { x: 3, y: 4 },
+      { x: 3, y: 3 },
+      { x: 4, y: 3 },
+      { x: 4, y: 2 },
+      { x: 5, y: 2 },
+      { x: 5, y: 1 },
+      { x: 6, y: 1 },
+    ],
+  }, // 6: Experto - Laberinto en Z (Size 7x7)
 ];
 
 export function useNavigationEngine({
@@ -149,7 +313,7 @@ export function useNavigationEngine({
           firstMoveTimeRef.current - levelStartTimeRef.current,
         );
       }
-      setCommands((prev) => (prev.length < 20 ? [...prev, dir] : prev));
+      setCommands((prev) => (prev.length < 60 ? [...prev, dir] : prev));
     },
     [gameState, commands.length],
   );

@@ -43,6 +43,18 @@ export const gameModule = defineType({
             value: "navigation",
           },
           { title: "Propulsores Warp (Suma Continua)", value: "warp_drive" },
+          {
+            title: "Acoplamiento Estelar (Rotación Mental)",
+            value: "star_docking",
+          },
+          {
+            title: "Desensamblaje del Casco (Planificación Ejecutiva)",
+            value: "hull_disassembly",
+          },
+          {
+            title: "Laboratorio de Fluidos (Planificación y Torre de Hanoi)",
+            value: "water_sort",
+          },
         ],
         layout: "dropdown",
       },

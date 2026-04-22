@@ -178,8 +178,15 @@ export default async function KidReportPage({
       "cargo_n_back",
       "reverse_communicator",
       "warp_drive",
+      "water_sort",
     ],
-    procesamiento: ["nebula_storm", "signal_decoder", "navigation"],
+    procesamiento: [
+      "nebula_storm",
+      "signal_decoder",
+      "navigation",
+      "star_docking",
+      "hull_disassembly",
+    ],
   };
 
   // Helper para renderizar las tarjetas de juegos

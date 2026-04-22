@@ -337,4 +337,101 @@ export const CLINICAL_DICTIONARY: Record<string, GameDictionary> = {
       },
     },
   },
+  star_docking: {
+    title: "Acoplamiento Estelar",
+    domain: "Habilidades Visoespaciales y Rotación Mental",
+    description:
+      "Evaluación de la capacidad de rotación mental y orientación espacial. El cadete debe alinear la orientación de su nave con el puerto de la estación, trabajando la percepción de ángulos y la precisión psicomotora.",
+    metrics: {
+      successfulDocks: {
+        label: "Acoples Exitosos",
+        description:
+          "Cantidad de veces que logró alinear la nave dentro del margen de error permitido.",
+      },
+      failedDocks: {
+        label: "Fallas de Alineación",
+        description:
+          "Intentos donde se presionó acoplar pero la nave no estaba alineada.",
+      },
+      averageErrorMargin: {
+        label: "Precisión Angular Media",
+        description:
+          "Promedio de grados de desviación en cada intento. A menor número, mejor precisión visoespacial.",
+      },
+      averageDecisionTime: {
+        label: "Tiempo de Procesamiento Espacial",
+        description:
+          "Tiempo promedio que tarda el cadete en calcular la rotación y ejecutar la acción.",
+        isTime: true,
+      },
+      totalAttempts: {
+        label: "Volumen de Intentos",
+        description:
+          "Total de veces que el cadete intentó realizar la maniobra de acoplamiento.",
+      },
+    },
+  },
+  hull_disassembly: {
+    title: "Desensamblaje del Casco",
+    domain: "Planificación y Función Ejecutiva",
+    description:
+      "Evaluación basada en la Torre de Londres y resolución de problemas visoespaciales. Mide la capacidad del paciente para anticipar consecuencias, planificar secuencias lógicas y evitar bloqueos (deadlocks).",
+    metrics: {
+      stagesCompleted: {
+        label: "Sectores Despejados",
+        description:
+          "Cantidad de laberintos lógicos resueltos con éxito. A mayor número, mayor agilidad mental y resolución de problemas.",
+      },
+      invalidMoves: {
+        label: "Errores de Planificación",
+        description:
+          "Veces que el cadete intentó mover un tornillo a un agujero bloqueado por una placa. Indica impulsividad o falta de anticipación visual.",
+      },
+      totalMoves: {
+        label: "Volumen de Maniobras",
+        description:
+          "Cantidad total de tornillos movidos. Útil para contrastar con los errores y medir la eficiencia de la estrategia.",
+      },
+      averageTimePerMoveMs: {
+        label: "Tiempo de Decisión",
+        description:
+          "Tiempo promedio (en milisegundos) que el cadete observa el tablero antes de mover una pieza. Tiempos muy cortos con altos errores indican impulsividad severa.",
+        isTime: true,
+      },
+    },
+  },
+  water_sort: {
+    title: "Laboratorio de Fluidos",
+    domain: "Planificación y Automonitoreo (Función Ejecutiva)",
+    description:
+      "Adaptación del paradigma de la Torre de Hanoi y clasificación categórica. Evalúa la capacidad del paciente para sostener información en la memoria de trabajo, anticipar movimientos múltiples y tolerar la frustración.",
+    metrics: {
+      stagesCompleted: {
+        label: "Compuestos Sintetizados",
+        description:
+          "Cantidad de niveles completados exitosamente. Mide la persistencia y capacidad de resolución de problemas complejos.",
+      },
+      invalidPours: {
+        label: "Derrames Inválidos (Impulsividad)",
+        description:
+          "Veces que intentó verter líquido en un tubo lleno o de distinto color. Un número alto indica falla en la inhibición de impulsos.",
+      },
+      undosUsed: {
+        label: "Uso de Autocorrección (Deshacer)",
+        description:
+          "Veces que el paciente reconoció un error estratégico y retrocedió. Indica un buen nivel de flexibilidad cognitiva y automonitoreo.",
+      },
+      totalMoves: {
+        label: "Volumen de Movimientos",
+        description:
+          "Total de trasvases realizados. Al compararlo con los niveles completados, indica la eficiencia de la planificación del cadete.",
+      },
+      averageDecisionTimeMs: {
+        label: "Tiempo de Planificación",
+        description:
+          "Milisegundos promedio entre cada movimiento. Tiempos muy bajos con altos errores de derrame confirman un perfil impulsivo.",
+        isTime: true,
+      },
+    },
+  },
 };

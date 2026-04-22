@@ -28,6 +28,38 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
             // 🔥 NUEVO: Juegos con Tasa de Precisión pre-calculada (Ej: Propulsores Warp / Suma Continua)
             calculatedAccuracy = metrics.accuracyRate;
           } else if (
+            metrics.successfulDocks !== undefined &&
+            metrics.totalAttempts !== undefined
+          ) {
+            // 🔥 NUEVO: Lógica para Star Docking
+            calculatedAccuracy =
+              metrics.totalAttempts > 0
+                ? (metrics.successfulDocks / metrics.totalAttempts) * 100
+                : 0;
+          } else if (
+            metrics.stagesCompleted !== undefined &&
+            metrics.invalidMoves !== undefined
+          ) {
+            // 🔥 NUEVO: Lógica de Hull Disassembly (Eficiencia de Planificación)
+            // Calculamos la precisión basándonos en la ausencia de movimientos inválidos
+            const totalValidMoves = metrics.totalMoves - metrics.invalidMoves;
+            calculatedAccuracy =
+              metrics.totalMoves > 0
+                ? Math.max(0, (totalValidMoves / metrics.totalMoves) * 100)
+                : 0;
+          } else if (
+            metrics.invalidPours !== undefined &&
+            metrics.undosUsed !== undefined
+          ) {
+            // 🔥 NUEVO: Lógica de Water Sort (Eficiencia Clínica)
+            // Calculamos precisión penalizando errores por impulsividad (invalidPours).
+            // Usar 'undo' es bueno clínicamente, así que no lo penalizamos tan fuerte en la gráfica.
+            const totalValidPours = metrics.totalMoves - metrics.invalidPours;
+            calculatedAccuracy =
+              metrics.totalMoves > 0
+                ? Math.max(0, (totalValidPours / metrics.totalMoves) * 100)
+                : 0;
+          } else if (
             metrics.correctClicks !== undefined &&
             metrics.incorrectClicks !== undefined
           ) {

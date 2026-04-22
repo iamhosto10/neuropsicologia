@@ -44,6 +44,18 @@ const games = [
     gameType: "navigation",
   },
   { title: "Propulsores Warp (Suma Continua)", gameType: "warp_drive" },
+  {
+    title: "Acoplamiento Estelar (Rotación Mental)",
+    gameType: "star_docking",
+  },
+  {
+    title: "Desensamblaje del Casco (Planificación Ejecutiva)",
+    gameType: "hull_disassembly",
+  },
+  {
+    title: "Laboratorio de Fluidos (Planificación y Torre de Hanoi)",
+    gameType: "water_sort",
+  },
 ];
 
 const ClientPage = () => {

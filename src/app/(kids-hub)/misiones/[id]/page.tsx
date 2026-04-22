@@ -14,6 +14,9 @@ import NebulaStormGame from "@/components/games/nebula-storm-game";
 import SignalDecoderGame from "@/components/games/signal-decoder-game";
 import NavigationGame from "@/components/games/navigation-game";
 import WarpDriveGame from "@/components/games/warp-drive-game";
+import StarDockingGame from "@/components/games/star-docking-game";
+import HullDisassemblyGame from "@/components/games/hull-disassembly-game";
+import WaterSortGame from "@/components/games/water-sort-game";
 
 // 🔥 LA MAGIA: Buscamos la sesión que contenga una misión con este _key específico
 const getMissionByKeyQuery = `
@@ -97,6 +100,13 @@ export default async function MissionPage({
         {mission.gameType === "warp_drive" && (
           <WarpDriveGame config={gameConfig} />
         )}
+        {mission.gameType === "star_docking" && (
+          <StarDockingGame config={gameConfig} />
+        )}
+        {mission.gameType === "hull_disassembly" && (
+          <HullDisassemblyGame config={gameConfig} />
+        )}
+        {mission.gameType === "" && <WaterSortGame config={gameConfig} />}
       </div>
     </div>
   );

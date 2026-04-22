@@ -15,6 +15,9 @@ import SignalDecoderGame from "../games/signal-decoder-game";
 import NavigationGame from "../games/navigation-game";
 import WarpDriveGame from "../games/warp-drive-game";
 import config from "../../../sanity.config";
+import StarDockingGame from "../games/star-docking-game";
+import HullDisassemblyGame from "../games/hull-disassembly-game";
+import WaterSortGame from "../games/water-sort-game";
 
 export default function InlineGameWrapper({ value }: { value: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -49,7 +52,7 @@ export default function InlineGameWrapper({ value }: { value: any }) {
   const gameConfig = {
     title: title || "Laboratorio",
     difficulty: difficulty || "easy",
-    duration: 30,
+    duration: 200,
     kidId: "practice-mode",
     missionId: `practice-${Math.random()}`,
     energyReward: 0,
@@ -80,6 +83,12 @@ export default function InlineGameWrapper({ value }: { value: any }) {
         return <NavigationGame config={gameConfig} />;
       case "warp_drive":
         return <WarpDriveGame config={gameConfig} />;
+      case "star_docking":
+        return <StarDockingGame config={gameConfig} />;
+      case "hull_disassembly":
+        return <HullDisassemblyGame config={gameConfig} />;
+      case "water_sort":
+        return <WaterSortGame config={gameConfig} />;
       default:
         return <SpaceCleanupGame config={gameConfig} />;
     }

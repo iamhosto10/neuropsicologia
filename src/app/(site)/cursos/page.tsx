@@ -26,7 +26,7 @@ export default async function CursosPage() {
   const allCourses =
     await client.fetch(`*[_type == "course"] | order(_createdAt desc) {
     _id, title, description, "image": image.asset->url, "slug": slug.current, duration, level
-  }`);
+  }`, {}, { next: { revalidate: 60 } });
 
   // 2. Revisamos si hay un cadete (niño) activo en la tablet
   const cookieStore = await cookies();
@@ -36,13 +36,14 @@ export default async function CursosPage() {
 
   if (activeKidId) {
     // Si hay un niño, buscamos específicamente qué cursos le asignó su terapeuta
-    const kidData = await client.fetch(
+    const kidData = await client.withConfig({ useCdn: false }).fetch(
       `*[_type == "kidProfile" && _id == $activeKidId][0]{
       assignedCourses[]->{
         _id, title, description, "image": image.asset->url, "slug": slug.current, duration, level
       }
     }`,
       { activeKidId },
+      { cache: "no-store" }, // progreso del niño: siempre fresco
     );
 
     assignedCourses = kidData?.assignedCourses || [];

@@ -18,7 +18,9 @@ export const dynamic = "force-dynamic";
 
 export default async function ActividadesPage() {
   // 1. Traemos el catálogo completo
-  const activities = await client.fetch(getAllActivitiesQuery);
+  // Catálogo: se refresca cada minuto (next-sanity cachea por defecto y
+  // el contenido nuevo del Studio no aparecía)
+  const activities = await client.fetch(getAllActivitiesQuery, {}, { next: { revalidate: 60 } });
 
   // 2. Revisamos si hay un cadete activo
   const cookieStore = await cookies();
@@ -28,13 +30,14 @@ export default async function ActividadesPage() {
 
   if (activeKidId) {
     // Buscamos las actividades asignadas
-    const kidData = await client.fetch(
+    const kidData = await client.withConfig({ useCdn: false }).fetch(
       `*[_type == "kidProfile" && _id == $activeKidId][0]{
       assignedActivities[]->{
         _id, title, description, "slug": slug.current, duration, ageRange, "imageUrl": image.asset->url
       }
     }`,
       { activeKidId },
+      { cache: "no-store" }, // progreso del niño: siempre fresco
     );
     assignedActivities = kidData?.assignedActivities || [];
   }

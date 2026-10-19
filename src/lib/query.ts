@@ -331,7 +331,8 @@ export const getActivityBySlugQuery = `
     objectives,
     materials,
     instructions[]{
-      step,
+      // En el schema el título del paso se llama "title"
+      "step": title,
       description
     },
     videoUrl,

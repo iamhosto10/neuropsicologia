@@ -36,7 +36,7 @@ export async function generateMetadata({
     .fetch(
       getCourseAndLessonQuery,
       { courseSlug, lessonSlug },
-      { cache: "force-cache" },
+      { next: { revalidate: 60 } },
     );
 
   if (!data || !data.currentLesson) {
@@ -85,10 +85,11 @@ export default async function LessonPage({
   const { courseSlug, lessonSlug } = await params;
 
   // 1. Buscamos el curso y la lección
-  const data = await client.fetch(getCourseAndLessonQuery, {
-    courseSlug,
-    lessonSlug,
-  });
+  const data = await client.fetch(
+    getCourseAndLessonQuery,
+    { courseSlug, lessonSlug },
+    { next: { revalidate: 60 } },
+  );
 
   if (!data || !data.currentLesson) notFound();
 
@@ -106,6 +107,7 @@ export default async function LessonPage({
       .fetch(
         `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons, completedQuizzes, completedOpenQuestions}`,
         { kidId },
+        { cache: "no-store" },
       );
     completedLessons = kidData?.completedLessons || [];
     completedQuizzes = kidData?.completedQuizzes || [];

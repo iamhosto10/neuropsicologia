@@ -1,7 +1,9 @@
 // scripts/seed-demo.mjs
 // Crea datos de demo para un cadete: 2 semanas de sesiones con telemetría
-// realista (mejora progresiva), misiones pendientes para hoy, cristales y
-// bitácora de actividades.
+// realista (mejora progresiva), misiones pendientes para hoy, cristales,
+// bitácora y actividades asignadas, y datos académicos: cursos asignados,
+// lecciones completadas, quizzes (con errores y reintentos) y preguntas
+// abiertas respondidas, usando los cursos reales de Sanity.
 //
 // Uso:
 //   node --env-file=.env.local scripts/seed-demo.mjs <kidId>          # crear / actualizar
@@ -263,6 +265,139 @@ function buildMission(gameType, key, difficulty, timeLimit) {
   };
 }
 
+// ---------- Datos académicos (cursos, lecciones, quizzes) ----------
+
+// Avance por curso (por slug): cuántas lecciones completó y si está asignado.
+const COURSE_PLAN = [
+  { slug: "el-codigo-de-navegacion-estelar", completed: 4, assigned: false }, // 100%
+  { slug: "estabilizando-el-reactor-core-86df8", completed: 2, assigned: true }, // en curso
+  { slug: "navegantes-del-hiperespacio", completed: 1, assigned: true }, // recién empezado
+  { slug: "exploradores-del-archivo-galactico", completed: 0, assigned: true }, // sin empezar
+];
+// Días atrás en que completó cada lección (en orden)
+const LESSON_DAYS_AGO = [13, 12, 10, 8, 6, 4, 2];
+const LESSON_REWARD = 10; // markLessonCompleted
+const ACTIVITY_REWARD = 20; // markActivityCompleted
+
+// Respuestas a las preguntas abiertas, como las escribiría un niño.
+// Clave: _key del bloque lessonOpenQuestion en Sanity.
+const OPEN_ANSWERS = {
+  "079597b48ce6": "Nací en 2016. Lo divido en 20 y 16, así es como dos cápsulas: veinte y dieciséis.",
+  "81b8dd184a26": "Mi sonido es PUM PUM. Cada vez que meto un cuaderno en la mochila digo PUM y cuando suenan todos ya está lista.",
+  "3e265b3af67e": "Mi perro Toby se mete dentro de la mochila y se toma toda la botella de agua y después empieza a volar como un cohete hasta la sala de control jaja.",
+  "1e29207f54af": "Mi mamá me dijo que trajera la ropa sucia y el control de la tele y solo traje el control. Si hubiera repetido 'ropa sucia y control' en voz alta no se me olvida.",
+  "47e6e96a-3080-4867-8ee6-daa6403d66ec": "Cuando perdí en el videojuego se me puso la cara caliente y apreté los puños muy fuerte.",
+  "b8269229-0bb1-4aa2-be1b-e66924b9f1f1": "Tranquilo. Se siente como un globo que se desinfla despacito.",
+  "73e0d015-3a94-479a-9a9f-69cfa98d616c": "Bañarme. Voy a poner una canción de 5 minutos y tengo que salir antes de que termine.",
+};
+const FALLBACK_OPEN_ANSWER = "Lo intentaría hacer paso a paso como aprendí en la misión.";
+
+async function buildAcademicData(today) {
+  const courses = await client.fetch(
+    `*[_type == "course" && slug.current in $slugs]{
+      _id, "slug": slug.current,
+      "lessons": syllabus[].lessons[]->{
+        _id, title,
+        "quizzes": content[_type == "lessonQuestion"]{_key, options, correctOptionIndex, reward},
+        "openQuestions": content[_type == "lessonOpenQuestion"]{_key, reward}
+      }
+    }`,
+    { slugs: COURSE_PLAN.map((c) => c.slug) },
+  );
+  const bySlug = Object.fromEntries(courses.map((c) => [c.slug, c]));
+
+  const completedLessons = [];
+  const completedQuizzes = [];
+  const completedOpenQuestions = [];
+  const academicTelemetry = [];
+  const assignedCourses = [];
+  let crystals = 0;
+  let lessonIndex = 0;
+  let recordIndex = 0;
+  const missingCourses = [];
+
+  const record = (fields) => ({ _key: `demo-acad-${recordIndex++}`, ...fields });
+  const at = (daysAgo, minutes) => {
+    const h = 18 + Math.floor(minutes / 60);
+    const m = String(minutes % 60).padStart(2, "0");
+    return `${addDays(today, -daysAgo)}T${h}:${m}:00-05:00`;
+  };
+
+  for (const plan of COURSE_PLAN) {
+    const course = bySlug[plan.slug];
+    if (!course) {
+      missingCourses.push(plan.slug);
+      continue;
+    }
+    if (plan.assigned) {
+      assignedCourses.push({ _key: `demo-course-${course._id}`, _type: "reference", _ref: course._id });
+    }
+
+    const lessons = (course.lessons || []).filter(Boolean).slice(0, plan.completed);
+    for (const lesson of lessons) {
+      const daysAgo = LESSON_DAYS_AGO[Math.min(lessonIndex, LESSON_DAYS_AGO.length - 1)];
+      // Más errores en las primeras lecciones; mejora con el tiempo
+      const errorChance = lerp(0.75, 0.2, lessonIndex / (LESSON_DAYS_AGO.length - 1));
+      let minute = 0;
+
+      for (const q of lesson.quizzes || []) {
+        const options = q.options || [];
+        const wrongFirst = rand() < errorChance && options.length > 1;
+        if (wrongFirst) {
+          const wrong = (q.correctOptionIndex + 1 + Math.floor(rand() * (options.length - 1))) % options.length;
+          academicTelemetry.push(record({
+            _type: "quizRecord", lessonId: lesson._id, blockKey: q._key,
+            isCorrect: false, selected: options[wrong], timestamp: at(daysAgo, (minute += 3)),
+          }));
+        }
+        // Reintenta (o acierta a la primera)
+        academicTelemetry.push(record({
+          _type: "quizRecord", lessonId: lesson._id, blockKey: q._key,
+          isCorrect: true, selected: options[q.correctOptionIndex], timestamp: at(daysAgo, (minute += 2)),
+        }));
+        completedQuizzes.push(`${lesson._id}-${q._key}`);
+        crystals += q.reward || 0;
+      }
+
+      for (const oq of lesson.openQuestions || []) {
+        academicTelemetry.push(record({
+          _type: "openQuestionRecord", lessonId: lesson._id, blockKey: oq._key,
+          responseText: OPEN_ANSWERS[oq._key] || FALLBACK_OPEN_ANSWER, timestamp: at(daysAgo, (minute += 4)),
+        }));
+        completedOpenQuestions.push(`${lesson._id}-${oq._key}`);
+        crystals += oq.reward || 0;
+      }
+
+      completedLessons.push(lesson._id);
+      crystals += LESSON_REWARD;
+      lessonIndex++;
+    }
+  }
+
+  return {
+    completedLessons, completedQuizzes, completedOpenQuestions,
+    academicTelemetry, assignedCourses, crystals, missingCourses,
+  };
+}
+
+// Quita del niño lo que haya sembrado una corrida anterior (para ser idempotente)
+function withoutDemo(kid, demo) {
+  const minus = (arr, remove) => (arr || []).filter((x) => !remove.includes(x));
+  const notDemoKey = (arr) => (arr || []).filter((x) => !String(x?._key || "").startsWith("demo-"));
+  return {
+    completedLessons: minus(kid.completedLessons, demo.completedLessons),
+    completedQuizzes: minus(kid.completedQuizzes, demo.completedQuizzes),
+    completedOpenQuestions: minus(kid.completedOpenQuestions, demo.completedOpenQuestions),
+    completedActivities: minus(kid.completedActivities, demo.completedActivities),
+    academicTelemetry: notDemoKey(kid.academicTelemetry),
+    assignedCourses: notDemoKey(kid.assignedCourses),
+    assignedActivities: notDemoKey(kid.assignedActivities),
+  };
+}
+
+const KID_ACADEMIC_FIELDS = `completedLessons, completedQuizzes, completedOpenQuestions,
+  completedActivities, academicTelemetry, assignedCourses, assignedActivities`;
+
 // ---------- Main ----------
 
 async function clean() {
@@ -270,11 +405,17 @@ async function clean() {
     `*[_type == "dailySession" && _id match $prefix]._id`,
     { prefix: `${DEMO_PREFIX}*` },
   );
+  const today = todayYmd();
+  const demo = await buildAcademicData(today);
+  const activities = await client.fetch(`*[_type == "activity"] | order(_createdAt asc)[0...3]._id`);
+  const kid = await client.fetch(`*[_id == $kidId][0]{${KID_ACADEMIC_FIELDS}}`, { kidId });
   const tx = client.transaction();
   ids.forEach((id) => tx.delete(id));
-  tx.patch(kidId, (p) => p.unset(unsetDemoActivities));
+  tx.patch(kidId, (p) =>
+    p.unset(unsetDemoActivities).set(withoutDemo(kid || {}, { ...demo, completedActivities: activities })),
+  );
   await tx.commit();
-  console.log(`🧹 Borradas ${ids.length} sesiones de demo y la bitácora de demo.`);
+  console.log(`🧹 Borradas ${ids.length} sesiones de demo, la bitácora y los datos académicos de demo.`);
 }
 
 async function seed() {
@@ -351,24 +492,53 @@ async function seed() {
     });
   }
 
-  // Bitácora de actividades físicas (referencias a actividades reales)
+  // Actividades físicas: completó la 1ª y la 3ª (con reflexión), tiene asignada la 2ª
   const activities = await client.fetch(`*[_type == "activity"] | order(_createdAt asc)[0...3]{_id}`);
-  const moods = ["frustrado", "normal", "feliz"];
-  const activityLog = activities.map((a, j) => ({
+  const doneActivities = activities.filter((_, j) => j !== 1);
+  const pendingActivities = activities.filter((_, j) => j === 1);
+  const reflections = [
+    { mood: "frustrado", difficulty: 4, daysAgo: 11 },
+    { mood: "feliz", difficulty: 2, daysAgo: 3 },
+  ];
+  const activityLog = doneActivities.map((a, j) => ({
     _key: DEMO_ACTIVITY_KEYS[j],
     _type: "object",
     activityRef: { _type: "reference", _ref: a._id },
-    completedAt: `${addDays(today, -(11 - j * 4))}T17:30:00-05:00`,
-    reflection: { mood: moods[j % moods.length], difficulty: 4 - j },
+    completedAt: `${addDays(today, -reflections[j].daysAgo)}T17:30:00-05:00`,
+    reflection: { mood: reflections[j].mood, difficulty: reflections[j].difficulty },
   }));
+  crystals += doneActivities.length * ACTIVITY_REWARD;
+
+  // Cursos, lecciones, quizzes y preguntas abiertas
+  const academic = await buildAcademicData(today);
+  crystals += academic.crystals;
+  const kidAcademic = await client.fetch(`*[_id == $kidId][0]{${KID_ACADEMIC_FIELDS}}`, { kidId });
+  const base = withoutDemo(kidAcademic || {}, {
+    ...academic,
+    completedActivities: activities.map((a) => a._id),
+  });
+
+  // Margen extra para comprar en la tienda en vivo
+  const totalCrystals = crystals + 150;
 
   tx.patch(kidId, (p) =>
     p
       .unset(unsetDemoActivities)
       .setIfMissing({ activityLog: [], unlockedAvatars: ["default-cadet"], activeAvatar: "default-cadet" })
       .append("activityLog", activityLog)
-      // Cristales del historial + margen para comprar en la tienda en vivo
-      .set({ energyCrystals: crystals + 150 }),
+      .set({
+        energyCrystals: totalCrystals,
+        completedLessons: [...base.completedLessons, ...academic.completedLessons],
+        completedQuizzes: [...base.completedQuizzes, ...academic.completedQuizzes],
+        completedOpenQuestions: [...base.completedOpenQuestions, ...academic.completedOpenQuestions],
+        completedActivities: [...base.completedActivities, ...doneActivities.map((a) => a._id)],
+        academicTelemetry: [...base.academicTelemetry, ...academic.academicTelemetry],
+        assignedCourses: [...base.assignedCourses, ...academic.assignedCourses],
+        assignedActivities: [
+          ...base.assignedActivities,
+          ...pendingActivities.map((a) => ({ _key: `demo-activity-assigned-${a._id}`, _type: "reference", _ref: a._id })),
+        ],
+      }),
   );
 
   await tx.commit();
@@ -377,7 +547,12 @@ async function seed() {
   console.log(`   Sesiones pasadas: ${PAST_SESSIONS.length - skipped.length} (de ${addDays(today, -14)} a ${addDays(today, -1)})`);
   if (skipped.length) console.log(`   Días con sesión real (no tocados): ${skipped.join(", ")}`);
   console.log(`   Hoy (${today}): ${TODAY_GAMES.map((g) => GAMES[g]).join(", ")} — ${realByDate[today] ? "sesión real reiniciada" : "sesión creada"}`);
-  console.log(`   Bitácora: ${activityLog.length} actividades · Cristales: ${crystals + 150}`);
+  const quizzes = academic.academicTelemetry.filter((r) => r._type === "quizRecord");
+  console.log(`   Actividades: ${activityLog.length} completadas, ${pendingActivities.length} asignada`);
+  console.log(`   Lecciones completadas: ${academic.completedLessons.length} · Cursos asignados: ${academic.assignedCourses.length}`);
+  console.log(`   Quizzes: ${academic.completedQuizzes.length} completados (${quizzes.length} intentos, ${quizzes.filter((q) => !q.isCorrect).length} errores) · Preguntas abiertas: ${academic.completedOpenQuestions.length}`);
+  if (academic.missingCourses.length) console.log(`   ⚠️ Cursos no encontrados: ${academic.missingCourses.join(", ")}`);
+  console.log(`   Cristales: ${totalCrystals}`);
 }
 
 (CLEAN ? clean() : seed()).catch((err) => {

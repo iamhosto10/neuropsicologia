@@ -524,7 +524,9 @@ async function seed() {
   tx.patch(kidId, (p) =>
     p
       .unset(unsetDemoActivities)
-      .setIfMissing({ activityLog: [], unlockedAvatars: ["default-cadet"], activeAvatar: "default-cadet" })
+      .setIfMissing({ activityLog: [] })
+      // Avatar comprado y equipado, para que se vea en el HQ y la tienda
+      .set({ unlockedAvatars: ["default-cadet", "casco-turbo"], activeAvatar: "casco-turbo" })
       .append("activityLog", activityLog)
       .set({
         energyCrystals: totalCrystals,

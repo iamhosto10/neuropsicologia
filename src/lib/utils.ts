@@ -8,6 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export const AVATAR_MAP: Record<string, string> = {
   "default-cadet": "👨‍🚀",
   "turbo-helmet": "🪖",
+  "casco-turbo": "🪖",
   "alien-pet": "👾",
   "gold-commander": "👑",
 };

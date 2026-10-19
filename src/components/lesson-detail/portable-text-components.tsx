@@ -12,7 +12,8 @@ export const ptComponents = {
       return (
         <div className="my-10 rounded-3xl overflow-hidden shadow-lg border border-slate-100 bg-slate-50">
           <img
-            src={urlFor(value).url()}
+            src={urlFor(value).width(1000).quality(75).auto("format").url()}
+            srcSet={`${urlFor(value).width(1000).quality(75).auto("format").url()} 1x, ${urlFor(value).width(2000).quality(75).auto("format").url()} 2x`}
             alt={value.alt || "Ilustración de la lección"}
             className="w-full h-auto object-cover max-h-125"
             loading="lazy"

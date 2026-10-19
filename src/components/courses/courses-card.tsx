@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, ArrowRight, CheckCircle2, ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 interface CoursesCardProps {
   title: string;
@@ -75,7 +76,8 @@ export default function CoursesCard({
         {safeImage && !imageError && (
           <img
             ref={imgRef} // 🔥 4. Le pasamos la referencia
-            src={safeImage}
+            src={sanityImageUrl(safeImage, 640)}
+            srcSet={sanityImageSrcSet(safeImage, 640)}
             alt={title}
             loading="lazy"
             decoding="async"

@@ -1,4 +1,5 @@
 import { Clock, BarChart } from "lucide-react";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 interface CourseHeroProps {
   title: string;
@@ -19,7 +20,8 @@ export default function CourseHero({
     <section className="relative bg-slate-900 text-white py-20 overflow-hidden">
       <div className="absolute inset-0 opacity-20">
         <img
-          src={image}
+          src={sanityImageUrl(image, 800)}
+          srcSet={sanityImageSrcSet(image, 800)}
           alt={title}
           className="w-full h-full object-cover blur-sm"
         />

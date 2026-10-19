@@ -2,6 +2,7 @@
 import { forwardRef } from "react";
 import { Brain, Activity, Target } from "lucide-react";
 import { CLINICAL_DICTIONARY } from "@/lib/clinical-dictionary";
+import { APP_TIME_ZONE, getTodayDate } from "@/lib/utils";
 
 interface ClinicalReportProps {
   kidData: any;
@@ -19,11 +20,19 @@ export const ClinicalReportTemplate = forwardRef<
     { kidData, totalSessions, completedSessions, accuracyData, detailedStats },
     ref,
   ) => {
+    // Fecha e ID deterministas (misma zona horaria en servidor y navegador):
+    // con Math.random() el ID cambiaba entre el SSR y la hidratación.
     const today = new Date().toLocaleDateString("es-ES", {
+      timeZone: APP_TIME_ZONE,
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+    const reportId = `REP-${getTodayDate().replaceAll("-", "")}-${String(
+      kidData._id,
+    )
+      .slice(-4)
+      .toUpperCase()}`;
 
     return (
       <div
@@ -36,7 +45,7 @@ export const ClinicalReportTemplate = forwardRef<
             <Brain className="w-10 h-10 text-slate-800" />
             <div>
               <h1 className="text-2xl font-black uppercase tracking-widest text-slate-900">
-                NeuroSpace Clinic
+                NeuroPlay Clínica
               </h1>
               <p className="text-sm text-slate-500">
                 Unidad de Entrenamiento Neuropsicológico
@@ -48,8 +57,7 @@ export const ClinicalReportTemplate = forwardRef<
               <strong>Fecha de Emisión:</strong> {today}
             </p>
             <p>
-              <strong>ID Documento:</strong> REP-
-              {Math.floor(Math.random() * 10000)}
+              <strong>ID Documento:</strong> {reportId}
             </p>
           </div>
         </div>
@@ -152,7 +160,7 @@ export const ClinicalReportTemplate = forwardRef<
           <div className="text-center">
             <div className="w-48 border-b border-slate-800 mb-2 mx-auto"></div>
             <p className="font-bold text-slate-800">Firma del Especialista</p>
-            <p className="text-xs text-slate-500">NeuroSpace Clinic Dept.</p>
+            <p className="text-xs text-slate-500">NeuroPlay Clínica</p>
           </div>
         </div>
       </div>

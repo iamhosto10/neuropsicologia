@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Battery, Check, Lock, Sparkles, Loader2, User } from "lucide-react";
 import { purchaseItem, equipItem } from "@/app/actions/store.actions";
 import { Badge } from "@/components/ui/badge";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 export default function StoreClientController({
   kidId,
@@ -104,7 +105,8 @@ export default function StoreClientController({
 
                   {item.imageUrl ? (
                     <img
-                      src={item.imageUrl}
+                      src={sanityImageUrl(item.imageUrl, 300)}
+                      srcSet={sanityImageSrcSet(item.imageUrl, 300)}
                       alt={item.name}
                       className={`h-36 object-contain z-10 transition-all duration-500 ${
                         !isUnlocked

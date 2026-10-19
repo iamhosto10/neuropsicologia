@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 export default function ActivityCatalog({
   initialActivities = [],
@@ -48,7 +49,13 @@ export default function ActivityCatalog({
             >
               <div className="h-48 relative bg-slate-100 overflow-hidden shrink-0">
                 <img
-                  src={activity.imageUrl || "/placeholder-image.jpg"}
+                  src={
+                    sanityImageUrl(activity.imageUrl, 640) ||
+                    "/placeholder-image.jpg"
+                  }
+                  srcSet={sanityImageSrcSet(activity.imageUrl, 640)}
+                  loading="lazy"
+                  decoding="async"
                   alt={activity.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />

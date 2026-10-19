@@ -5,7 +5,7 @@ import { schema } from "@/sanity/schemaTypes";
 const config = defineConfig({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  title: "Neuropsicologia",
+  title: "NeuroPlay",
   apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION,
   basePath: "/studio", // Aquí es donde vivirá tu panel
   plugins: [structureTool()],

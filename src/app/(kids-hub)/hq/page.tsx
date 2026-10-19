@@ -18,6 +18,7 @@ import Link from "next/link";
 import { getOwnedActiveKidId } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import { getAvatarIcon, getTodayDate } from "@/lib/utils";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 export default async function HeadquartersPage() {
   const kidId = await getOwnedActiveKidId();
@@ -69,7 +70,8 @@ export default async function HeadquartersPage() {
             <div className="w-16 h-16 bg-slate-800 rounded-full border-2 border-slate-700 flex items-center justify-center shadow-lg relative overflow-hidden group">
               {dashboardData.activeAvatarDetails?.imageUrl ? (
                 <img
-                  src={dashboardData.activeAvatarDetails.imageUrl}
+                  src={sanityImageUrl(dashboardData.activeAvatarDetails.imageUrl, 128)}
+                  srcSet={sanityImageSrcSet(dashboardData.activeAvatarDetails.imageUrl, 128)}
                   alt="Avatar del Cadete"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />

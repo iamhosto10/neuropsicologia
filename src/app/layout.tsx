@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Neuro Espacial | Entrenamiento cognitivo para niños",
-    template: "%s | Neuro Espacial",
+    default: "NeuroPlay | Entrenamiento cognitivo para niños",
+    template: "%s | NeuroPlay",
   },
   description:
     "Entrenamiento cognitivo para niños con TDAH y TEA convertido en misiones espaciales, con seguimiento clínico en tiempo real para padres y terapeutas.",

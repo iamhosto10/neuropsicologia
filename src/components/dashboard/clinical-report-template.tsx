@@ -45,7 +45,7 @@ export const ClinicalReportTemplate = forwardRef<
             <Brain className="w-10 h-10 text-slate-800" />
             <div>
               <h1 className="text-2xl font-black uppercase tracking-widest text-slate-900">
-                NeuroSpace Clinic
+                NeuroPlay Clínica
               </h1>
               <p className="text-sm text-slate-500">
                 Unidad de Entrenamiento Neuropsicológico
@@ -160,7 +160,7 @@ export const ClinicalReportTemplate = forwardRef<
           <div className="text-center">
             <div className="w-48 border-b border-slate-800 mb-2 mx-auto"></div>
             <p className="font-bold text-slate-800">Firma del Especialista</p>
-            <p className="text-xs text-slate-500">NeuroSpace Clinic Dept.</p>
+            <p className="text-xs text-slate-500">NeuroPlay Clínica</p>
           </div>
         </div>
       </div>

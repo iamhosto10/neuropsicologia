@@ -13,7 +13,7 @@ export default function LandingHero() {
       <div className="container mx-auto px-4 relative z-10 text-center">
         <div className="inline-flex items-center gap-2 bg-cyan-500/10 text-cyan-400 px-4 py-2 rounded-full font-bold text-sm mb-8 border border-cyan-500/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <Star className="w-4 h-4 fill-cyan-400" /> Nueva Metodología
-          Neuro-Espacial
+          NeuroPlay
         </div>
 
         <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight max-w-5xl mx-auto leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000">

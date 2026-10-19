@@ -19,7 +19,7 @@ export default function Footer() {
                 <Rocket className="w-6 h-6 text-white group-hover:-translate-y-1 transition-transform" />
               </div>
               <span className="font-black text-2xl tracking-tight text-white">
-                Neuro<span className="text-cyan-400">Espacial</span>
+                Neuro<span className="text-cyan-400">Play</span>
               </span>
             </Link>
             <p className="text-slate-400 leading-relaxed text-sm pr-4">
@@ -29,7 +29,7 @@ export default function Footer() {
             <div className="space-y-3 text-sm">
               <p className="flex items-center gap-3 hover:text-cyan-400 transition-colors cursor-pointer">
                 <Mail className="w-4 h-4 text-slate-500" />{" "}
-                hola@neuroespacial.com
+                hola@neuroplay.com
               </p>
               <p className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-slate-500" /> Base de
@@ -150,7 +150,7 @@ export default function Footer() {
         {/* BARRA INFERIOR (Copyright) */}
         <div className="pt-8 border-t border-slate-800/60 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-medium">
           <p className="text-slate-500">
-            &copy; {currentYear} NeuroEspacial. Todos los derechos reservados.
+            &copy; {currentYear} NeuroPlay. Todos los derechos reservados.
           </p>
           <p className="flex items-center gap-2 text-slate-500">
             Construido con{" "}

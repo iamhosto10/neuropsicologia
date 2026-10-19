@@ -45,7 +45,7 @@ export default function Navbar({ userId }: { userId: string | null }) {
             <Rocket className="w-6 h-6 text-white" />
           </div>
           <span className="font-black text-xl tracking-tight text-cyan-400">
-            Neuro Espacial
+            NeuroPlay
           </span>
         </Link>
 
@@ -113,7 +113,7 @@ export default function Navbar({ userId }: { userId: string | null }) {
               className="bg-slate-900 border-slate-800 text-slate-100 p-6"
             >
               <SheetTitle className="text-cyan-400 font-black text-xl">
-                Neuro Espacial
+                NeuroPlay
               </SheetTitle>
 
               <nav className="flex flex-col gap-2 mt-6">

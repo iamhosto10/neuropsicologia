@@ -73,6 +73,9 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
           } else if (metrics.efficiencyScore !== undefined) {
             // Juegos de Planificación (Ej: Ruta de Navegación)
             calculatedAccuracy = metrics.efficiencyScore;
+          } else {
+            // Resto de juegos: antes caían aquí y salían con 0% en la gráfica
+            calculatedAccuracy = computeOtherAccuracy(metrics);
           }
 
           allEvents.push({ ...data, date: safeDate, calculatedAccuracy });
@@ -84,6 +87,44 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
   });
 
   return allEvents;
+}
+
+// Precisión (0-100) de los juegos que no entran en los casos de arriba,
+// según la telemetría que guarda cada motor (src/hooks/use*Engine.ts).
+function computeOtherAccuracy(m: Record<string, number>): number {
+  const ratio = (ok: number, total: number) =>
+    total > 0 ? (ok / total) * 100 : 0;
+  const avg = (a: number, b: number) => (a + b) / 2;
+
+  // Tormenta de Nebulosa (Flanker)
+  if (m.accuracyCongruentPercent !== undefined)
+    return avg(m.accuracyCongruentPercent, m.accuracyIncongruentPercent ?? 0);
+  // Panel de Seguridad (Corsi) y Comunicador Inverso
+  if (m.accuracyDirectPercent !== undefined)
+    return avg(m.accuracyDirectPercent, m.accuracyReversePercent ?? 0);
+  // Decodificador de Señales (SDMT)
+  if (m.accuracyPercent !== undefined) return m.accuracyPercent;
+  // Rastreador de Satélites
+  if (m.timeOnTargetPercentage !== undefined) return m.timeOnTargetPercentage;
+  // Laboratorio de Carga (N-Back)
+  if (m.truePositives !== undefined)
+    return ratio(
+      m.truePositives + m.trueNegatives,
+      m.truePositives + m.trueNegatives + m.falsePositives + m.falseNegatives,
+    );
+  // Campo de Asteroides (Go/No-Go)
+  if (m.correctHits !== undefined)
+    return ratio(
+      m.correctHits + m.correctRejections,
+      m.correctHits + m.correctRejections + m.commissionErrors + m.omissionErrors,
+    );
+  // Gran Evasión (Multitarea)
+  if (m.correctNumbersCaught !== undefined)
+    return ratio(
+      m.correctNumbersCaught,
+      m.correctNumbersCaught + m.incorrectNumbersCaught,
+    );
+  return 0;
 }
 
 export function generateAccuracyChartData(events: any[]) {

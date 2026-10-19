@@ -9,6 +9,14 @@ export const AVATAR_MAP: Record<string, string> = {
   "default-cadet": "👨‍🚀",
   "turbo-helmet": "🪖",
   "casco-turbo": "🪖",
+  // Avatares de demo (scripts/seed-avatars.mjs)
+  "piloto-cohete": "🚀",
+  "alien-amigo": "👽",
+  "robot-r2": "🤖",
+  "gato-astronauta": "🐱",
+  "unicornio-galactico": "🦄",
+  "dragon-estelar": "🐉",
+  "corona-comandante": "👑",
   "alien-pet": "👾",
   "gold-commander": "👑",
 };

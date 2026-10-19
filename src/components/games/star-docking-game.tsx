@@ -14,6 +14,8 @@ import {
   Loader2,
 } from "lucide-react";
 import useSound from "use-sound";
+import { useRouter } from "next/navigation";
+import { saveMissionProgress } from "@/app/actions/mission.actions";
 import { useDockingEngine, DockingTelemetry } from "@/hooks/useDockingEngine";
 
 interface StarDockingProps {
@@ -22,6 +24,10 @@ interface StarDockingProps {
     instruction?: string;
     duration?: number;
     difficulty?: "easy" | "medium" | "hard";
+    kidId?: string;
+    missionId?: string;
+    energyReward?: number;
+    isPractice?: boolean;
   };
   // Función universal que recibe desde el page.tsx para guardar el progreso
   onFinishMission?: (
@@ -37,6 +43,7 @@ export default function StarDockingGame({
   // --- ESTADOS DE UI Y AUDIO ---
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isSaving, setIsSaving] = useState(false); // CANDADO VISUAL (SOP)
+  const router = useRouter();
 
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
     loop: true,
@@ -52,11 +59,22 @@ export default function StarDockingGame({
     finalScore: number,
   ) => {
     stopBg();
-    setIsSaving(true); // Bloqueamos la UI mientras guarda
     if (onFinishMission) {
+      setIsSaving(true);
       await onFinishMission(telemetry, finalScore);
+      setIsSaving(false);
+      return;
     }
-    setIsSaving(false);
+    if (config.isPractice || !config.kidId || !config.missionId) return;
+
+    setIsSaving(true);
+    await saveMissionProgress(
+      config.kidId,
+      config.missionId,
+      config.energyReward ?? 0,
+      [telemetry],
+    );
+    router.push("/hq");
   };
 
   const {

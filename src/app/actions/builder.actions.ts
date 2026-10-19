@@ -2,9 +2,13 @@
 "use server";
 import { client, writeClient } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
+import { auth } from "@clerk/nextjs/server";
 import { v4 as uuidv4 } from "uuid"; // Opcional, pero bueno para slugs únicos
 
 export async function createCourseAction(formData: FormData) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -71,6 +75,9 @@ export async function createLessonAction(
   moduleTitle: string,
   formData: FormData,
 ) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     const title = formData.get("lessonTitle") as string;
     if (!title) throw new Error("El título de la lección es obligatorio");
@@ -318,6 +325,9 @@ export async function createLessonAction(
 // }
 
 export async function getLessonForEditAction(lessonId: string) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     // 🔥 CAMBIO: Añadimos 'asset' crudo y 'imageUrl' resuelta
     const query = `*[_type == "lesson" && _id == $id][0]{
@@ -554,6 +564,9 @@ export async function updateLessonAction(
   courseId: string,
   formData: FormData,
 ) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     const title = formData.get("lessonTitle") as string;
     if (!title) throw new Error("El título es obligatorio");
@@ -665,6 +678,9 @@ export async function updateCourseMetadataAction(
   courseId: string,
   formData: FormData,
 ) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -717,6 +733,9 @@ export async function updateCourseMetadataAction(
 // ACCIÓN 4: ELIMINAR LECCIÓN (VERSIÓN TRANSACCIÓN ATÓMICA)
 // ==========================================
 export async function deleteLessonAction(courseId: string, lessonId: string) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     const currentCourse = await client
       .withConfig({ useCdn: false })
@@ -767,6 +786,9 @@ export async function deleteLessonAction(courseId: string, lessonId: string) {
 }
 
 export async function uploadAssetAction(formData: FormData) {
+  if (!(await auth()).userId) {
+    return { success: false, error: "No autorizado. Inicia sesión." };
+  }
   try {
     const file = formData.get("file") as File;
     if (!file || file.size === 0) throw new Error("No hay archivo");

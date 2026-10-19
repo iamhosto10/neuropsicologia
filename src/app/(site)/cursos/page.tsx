@@ -8,7 +8,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cursos Cognitivos | Academia Espacial",
+  title: "Cursos Cognitivos",
   description:
     "Explora cursos diseñados para mejorar la atención, memoria, control inhibitorio y habilidades cognitivas. Aprende a tu ritmo con misiones interactivas.",
   openGraph: {

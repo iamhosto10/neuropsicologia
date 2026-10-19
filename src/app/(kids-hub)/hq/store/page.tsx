@@ -1,19 +1,20 @@
 // src/app/(kids-hub)/hq/store/page.tsx
-import { getActiveKidId } from "@/app/actions/profile.actions";
+import { getOwnedActiveKidId } from "@/lib/auth-guards";
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Battery, ShoppingCart } from "lucide-react";
 import StoreClientController from "./store-client-controller";
+import { getTodayDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function StorePage() {
-  const kidId = await getActiveKidId();
+  const kidId = await getOwnedActiveKidId();
   if (!kidId) redirect("/select-profile");
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayDate();
 
   // 1. Traemos los datos del cadete
   const kidData = await client
@@ -106,3 +107,5 @@ export default async function StorePage() {
     </div>
   );
 }
+
+export const metadata = { title: "Bazar Espacial" };

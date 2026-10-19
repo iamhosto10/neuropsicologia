@@ -102,3 +102,5 @@ export default async function SelectProfilePage() {
     </div>
   );
 }
+
+export const metadata = { title: "¿Quién juega hoy?" };

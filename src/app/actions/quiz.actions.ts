@@ -1,7 +1,7 @@
 "use server";
+import { getOwnedActiveKidId } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 export async function submitQuizAnswer(
@@ -13,8 +13,7 @@ export async function submitQuizAnswer(
   blockKey: string,
 ) {
   try {
-    const cookieStore = await cookies();
-    const kidId = cookieStore.get("activeKidId")?.value;
+    const kidId = await getOwnedActiveKidId();
 
     if (!kidId) return { error: "No hay cadete activo." };
 
@@ -24,13 +23,11 @@ export async function submitQuizAnswer(
     });
 
     const kid = await writeClient.fetch(
-      `*[_type == "kidProfile" && _id == $kidId][0]{completedQuizzes, energyCrystals, academicTelemetry}`,
+      `*[_type == "kidProfile" && _id == $kidId][0]{completedQuizzes}`,
       { kidId },
     );
 
     const completed = kid?.completedQuizzes || [];
-    const currentCrystals = kid?.energyCrystals || 0;
-    const currentTelemetry = kid?.academicTelemetry || [];
 
     const uniqueId = `${lessonId}-${blockKey}`;
 
@@ -44,20 +41,19 @@ export async function submitQuizAnswer(
       timestamp: new Date().toISOString(),
     };
 
-    // 🔥 MÉTODO INFALIBLE: Unimos la telemetría vieja con la nueva en JavaScript
-    const updatedTelemetry = [...currentTelemetry, telemetryRecord];
-
-    // Iniciamos el parche sobrescribiendo la telemetría directamente
+    // append/inc en vez de reescribir el arreglo: dos respuestas seguidas
+    // ya no se pisan entre sí ni pierden cristales
     const patch = writeClient
       .patch(kidId)
-      .set({ academicTelemetry: updatedTelemetry });
+      .setIfMissing({ academicTelemetry: [] })
+      .append("academicTelemetry", [telemetryRecord]);
 
     // Si es correcta y no estaba completada, unimos también el arreglo de completados
     if (isCorrect && !completed.includes(uniqueId)) {
-      const updatedCompleted = [...completed, uniqueId];
       patch
-        .set({ completedQuizzes: updatedCompleted })
-        .set({ energyCrystals: currentCrystals + reward });
+        .setIfMissing({ completedQuizzes: [] })
+        .append("completedQuizzes", [uniqueId])
+        .inc({ energyCrystals: reward });
     }
 
     await patch.commit();

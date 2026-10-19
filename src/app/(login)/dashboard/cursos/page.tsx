@@ -120,3 +120,5 @@ export default async function MisCursosPage() {
     </div>
   );
 }
+
+export const metadata = { title: "Mis Cursos" };

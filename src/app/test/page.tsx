@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import ClientPage from "./clientpage";
 
 export const metadata: Metadata = {
@@ -11,6 +12,13 @@ export const metadata: Metadata = {
   },
 };
 const Page = () => {
+  // Sandbox de desarrollo: oculto en producción salvo ENABLE_SANDBOX=true
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ENABLE_SANDBOX !== "true"
+  ) {
+    notFound();
+  }
   return (
     <div className="flex flex-col gap-1 max-w-4xl px-11 pt-17 mx-auto bg-background">
       {/* Contenedor relativo para controlar el tamaño */}

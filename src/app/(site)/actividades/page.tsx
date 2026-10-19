@@ -8,7 +8,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Actividades Clínicas | Academia Espacial",
+  title: "Actividades Clínicas",
   description:
     "Explora ejercicios prácticos y dinámicos para reforzar el aprendizaje cognitivo en casa o en consulta.",
 };

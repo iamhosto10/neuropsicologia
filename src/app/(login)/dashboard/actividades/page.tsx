@@ -80,3 +80,5 @@ export default async function MisActividadesPage() {
     </div>
   );
 }
+
+export const metadata = { title: "Mis Actividades" };

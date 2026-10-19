@@ -2,6 +2,7 @@ import { client } from "@/sanity/lib/client";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { getOwnedActiveKidId } from "@/lib/auth-guards";
 
 import AsteroidFieldGame from "@/components/games/asteroid-field-game";
 import MemoryMatrixGame from "@/components/games/memory-matrix-game";
@@ -32,7 +33,7 @@ export default async function MissionPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params; // id = el _key del objeto
-  const data = await client.fetch(
+  const data = await client.withConfig({ useCdn: false }).fetch(
     getMissionByKeyQuery,
     { id },
     { cache: "no-store" },
@@ -41,6 +42,11 @@ export default async function MissionPage({
   if (!data || !data.mission) notFound();
 
   const { kidId, mission } = data;
+
+  // La misión debe ser del cadete activo, y ese cadete del usuario con sesión
+  const activeKidId = await getOwnedActiveKidId();
+  if (!activeKidId) redirect("/select-profile");
+  if (activeKidId !== kidId) notFound();
 
   // Configuramos el objeto maestro que reciben todos los juegos
   const gameConfig = {
@@ -106,8 +112,12 @@ export default async function MissionPage({
         {mission.gameType === "hull_disassembly" && (
           <HullDisassemblyGame config={gameConfig} />
         )}
-        {mission.gameType === "" && <WaterSortGame config={gameConfig} />}
+        {mission.gameType === "water_sort" && (
+          <WaterSortGame config={gameConfig} />
+        )}
       </div>
     </div>
   );
 }
+
+export const metadata = { title: "Misión" };

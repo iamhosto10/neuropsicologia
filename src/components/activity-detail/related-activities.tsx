@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 interface RelatedActivity {
   id: string;
@@ -31,7 +32,8 @@ export default function RelatedActivities({
           >
             <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-slate-800">
               <img
-                src={activity.image}
+                src={sanityImageUrl(activity.image, 128)}
+                srcSet={sanityImageSrcSet(activity.image, 128)}
                 alt={activity.title}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />

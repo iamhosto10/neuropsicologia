@@ -19,12 +19,12 @@ export async function generateMetadata({
 
   if (!course) {
     return {
-      title: "Curso no encontrado | Academia Espacial",
+      title: "Curso no encontrado",
     };
   }
 
   return {
-    title: `${course?.title} | Academia Espacial`,
+    title: course?.title,
     description: course?.description,
     openGraph: {
       title: course?.title,

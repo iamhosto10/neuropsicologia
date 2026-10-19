@@ -1,6 +1,7 @@
 import { Clock, Users, PlayCircle, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 interface ActivityOverviewProps {
   title: string;
@@ -25,7 +26,10 @@ export default function ActivityOverview({
     <div className="bg-white rounded-[2.5rem] p-4 md:p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
       {/* Imagen Principal */}
       <div className="w-full md:w-2/5 aspect-square md:aspect-auto md:h-80 rounded-3xl overflow-hidden relative shrink-0">
-        <img src={image} alt={title} className="w-full h-full object-cover" />
+        <img
+          src={sanityImageUrl(image, 1000)}
+          srcSet={sanityImageSrcSet(image, 1000)}
+          alt={title} className="w-full h-full object-cover" />
         {category && (
           <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-slate-800 px-4 py-2 rounded-xl font-bold text-sm shadow-sm flex items-center gap-2">
             <Tag className="w-4 h-4 text-cyan-500" />

@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { Target, Compass, ArrowLeft, Beaker } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 export const metadata: Metadata = {
   title: "Actividades Clínicas",
@@ -84,7 +85,12 @@ export default async function ActividadesPage() {
               >
                 <div className="h-40 relative bg-slate-100 rounded-2xl overflow-hidden mb-4 shrink-0">
                   <img
-                    src={activity.imageUrl || "/placeholder-image.jpg"}
+                    src={
+                      sanityImageUrl(activity.imageUrl, 640) ||
+                      "/placeholder-image.jpg"
+                    }
+                    srcSet={sanityImageSrcSet(activity.imageUrl, 640)}
+                    loading="lazy"
                     alt={activity.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

@@ -41,7 +41,7 @@ export async function generateMetadata({
 
   if (!data || !data.currentLesson) {
     return {
-      title: "Lección no encontrada | Academia Espacial",
+      title: "Lección no encontrada",
     };
   }
 

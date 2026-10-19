@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { updateCourseMetadataAction } from "@/app/actions/builder.actions";
 import Link from "next/link";
+import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 export default function EditCourseForm({ course }: { course: any }) {
   const router = useRouter();
@@ -160,7 +161,8 @@ export default function EditCourseForm({ course }: { course: any }) {
           {course.image && (
             <div className="mb-4 w-48 aspect-video rounded-xl overflow-hidden border border-slate-200 shadow-sm">
               <img
-                src={course.image}
+                src={sanityImageUrl(course.image, 400)}
+                srcSet={sanityImageSrcSet(course.image, 400)}
                 alt="Portada"
                 className="w-full h-full object-cover"
               />

@@ -20,6 +20,7 @@ import {
   Cpu,
   Gamepad2,
 } from "lucide-react";
+import { getTodayDate } from "@/lib/utils";
 
 // Helper para asignar un icono según el dominio clínico
 const getDomainIcon = (domain: string) => {
@@ -45,7 +46,7 @@ export default function MissionAssigner({
   const [error, setError] = useState<string | null>(null);
 
   // Estados del Formulario (Inicializados con initialData si existe)
-  const todayDate = new Date().toISOString().split("T")[0];
+  const todayDate = getTodayDate();
   const [selectedDate, setSelectedDate] = useState<string>(
     initialData?.date || todayDate,
   );

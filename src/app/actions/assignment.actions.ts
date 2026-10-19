@@ -1,4 +1,5 @@
 "use server";
+import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
@@ -8,6 +9,7 @@ export async function assignToKid(
   itemId: string,
   itemType: "course" | "activity",
 ) {
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
@@ -32,7 +34,7 @@ export async function assignToKid(
         .setIfMissing({ [fieldName]: [] })
         .append(fieldName, [
           {
-            _key: Math.random().toString(36).substring(7),
+            _key: crypto.randomUUID(),
             _type: "reference",
             _ref: itemId,
           },
@@ -40,8 +42,6 @@ export async function assignToKid(
         .commit();
     }
 
-    // Freno anti-caché
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     revalidatePath(`/dashboard/cursos`);
     revalidatePath(`/cursos`);

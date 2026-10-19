@@ -1,5 +1,6 @@
 // src/app/actions/course.actions.ts
 "use server";
+import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
@@ -9,6 +10,7 @@ export async function markLessonCompleted(
   lessonId: string,
   currentPath: string,
 ) {
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
@@ -17,11 +19,10 @@ export async function markLessonCompleted(
 
     // 1. Buscamos los datos actuales del niño
     const kid = await writeClient.fetch(
-      `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons, energyCrystals}`,
+      `*[_type == "kidProfile" && _id == $kidId][0]{completedLessons}`,
       { kidId },
     );
     const completed = kid?.completedLessons || [];
-    const currentCrystals = kid?.energyCrystals || 0;
 
     const courseOwner = await writeClient.fetch(
       `*[_type == "course" && $lessonId in lessons[]._ref][0]{_id}`,
@@ -34,7 +35,7 @@ export async function markLessonCompleted(
       patch
         .setIfMissing({ completedLessons: [] })
         .append("completedLessons", [lessonId])
-        .set({ energyCrystals: currentCrystals + 10 });
+        .inc({ energyCrystals: 10 });
     }
 
     if (courseOwner && courseOwner._id) {
@@ -42,7 +43,6 @@ export async function markLessonCompleted(
     }
     await patch.commit();
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     revalidatePath(currentPath);
     revalidatePath("/dashboard");

@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { saveMissionProgress } from "@/app/actions/mission.actions";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useWarpDriveEngine } from "@/hooks/useWarpDriveEngine";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,7 +31,6 @@ interface WarpDriveGameProps {
 
 export default function WarpDriveGame({ config }: WarpDriveGameProps) {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [visualState, setVisualState] = useState<"idle" | "success" | "error">(
     "idle",
   );
@@ -51,9 +50,14 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
     difficulty: config.difficulty || "medium",
   });
 
-  // Efecto manual para guardar (ya que este hook no tiene un onFinish nativo aún)
-  if (engine.gameState === "finished" && !isSaving && !config.isPractice) {
-    setIsSaving(true);
+  // Guardado al terminar (este hook no tiene un onFinish nativo aún).
+  // El ref evita un doble guardado si el efecto corre dos veces.
+  const savedRef = useRef(false);
+  const isSaving = engine.gameState === "finished" && !config.isPractice;
+  useEffect(() => {
+    if (engine.gameState !== "finished" || config.isPractice) return;
+    if (savedRef.current) return;
+    savedRef.current = true;
     stopBackground();
 
     const telemetry = engine.getTelemetry();
@@ -66,7 +70,7 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
     ]).then(() => {
       router.push("/hq");
     });
-  }
+  }, [engine, config, router, stopBackground]);
 
   const handleStart = () => {
     if (soundEnabled) playBackground();

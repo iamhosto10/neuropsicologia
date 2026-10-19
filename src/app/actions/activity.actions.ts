@@ -1,5 +1,6 @@
 // src/app/actions/activity.actions.ts
 "use server";
+import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
@@ -12,6 +13,7 @@ export async function markActivityCompleted(
   // 🔥 Nuevo parámetro opcional para recibir la bitácora
   reflectionData?: { mood: string; difficulty: number },
 ) {
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
@@ -20,11 +22,10 @@ export async function markActivityCompleted(
 
     // 1. Buscamos los datos actuales del niño
     const kid = await writeClient.fetch(
-      `*[_type == "kidProfile" && _id == $kidId][0]{completedActivities, energyCrystals}`,
+      `*[_type == "kidProfile" && _id == $kidId][0]{completedActivities}`,
       { kidId },
     );
     const completed = kid?.completedActivities || [];
-    const currentCrystals = kid?.energyCrystals || 0;
 
     const patch = writeClient.patch(kidId);
 
@@ -34,7 +35,7 @@ export async function markActivityCompleted(
       patch
         .setIfMissing({ completedActivities: [], activityLog: [] })
         .append("completedActivities", [activityId])
-        .set({ energyCrystals: currentCrystals + 20 });
+        .inc({ energyCrystals: 20 });
 
       // 🔥 SI VIENE REFLEXIÓN, LA AÑADIMOS A LA NUEVA BITÁCORA
       if (reflectionData) {
@@ -58,8 +59,6 @@ export async function markActivityCompleted(
     // 4. Guardamos los cambios
     await patch.commit();
 
-    // 5. Freno anti-caché de Next.js
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // 6. Invalidamos las rutas
     revalidatePath(currentPath);

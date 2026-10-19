@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import DashboardOverview from "@/components/dashboard/dashboard-overview";
 import MobileProgressCard from "@/components/dashboard/mobile-progress-card";
+import { getTodayDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export default async function DashboardPage() {
 
   // 🔥 CORRECCIÓN: Creamos el ID exacto que usa tu base de datos
   const sanityUserId = `user-${userId}`;
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayDate();
 
   // 🔥 CORRECCIÓN: Buscamos usando parent._ref en lugar de parentId
   const query = `*[_type == "kidProfile" && parent._ref == $sanityUserId] | order(_createdAt desc) {
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
     alias,
     activeAvatar,
     energyCrystals,
-    "todaySession": *[_type == "dailySession" && kidReference._ref == ^._id && date == $today][0] {
+    "todaySession": *[_type == "dailySession" && kidProfile._ref == ^._id && date == $today][0] {
       isCompleted,
       "totalMissions": count(missions),
       "completedMissions": count(completedMissions)
@@ -65,3 +66,5 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
+export const metadata = { title: "Panel de Comando" };

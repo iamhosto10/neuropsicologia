@@ -1,7 +1,7 @@
 "use server";
+import { getOwnedActiveKidId } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
 export async function submitOpenAnswer(
@@ -12,8 +12,7 @@ export async function submitOpenAnswer(
   blockKey: string,
 ) {
   try {
-    const cookieStore = await cookies();
-    const kidId = cookieStore.get("activeKidId")?.value;
+    const kidId = await getOwnedActiveKidId();
 
     if (!kidId) return { error: "No hay cadete activo." };
 
@@ -24,40 +23,35 @@ export async function submitOpenAnswer(
 
     const kid = await writeClient.fetch(
       `*[_type == "kidProfile" && _id == $kidId][0]{
-        completedOpenQuestions, 
-        energyCrystals,
-        academicTelemetry
+        completedOpenQuestions
       }`,
       { kidId },
     );
 
     const completed = kid?.completedOpenQuestions || [];
-    const currentCrystals = kid?.energyCrystals || 0;
-
-    const currentTelemetry = kid?.academicTelemetry || [];
     const uniqueId = `${lessonId}-${blockKey}`;
 
     const telemetryRecord = {
       _type: "openQuestionRecord",
-      _key:
-        Math.random().toString(36).substring(2, 10) + Date.now().toString(36),
+      _key: crypto.randomUUID(),
       lessonId: lessonId,
       blockKey,
       responseText: responseText,
       timestamp: new Date().toISOString(),
     };
 
-    const updatedTelemetry = [...currentTelemetry, telemetryRecord];
-
+    // append/inc en vez de reescribir el arreglo: dos respuestas seguidas
+    // ya no se pisan entre sí ni pierden cristales
     const patch = writeClient
       .patch(kidId)
-      .set({ academicTelemetry: updatedTelemetry });
+      .setIfMissing({ academicTelemetry: [] })
+      .append("academicTelemetry", [telemetryRecord]);
 
     if (!completed.includes(uniqueId)) {
       patch
         .setIfMissing({ completedOpenQuestions: [] })
         .append("completedOpenQuestions", [uniqueId])
-        .set({ energyCrystals: currentCrystals + reward });
+        .inc({ energyCrystals: reward });
     }
 
     await patch.commit();

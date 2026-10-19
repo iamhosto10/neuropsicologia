@@ -96,7 +96,72 @@ export default function Navbar({ userId }: { userId: string | null }) {
           </div>
         </nav>
 
-        {/* ... Lógica idéntica para el Menú Móvil usando !userId o userId ... */}
+        {/* Menú Móvil */}
+        <div className="md:hidden flex items-center gap-3">
+          {userId && <UserButton afterSignOutUrl="/" />}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                aria-label="Abrir menú"
+                className="p-2 rounded-xl text-slate-200 hover:bg-slate-800 transition-colors"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="bg-slate-900 border-slate-800 text-slate-100 p-6"
+            >
+              <SheetTitle className="text-cyan-400 font-black text-xl">
+                Neuro Espacial
+              </SheetTitle>
+
+              <nav className="flex flex-col gap-2 mt-6">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-colors ${pathname.startsWith(link.href) ? "bg-slate-800 text-cyan-400" : "text-slate-300 hover:bg-slate-800 hover:text-cyan-400"}`}
+                  >
+                    {link.icon} {link.name}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-6 pt-6 border-t border-slate-800 flex flex-col gap-3">
+                {!userId ? (
+                  <>
+                    <SignInButton mode="modal">
+                      <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="w-full px-4 py-3 rounded-xl font-bold text-slate-200 border border-slate-700 hover:bg-slate-800 transition-colors"
+                      >
+                        Iniciar Sesión
+                      </button>
+                    </SignInButton>
+                    <SignUpButton mode="modal">
+                      <Button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="w-full rounded-xl font-bold bg-cyan-500 hover:bg-cyan-600 text-white py-6"
+                      >
+                        Empezar Gratis
+                      </Button>
+                    </SignUpButton>
+                  </>
+                ) : (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
+                  >
+                    <LayoutDashboard className="w-4 h-4" /> Mi Panel
+                  </Link>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

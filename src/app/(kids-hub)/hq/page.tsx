@@ -15,20 +15,20 @@ import {
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
-import { getActiveKidId } from "@/app/actions/profile.actions";
+import { getOwnedActiveKidId } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
-import { getAvatarIcon } from "@/lib/utils";
+import { getAvatarIcon, getTodayDate } from "@/lib/utils";
 
 export default async function HeadquartersPage() {
-  const kidId = await getActiveKidId();
+  const kidId = await getOwnedActiveKidId();
 
   if (!kidId) {
     redirect("/select-profile");
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = getTodayDate();
 
-  const dashboardData = await client.fetch(
+  const dashboardData = await client.withConfig({ useCdn: false }).fetch(
     getKidDashboardQuery,
     { kidId, todayDate: today },
     { cache: "no-store" },
@@ -244,3 +244,5 @@ export default async function HeadquartersPage() {
     </div>
   );
 }
+
+export const metadata = { title: "Cuartel General" };

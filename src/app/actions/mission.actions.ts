@@ -1,5 +1,6 @@
 // src/app/actions/mission.actions.ts
 "use server";
+import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
@@ -12,7 +13,7 @@ export async function saveMissionProgress(
   crystalsEarned: number,
   telemetry: any[],
 ) {
-  console.log("telemetria", telemetry);
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { success: false };
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
@@ -45,13 +46,18 @@ export async function saveMissionProgress(
     // 3. Iniciamos la Transacción múltiple
     const tx = writeClient.transaction();
 
-    // Sumamos los cristales al niño
-    tx.patch(kidId, (p) => p.inc({ energyCrystals: crystalsEarned }));
-
     const completedArray = session.completedMissions || [];
 
     // Verificamos que no haya guardado esta misión ya (previene clics dobles)
     if (!completedArray.includes(missionKey)) {
+      // Sumamos los cristales al niño, nunca más de lo que da la misión
+      const maxReward = Number(currentMission?.energyReward) || 0;
+      const reward = Math.min(
+        Math.max(0, Math.round(Number(crystalsEarned) || 0)),
+        maxReward,
+      );
+      tx.patch(kidId, (p) => p.inc({ energyCrystals: reward }));
+
       const newCompletedArray = [...completedArray, missionKey];
       const isFullyCompleted =
         newCompletedArray.length >= (session.missions?.length || 0);
@@ -76,7 +82,6 @@ export async function saveMissionProgress(
     }
 
     await tx.commit();
-    await new Promise((resolve) => setTimeout(resolve, 600));
 
     console.log(`✅ Misión ${gameType} completada. Cristales sumados.`);
     revalidatePath("/hq");
@@ -97,6 +102,7 @@ export async function assignDailySession(
   if (!gamesConfig || gamesConfig.length === 0) {
     return { error: "Debes configurar al menos una misión." };
   }
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
 
   try {
     const writeClient = client.withConfig({
@@ -106,7 +112,7 @@ export async function assignDailySession(
 
     // 1. Armamos las misiones con los datos que mandó el terapeuta (sin crear documentos externos)
     const formattedMissions = gamesConfig.map((game) => ({
-      _key: Math.random().toString(36).substring(7), // Sanity exige llaves únicas
+      _key: crypto.randomUUID(), // Sanity exige llaves únicas
       gameType: game.gameType,
       title: game.title,
       difficulty: game.difficulty || "medium",
@@ -145,8 +151,6 @@ export async function assignDailySession(
     return { error: "Hubo un error al asignar las misiones." };
   }
 
-  // Freno anti-caché
-  await new Promise((resolve) => setTimeout(resolve, 1500));
 
   revalidatePath("/hq");
   revalidatePath(`/dashboard/kid/${kidId}`);
@@ -154,18 +158,24 @@ export async function assignDailySession(
 }
 
 export async function deleteDailySession(sessionId: string, kidId: string) {
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
       useCdn: false,
     });
 
+    // La sesión debe ser de este cadete
+    const owner = await writeClient.fetch(
+      `*[_type == "dailySession" && _id == $sessionId][0].kidProfile._ref`,
+      { sessionId },
+    );
+    if (owner !== kidId) return { error: "No autorizado" };
+
     // 1. Eliminamos el documento completo de la base de datos
     await writeClient.delete(sessionId);
     console.log(`🗑️ Sesión ${sessionId} eliminada correctamente.`);
 
-    // 2. Freno anti-caché
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // 3. Invalidamos las rutas para que la Agenda se actualice
     revalidatePath(`/dashboard/kid/${kidId}/assign`);

@@ -153,7 +153,7 @@ export default async function KidReportPage({
     session.telemetryData.forEach((telemetryString: string) => {
       try {
         const parsed = JSON.parse(telemetryString);
-        const gameType = missionsMap[parsed.missionId];
+        const gameType = parsed.gameType || missionsMap[parsed.missionId];
         // Si encontramos un juego y aún no lo hemos guardado, es el más reciente
         if (gameType && !latestStatsPerGame[gameType]) {
           latestStatsPerGame[gameType] = {

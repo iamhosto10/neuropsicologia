@@ -1,5 +1,6 @@
 // src/app/actions/profile.actions.ts
 "use server";
+import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 import { client } from "@/sanity/lib/client";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -7,6 +8,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function selectKidProfile(kidId: string) {
+  if (!(await isKidOwnedByCurrentUser(kidId))) redirect("/select-profile");
   const cookieStore = await cookies();
 
   cookieStore.set("activeKidId", kidId, {
@@ -65,7 +67,6 @@ export async function createKidProfile(formData: FormData) {
     console.error("❌ Error creando el perfil:", error);
     return { error: "Hubo un error de conexión al crear el perfil." };
   }
-  await new Promise((resolve) => setTimeout(resolve, 1500));
 
   revalidatePath("/dashboard");
   revalidatePath("/select-profile");
@@ -76,6 +77,11 @@ export async function selectKidAndRedirect(
   kidId: string,
   destinationUrl: string,
 ) {
+  if (!(await isKidOwnedByCurrentUser(kidId))) redirect("/select-profile");
+  // Solo rutas internas (evita redirecciones abiertas a otros sitios)
+  if (!destinationUrl.startsWith("/") || destinationUrl.startsWith("//")) {
+    destinationUrl = "/hq";
+  }
   const cookieStore = await cookies();
 
   // 1. Guardamos al niño activo en la galleta (cookie)
@@ -91,8 +97,7 @@ export async function selectKidAndRedirect(
 }
 
 export async function deleteKidProfile(kidId: string) {
-  const { userId } = await auth();
-  if (!userId) return { error: "No autorizado" };
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
 
   try {
     const writeClient = client.withConfig({
@@ -103,7 +108,6 @@ export async function deleteKidProfile(kidId: string) {
     // Eliminamos el documento de Sanity usando su ID
     await writeClient.delete(kidId);
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
     // Recargamos las páginas para que la tabla se actualice
     revalidatePath("/dashboard/pacientes");
     revalidatePath("/dashboard");
@@ -123,8 +127,7 @@ export async function updateKidProfile(kidId: string, formData: FormData) {
     return { error: "El nombre del cadete es requerido." };
   }
 
-  const { userId } = await auth();
-  if (!userId) return { error: "No autorizado" };
+  if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
 
   try {
     const writeClient = client.withConfig({
@@ -135,7 +138,6 @@ export async function updateKidProfile(kidId: string, formData: FormData) {
     // Actualizamos solo el campo 'alias'
     await writeClient.patch(kidId).set({ alias: alias.trim() }).commit();
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     revalidatePath("/dashboard/pacientes");
     revalidatePath(`/dashboard/kid/${kidId}`);

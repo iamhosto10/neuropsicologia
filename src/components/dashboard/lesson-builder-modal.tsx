@@ -32,7 +32,6 @@ import {
   createLessonAction,
   uploadAssetAction,
 } from "@/app/actions/builder.actions";
-import { uploadImage } from "@/sanity/lib/client";
 
 export default function LessonBuilderModal({
   courseId,
@@ -117,9 +116,7 @@ export default function LessonBuilderModal({
     const formData = new FormData();
     formData.append("file", file);
 
-    // const result = await uploadAssetAction(formData);
-    const filetoupload = formData.get("file") as File;
-    const result = await uploadImage(filetoupload);
+    const result = await uploadAssetAction(formData);
 
     if (result.success) {
       // 2. Si tiene éxito, inyectamos el ID, la URL y quitamos la carga TODO AL MISMO TIEMPO

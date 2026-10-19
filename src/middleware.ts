@@ -1,6 +1,15 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher(["/dashboard"]);
+// "/dashboard" solo protegía la ruta exacta; las subrutas quedaban abiertas.
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/hq(.*)",
+  "/misiones(.*)",
+  "/select-profile",
+  // Sandboxes de juegos (además se ocultan en producción)
+  "/test",
+  "/juegos",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {

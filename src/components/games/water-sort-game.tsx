@@ -14,6 +14,8 @@ import {
   Zap,
 } from "lucide-react";
 import useSound from "use-sound";
+import { useRouter } from "next/navigation";
+import { saveMissionProgress } from "@/app/actions/mission.actions";
 import {
   useWaterSortEngine,
   WaterSortTelemetry,
@@ -25,6 +27,10 @@ interface WaterSortProps {
     instruction?: string;
     duration?: number;
     difficulty?: "easy" | "medium" | "hard";
+    kidId?: string;
+    missionId?: string;
+    energyReward?: number;
+    isPractice?: boolean;
   };
   onFinishMission?: (
     telemetry: WaterSortTelemetry,
@@ -38,6 +44,7 @@ export default function WaterSortGame({
 }: WaterSortProps) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
 
   // --- AUDIO ---
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
@@ -55,9 +62,22 @@ export default function WaterSortGame({
     finalScore: number,
   ) => {
     stopBg();
+    if (onFinishMission) {
+      setIsSaving(true);
+      await onFinishMission(telemetry, finalScore);
+      setIsSaving(false);
+      return;
+    }
+    if (config.isPractice || !config.kidId || !config.missionId) return;
+
     setIsSaving(true);
-    if (onFinishMission) await onFinishMission(telemetry, finalScore);
-    setIsSaving(false);
+    await saveMissionProgress(
+      config.kidId,
+      config.missionId,
+      config.energyReward ?? 0,
+      [telemetry],
+    );
+    router.push("/hq");
   };
 
   const {

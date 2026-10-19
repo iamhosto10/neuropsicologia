@@ -63,3 +63,5 @@ export default async function PacientesPage() {
     </div>
   );
 }
+
+export const metadata = { title: "Pacientes" };

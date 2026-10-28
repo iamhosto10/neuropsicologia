@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 export default async function CursosPage() {
   // 1. Traemos el catálogo general completo
   const allCourses =
-    await client.fetch(`*[_type == "course"] | order(_createdAt desc) {
+    await client.withConfig({ useCdn: false }).fetch(`*[_type == "course"] | order(_createdAt desc) {
     _id, title, description, "image": image.asset->url, "slug": slug.current, duration, level
   }`, {}, { next: { revalidate: 60 } });
 

@@ -20,7 +20,9 @@ export default async function ActividadesPage() {
   // 1. Traemos el catálogo completo
   // Catálogo: se refresca cada minuto (next-sanity cachea por defecto y
   // el contenido nuevo del Studio no aparecía)
-  const activities = await client.fetch(getAllActivitiesQuery, {}, { next: { revalidate: 60 } });
+  const activities = await client
+    .withConfig({ useCdn: false })
+    .fetch(getAllActivitiesQuery, {}, { next: { revalidate: 60 } });
 
   // 2. Revisamos si hay un cadete activo
   const cookieStore = await cookies();

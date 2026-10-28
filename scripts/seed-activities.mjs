@@ -1,10 +1,11 @@
 // scripts/seed-activities.mjs
 // Crea actividades terapéuticas de ejemplo (para hacer en casa o en consulta).
-// No toca las actividades existentes. Cada una lleva una foto real de
+// No toca las actividades existentes. Cada una lleva una ilustración de
 // Unsplash (licencia libre), descargada en 1600px WebP para que no pese MB.
 //
 // Uso:
 //   node --env-file=.env.local scripts/seed-activities.mjs          # crear / actualizar textos
+//   node --env-file=.env.local scripts/seed-activities.mjs --images # forzar cambio de imágenes
 //   node --env-file=.env.local scripts/seed-activities.mjs --clean  # borrar
 //
 // Idempotente: ids fijos (activity-<slug>). Al re-ejecutar se actualizan
@@ -21,14 +22,15 @@ const client = createClient({
 
 const step = (key, title, description, icon) => ({ _key: key, title, description, icon });
 
-// Fotos de Unsplash (https://unsplash.com/license) por slug
+// Ilustraciones de Unsplash (https://unsplash.com/license) por slug
 const PHOTOS = {
-  "semaforo-de-las-emociones": "photo-1552402332-0613c5258456",
-  "estatuas-musicales": "photo-1758598738278-b1f60933a015",
-  "busqueda-del-tesoro-con-lista-visual": "photo-1489702932289-406b7782113c",
-  "rincon-de-la-calma": "photo-1706391460990-f7817d152cc3",
-  "chef-con-receta-ilustrada": "photo-1761839258803-21515f43190c",
+  "semaforo-de-las-emociones": "vector-1752770149851-d3dca1333b2f",
+  "estatuas-musicales": "vector-1762072064899-22d8d718decc",
+  "busqueda-del-tesoro-con-lista-visual": "vector-1753250862073-dd626da1b71b",
+  "rincon-de-la-calma": "vector-1738325063642-ca6a57d8743e",
+  "chef-con-receta-ilustrada": "vector-1781485836583-9baa66743001",
 };
+const FORCE_IMAGES = process.argv.includes("--images");
 
 async function uploadPhoto(slug) {
   const photoId = PHOTOS[slug];
@@ -37,8 +39,8 @@ async function uploadPhoto(slug) {
   const asset = await client.assets.upload("image", Buffer.from(await res.arrayBuffer()), {
     filename: `${slug}.webp`,
     contentType: "image/webp",
-    source: { name: "unsplash", id: photoId, url: `https://unsplash.com/photos/${photoId.replace("photo-", "")}` },
-    creditLine: "Foto: Unsplash",
+    source: { name: "unsplash", id: photoId, url: `https://unsplash.com/illustrations/${photoId.replace("vector-", "")}` },
+    creditLine: "Ilustración: Unsplash",
   });
   return { _type: "image", asset: { _type: "reference", _ref: asset._id } };
 }
@@ -221,7 +223,7 @@ async function seed() {
   );
   const images = {};
   for (const [i, a] of ACTIVITIES.entries()) {
-    if (!withImage.has(ids[i])) images[ids[i]] = await uploadPhoto(a.slug);
+    if (FORCE_IMAGES || !withImage.has(ids[i])) images[ids[i]] = await uploadPhoto(a.slug);
   }
 
   const tx = client.transaction();

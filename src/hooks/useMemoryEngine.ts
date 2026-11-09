@@ -24,6 +24,8 @@ export type MemoryTelemetryConsolidated = {
   maxSequenceReverse: number; // Corsi Span Inverso
   accuracyDirectPercent: number;
   accuracyReversePercent: number;
+  directRounds?: number; // rondas directas jugadas (0 => no hay precisión directa que promediar)
+  reverseRounds?: number; // rondas inversas jugadas (en fácil nunca hay)
 };
 
 interface MemoryConfig {
@@ -230,6 +232,8 @@ export function useMemoryEngine({
         maxSequenceReverse: getMaxSpan(reverseRecords),
         accuracyDirectPercent: getAccuracy(directRecords),
         accuracyReversePercent: getAccuracy(reverseRecords),
+        directRounds: directRecords.length,
+        reverseRounds: reverseRecords.length,
       },
     ];
 

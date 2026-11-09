@@ -128,6 +128,9 @@ export default async function KidReportPage({
   });
 
   const totalSessions = kidData.sessionsHistory?.length || 0;
+  // "Días entrenados" = días en que de verdad jugó (no los simplemente asignados)
+  const trainedDays =
+    kidData.sessionsHistory?.filter((s: any) => (s.completedCount || 0) > 0).length || 0;
   const completedSessions =
     kidData.sessionsHistory?.filter((s: any) => s.isCompleted).length || 0;
 
@@ -335,7 +338,7 @@ export default async function KidReportPage({
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-600 uppercase">
-                    Cristales Generados
+                    Cristales Disponibles
                   </p>
                   <p className="text-3xl font-black text-slate-900">
                     {kidData.energyCrystals}
@@ -354,7 +357,7 @@ export default async function KidReportPage({
                     Días Entrenados
                   </p>
                   <p className="text-3xl font-black text-slate-900">
-                    {totalSessions}
+                    {trainedDays}
                   </p>
                 </div>
               </CardContent>

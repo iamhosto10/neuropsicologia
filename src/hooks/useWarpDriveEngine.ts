@@ -9,6 +9,12 @@ export interface WarpDriveTelemetryConsolidated {
   accuracyRate: number;
 }
 
+/** Precisión sobre los intentos respondidos (aciertos + toques erróneos). */
+export function warpAccuracy(correct: number, errors: number) {
+  const attempts = correct + errors;
+  return attempts > 0 ? Math.round((correct / attempts) * 100) : 0;
+}
+
 export function useWarpDriveEngine(config: {
   duration: number;
   difficulty: string;
@@ -144,10 +150,9 @@ export function useWarpDriveEngine(config: {
           )
         : 0;
 
-    const accuracyRate =
-      totalEquations > 0
-        ? Math.round((correctAnswers / totalEquations) * 100)
-        : 0;
+    // Precisión sobre los intentos RESPONDIDOS: la ecuación en pantalla que no alcanzó a
+    // contestar ya no cuenta como fallo (daba 80 % con 0 errores).
+    const accuracyRate = warpAccuracy(correctAnswers, errorCount);
 
     return {
       totalEquations,

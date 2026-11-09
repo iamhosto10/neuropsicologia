@@ -4,6 +4,8 @@ import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
 import { retryOnConflict } from "@/lib/sanity-safe";
+import { isValidDate, validateMissions } from "@/lib/game-rules";
+import { getTodayDate } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -99,9 +101,10 @@ export async function assignDailySession(
   date: string,
   gamesConfig: any[],
 ) {
-  if (!gamesConfig || gamesConfig.length === 0) {
-    return { error: "Debes configurar al menos una misión." };
-  }
+  const checked = validateMissions(gamesConfig);
+  if (!checked.ok) return { error: checked.error };
+  if (!isValidDate(date)) return { error: "Fecha no válida." };
+  if (date < getTodayDate()) return { error: "No puedes programar misiones en una fecha pasada." };
   if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
 
   try {
@@ -110,37 +113,27 @@ export async function assignDailySession(
       useCdn: false,
     });
 
-    // 1. Armamos las misiones con los datos que mandó el terapeuta (sin crear documentos externos)
-    const formattedMissions = gamesConfig.map((game) => ({
-      _key: crypto.randomUUID(), // Sanity exige llaves únicas
-      gameType: game.gameType,
-      title: game.title,
-      difficulty: game.difficulty || "medium",
-      timeLimit: parseInt(game.timeLimit) || 60,
-      energyReward: parseInt(game.energyReward) || 50,
-    }));
+    // Misiones con _key nuevo (Sanity exige llaves únicas)
+    const formattedMissions = checked.missions.map((m) => ({ _key: crypto.randomUUID(), ...m }));
 
-    // 2. Buscamos si ya existe una sesión programada para ESA FECHA específica
     const existingSession = await writeClient.fetch(
-      `*[_type == "dailySession" && kidProfile._ref == $kidId && date == $date][0]`,
+      `*[_type == "dailySession" && kidProfile._ref == $kidId && date == $date][0]{_id}`,
       { kidId, date },
     );
 
     if (existingSession) {
-      // 3A. Si ya existe, le sobrescribimos las misiones (Patch)
+      // Al sobrescribir las misiones se reinicia el progreso del día: las llaves viejas
+      // contaban como "completadas" y el día podía marcarse terminado sin jugar.
+      // La telemetría ya guardada se conserva (es historial clínico).
       await writeClient
         .patch(existingSession._id)
-        .set({
-          missions: formattedMissions,
-          isCompleted: false,
-        })
+        .set({ missions: formattedMissions, completedMissions: [], isCompleted: false })
         .commit();
     } else {
-      // 3B. Si no existe, le creamos una agenda nueva para ese día (Create)
       await writeClient.create({
         _type: "dailySession",
         kidProfile: { _type: "reference", _ref: kidId },
-        date: date,
+        date,
         missions: formattedMissions,
         completedMissions: [],
         isCompleted: false,
@@ -150,7 +143,6 @@ export async function assignDailySession(
     console.error("❌ Error asignando misiones:", error);
     return { error: "Hubo un error al asignar las misiones." };
   }
-
 
   revalidatePath("/hq");
   revalidatePath(`/dashboard/kid/${kidId}`);

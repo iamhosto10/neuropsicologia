@@ -1,6 +1,8 @@
 // src/components/games/satellite-tracker-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -129,8 +131,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          {Math.floor(engine.timeLeft / 60)}:
-          {(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3">
@@ -141,7 +142,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
 
       {/* VIEWPORT */}
       <div
-        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair"
+        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair touch-none"
         onPointerDown={engine.handleFalsePositive}
       >
         {/* Fondo Decorativo SIEMPRE visible de fondo */}
@@ -204,7 +205,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
                 </h2>
                 <p className="text-slate-300 text-lg leading-relaxed">
                   {config.instruction ||
-                    "Mantén el cursor sobre el satélite para no perder la señal. ¡Haz clic rápido si se pone rojo!"}
+                    "Mantén el cursor o el dedo sobre el satélite para no perder la señal. ¡Haz clic rápido si se pone rojo!"}
                 </p>
                 <Button
                   onClick={handleStart}
@@ -230,8 +231,9 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
                 ease: "easeInOut",
               }}
               onAnimationComplete={engine.moveToNewPosition}
-              onMouseEnter={() => engine.setHovering(true)}
-              onMouseLeave={() => engine.setHovering(false)}
+              onPointerEnter={() => engine.setHovering(true)}
+              onPointerLeave={() => engine.setHovering(false)}
+              onPointerCancel={() => engine.setHovering(false)}
               onPointerDown={(e) => engine.handleCriticalClick(e)}
             >
               <div

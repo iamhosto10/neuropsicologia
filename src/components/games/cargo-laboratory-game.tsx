@@ -1,6 +1,8 @@
 // src/components/games/cargo-laboratory-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -55,7 +57,7 @@ export default function CargoLaboratoryGame({ config }: CargoLabProps) {
     customSymbols.length > 2 ? customSymbols : DEFAULT_SYMBOLS;
 
   const engine = useNBackEngine({
-    duration: 40,
+    duration: config.duration || 40,
     difficulty: config.difficulty || "medium",
     symbols: finalSymbols,
     onPlayGood: () => {
@@ -116,7 +118,7 @@ export default function CargoLaboratoryGame({ config }: CargoLabProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3 text-2xl font-mono text-cyan-400 font-bold">

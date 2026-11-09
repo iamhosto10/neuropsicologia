@@ -1,6 +1,8 @@
 // src/components/games/signal-decoder-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -104,7 +106,7 @@ export default function SignalDecoderGame({ config }: SignalDecoderProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3 text-2xl font-mono text-cyan-400 font-bold">

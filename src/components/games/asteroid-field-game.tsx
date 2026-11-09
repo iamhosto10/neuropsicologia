@@ -1,6 +1,8 @@
 // src/components/games/asteroid-field-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useRouter } from "next/navigation";
 import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useState } from "react";
@@ -99,7 +101,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
           )}
         </div>
         <div className="text-3xl font-mono font-bold text-slate-200">
-          00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
         <div className="text-right w-1/3">
           <p className="text-2xl font-mono text-cyan-400">{engine.score} PTS</p>

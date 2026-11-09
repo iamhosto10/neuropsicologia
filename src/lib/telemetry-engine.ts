@@ -78,7 +78,7 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
             calculatedAccuracy = computeOtherAccuracy(metrics);
           }
 
-          allEvents.push({ ...data, date: safeDate, calculatedAccuracy });
+          allEvents.push({ ...data, date: safeDate, fullDate: session.date, calculatedAccuracy });
         } catch (e) {
           console.error("Error parseando telemetría:", e);
         }
@@ -87,6 +87,26 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
   });
 
   return allEvents;
+}
+
+/**
+ * Promedia precisión directa e inversa SOLO con los tipos de ronda que se jugaron.
+ * Antes, en dificultad fácil (sin rondas inversas) promediaba con un 0 inventado y un niño
+ * perfecto aparecía con 50 %. Datos antiguos sin conteos: si no hubo ningún acierto inverso
+ * ni span inverso, se asume que no hubo rondas inversas.
+ */
+export function combineDirectReverse(m: Record<string, number>): number {
+  const direct = m.accuracyDirectPercent ?? 0;
+  const reverse = m.accuracyReversePercent ?? 0;
+  const hasCounts = m.directRounds !== undefined || m.reverseRounds !== undefined;
+  const reversePlayed = hasCounts
+    ? (m.reverseRounds ?? 0) > 0
+    : !(reverse === 0 && (m.maxSequenceReverse ?? 0) === 0);
+  const directPlayed = hasCounts ? (m.directRounds ?? 0) > 0 : true;
+  if (directPlayed && reversePlayed) return (direct + reverse) / 2;
+  if (directPlayed) return direct;
+  if (reversePlayed) return reverse;
+  return 0;
 }
 
 // Precisión (0-100) de los juegos que no entran en los casos de arriba,
@@ -100,8 +120,7 @@ function computeOtherAccuracy(m: Record<string, number>): number {
   if (m.accuracyCongruentPercent !== undefined)
     return avg(m.accuracyCongruentPercent, m.accuracyIncongruentPercent ?? 0);
   // Panel de Seguridad (Corsi) y Comunicador Inverso
-  if (m.accuracyDirectPercent !== undefined)
-    return avg(m.accuracyDirectPercent, m.accuracyReversePercent ?? 0);
+  if (m.accuracyDirectPercent !== undefined) return combineDirectReverse(m);
   // Decodificador de Señales (SDMT)
   if (m.accuracyPercent !== undefined) return m.accuracyPercent;
   // Rastreador de Satélites
@@ -130,11 +149,13 @@ function computeOtherAccuracy(m: Record<string, number>): number {
 export function generateAccuracyChartData(events: any[]) {
   // 1. Agrupamos por fecha y sacamos el promedio de accuracy calculado
   const groupedByDate = events.reduce((acc, event) => {
-    if (!acc[event.date]) {
-      acc[event.date] = { date: event.date, totalAccuracy: 0, count: 0 };
+    // Se agrupa por la fecha COMPLETA (DD/MM solo para mostrar): sin año, dos años distintos se mezclaban
+    const key = event.fullDate ?? event.date;
+    if (!acc[key]) {
+      acc[key] = { date: event.date, totalAccuracy: 0, count: 0 };
     }
-    acc[event.date].totalAccuracy += event.calculatedAccuracy || 0;
-    acc[event.date].count += 1;
+    acc[key].totalAccuracy += event.calculatedAccuracy || 0;
+    acc[key].count += 1;
     return acc;
   }, {});
 

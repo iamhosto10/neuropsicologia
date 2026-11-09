@@ -1,6 +1,8 @@
 // src/components/games/multitask-evasion-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -140,8 +142,7 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200 text-center">
-          {Math.floor(engine.timeLeft / 60)}:
-          {(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3 flex flex-col items-end">

@@ -1,5 +1,7 @@
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -168,8 +170,7 @@ export default function WaterSortGame({
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200 text-center">
-          {Math.floor(timeLeft / 60)}:
-          {(timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(timeLeft)}
         </div>
 
         <div className="text-right w-1/3 flex justify-end items-center gap-4">

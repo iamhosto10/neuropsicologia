@@ -1,6 +1,8 @@
 // src/components/games/space-cleanup-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -128,7 +130,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
           </div>
         </div>
         <div className="text-3xl font-bold font-mono text-slate-200">
-          {engine.timeLeft}s
+          {formatClock(engine.timeLeft)}
         </div>
         <div className="text-xl font-mono text-cyan-400 w-1/3 text-right">
           PTS: {engine.score}

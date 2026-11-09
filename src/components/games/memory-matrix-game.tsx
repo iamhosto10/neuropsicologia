@@ -1,6 +1,8 @@
 // src/components/games/memory-matrix-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -126,7 +128,7 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3">

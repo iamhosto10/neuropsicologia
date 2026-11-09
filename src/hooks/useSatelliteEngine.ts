@@ -1,6 +1,19 @@
 // src/hooks/useSatelliteEngine.ts
 import { useState, useRef, useCallback, useEffect } from "react";
 
+const FRAME_MS = 1000 / 60;
+
+/** Probabilidad de evento en un tick de `frames` fotogramas (equivale a `p` por fotograma a 60 Hz). */
+export function eventChancePerTick(p: number, frames: number) {
+  return 1 - Math.pow(1 - p, Math.max(frames, 0));
+}
+
+/** Un paso de la señal del radar. `frames` = tiempo transcurrido en unidades de 1/60 s. */
+export function stepSignal(signal: number, hovering: boolean, frames: number, drain: number) {
+  if (hovering) return Math.min(signal + (signal < 100 ? 0.5 * frames : 0), 100);
+  return Math.max(signal - drain * frames, 0);
+}
+
 export type GameState = "start" | "playing" | "finished";
 
 // 🔥 ACTUALIZADO: Las nuevas métricas clínicas de alto valor
@@ -163,7 +176,7 @@ export function useSatelliteEngine({
     const telemetry: SatelliteTelemetry[] = [
       {
         durationSeconds: Math.floor(totalTimeMs / 1000),
-        finalScore: stateRefs.current.score,
+        finalScore: Math.round(stateRefs.current.score),
         criticalEventsTriggered: statsRef.current.triggered,
         criticalEventsCaught: statsRef.current.caught,
         falsePositives: statsRef.current.falsePositives,
@@ -173,7 +186,7 @@ export function useSatelliteEngine({
     ];
 
     if (callbacksRef.current.onFinish)
-      callbacksRef.current.onFinish(stateRefs.current.score, telemetry);
+      callbacksRef.current.onFinish(Math.round(stateRefs.current.score), telemetry);
   }, []);
 
   const gameLoop = useCallback(() => {
@@ -182,30 +195,29 @@ export function useSatelliteEngine({
     const now = Date.now();
     const dt = now - lastFrameTimeRef.current;
     lastFrameTimeRef.current = now;
+    // Las constantes de dificultad están definidas "por fotograma a 60 Hz". Se escalan por el
+    // tiempo real transcurrido para que a 120/144 Hz el juego no sea el doble de difícil.
+    const frames = Math.min(dt, 100) / FRAME_MS;
 
     if (stateRefs.current.isHovering) {
       // 🔥 Sumamos los ms reales que ha pasado haciendo hover
       statsRef.current.hoverTimeMs += dt;
 
-      const boost = stateRefs.current.signal < 100 ? 0.5 : 0;
-      if (stateRefs.current.signal >= 100) stateRefs.current.score += 5;
-      stateRefs.current.signal = Math.min(
-        stateRefs.current.signal + boost,
-        100,
-      );
+      if (stateRefs.current.signal >= 100) stateRefs.current.score += 5 * frames;
+      stateRefs.current.signal = stepSignal(stateRefs.current.signal, true, frames, settings.drain);
     } else {
-      stateRefs.current.signal = Math.max(
-        stateRefs.current.signal - settings.drain,
-        0,
-      );
+      stateRefs.current.signal = stepSignal(stateRefs.current.signal, false, frames, settings.drain);
     }
 
-    if (!stateRefs.current.isCritical && Math.random() < settings.eventChance) {
+    if (
+      !stateRefs.current.isCritical &&
+      Math.random() < eventChancePerTick(settings.eventChance, frames)
+    ) {
       triggerCriticalEvent();
     }
 
     setSignalQuality(stateRefs.current.signal);
-    setScore(stateRefs.current.score);
+    setScore(Math.round(stateRefs.current.score));
 
     requestRef.current = requestAnimationFrame(gameLoop);
   }, [settings, triggerCriticalEvent]);
@@ -251,17 +263,17 @@ export function useSatelliteEngine({
     let timer: NodeJS.Timeout;
     if (gameState === "playing") {
       timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            finishGame();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft((prev) => Math.max(0, prev - 1));
       }, 1000);
     }
     return () => clearInterval(timer);
   }, [gameState, finishGame]);
+
+  // El fin de partida se dispara aquí (efecto) y NO dentro del updater de setTimeLeft: allí
+  // provocaba "Cannot update a component (Router) while rendering" y guardados dobles en dev.
+  useEffect(() => {
+    if (gameState === "playing" && timeLeft <= 0) finishGame();
+  }, [gameState, timeLeft, finishGame]);
 
   useEffect(() => {
     return () => {

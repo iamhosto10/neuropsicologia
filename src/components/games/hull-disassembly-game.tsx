@@ -1,5 +1,7 @@
 "use client";
 
+import { formatClock } from "@/lib/utils";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -74,6 +76,7 @@ export default function HullDisassemblyGame({
     holes,
     plates,
     selectedHole,
+    isStuck,
     actions,
   } = useHullEngine(config, handleGameFinish);
 
@@ -136,14 +139,23 @@ export default function HullDisassemblyGame({
               <VolumeX className="w-5 h-5 text-slate-500" />
             )}
           </button>
+          {gameState === "playing" && (
+            <button
+              onClick={() => actions.resetStage()}
+              title="Reiniciar sector"
+              aria-label="Reiniciar sector"
+              className={`p-2 rounded-full transition-colors shrink-0 ${isStuck ? "bg-amber-500 text-slate-950 animate-pulse" : "bg-slate-800 hover:bg-slate-700 text-cyan-400"}`}
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+          )}
           <div className="hidden sm:block">
             <p className="text-xs text-slate-400 uppercase">Sector</p>
             <p className="text-xl font-bold text-cyan-400">{currentStage}</p>
           </div>
         </div>
         <div className="text-3xl font-mono font-bold text-slate-200 text-center">
-          {Math.floor(timeLeft / 60)}:
-          {(timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(timeLeft)}
         </div>
         <div className="text-right w-1/3">
           <p className="text-xs text-slate-400 uppercase">Puntaje</p>
@@ -163,6 +175,15 @@ export default function HullDisassemblyGame({
             backgroundSize: "30px 30px",
           }}
         />
+
+        {isStuck && (
+          <div role="status" className="absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-full shadow-lg">
+            ¡Sin movimientos! Pulsa
+            <button onClick={() => actions.resetStage()} className="bg-slate-950 text-amber-400 px-3 py-1 rounded-full flex items-center gap-1">
+              <RotateCcw className="w-4 h-4" /> Reiniciar sector
+            </button>
+          </div>
+        )}
 
         <AnimatePresence>
           {isSaving && (

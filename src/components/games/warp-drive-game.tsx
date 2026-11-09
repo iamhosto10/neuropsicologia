@@ -62,9 +62,8 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
     stopBackground();
 
     const telemetry = engine.getTelemetry();
-    const earnedCrystals = Math.round(
-      (telemetry.accuracyRate / 100) * config.energyReward,
-    );
+    // La recompensa la calcula el servidor (base + bonus según precisión)
+    const earnedCrystals = config.energyReward;
 
     saveMissionAndGoHome(config.kidId, config.missionId, earnedCrystals, [
       telemetry,

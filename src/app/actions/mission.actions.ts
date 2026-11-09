@@ -6,6 +6,7 @@ import { client } from "@/sanity/lib/client";
 import { retryOnConflict } from "@/lib/sanity-safe";
 import { isValidDate, validateMissions } from "@/lib/game-rules";
 import { getTodayDate } from "@/lib/utils";
+import { computeReward } from "@/lib/reward-policy";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,7 +16,7 @@ import { redirect } from "next/navigation";
 export async function saveMissionProgress(
   kidId: string,
   missionKey: string, // _key de la misión dentro de la sesión
-  crystalsEarned: number,
+  _crystalsFromClient: number, // ignorado: el servidor calcula la recompensa
   telemetry: any[],
 ) {
   if (!(await isKidOwnedByCurrentUser(kidId))) return { success: false };
@@ -53,9 +54,10 @@ export async function saveMissionProgress(
       const completedArray: string[] = session.completedMissions || [];
       if (completedArray.includes(missionKey)) return; // ya guardada: no duplicar
 
-      // Cristales: nunca más de lo que da la misión
+      // Cristales: política "base + bonus" calculada aquí con la telemetría (el valor del
+      // navegador se ignora); nunca más de lo que da la misión.
       const maxReward = Number(currentMission?.energyReward) || 0;
-      const reward = Math.min(Math.max(0, Math.round(Number(crystalsEarned) || 0)), maxReward);
+      const reward = Math.min(computeReward(metrics, maxReward), maxReward);
 
       const newCompletedArray = [...completedArray, missionKey];
       const isFullyCompleted = newCompletedArray.length >= (session.missions?.length || 0);

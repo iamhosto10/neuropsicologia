@@ -24,29 +24,31 @@ beforeEach(() => {
   });
 });
 
+const PERFECT = { accuracyRate: 100, correctAnswers: 4, errorCount: 0 };
+
 describe("saveMissionProgress", () => {
   it("guarda telemetría con gameType, marca la misión y suma cristales", async () => {
-    const r = await saveMissionProgress("kid1", "m1", 50, [{ accuracyRate: 80 }]);
+    const r = await saveMissionProgress("kid1", "m1", 50, [{ ...PERFECT, accuracyRate: 100 }]);
     expect(r).toEqual({ success: true });
     expect(kid().energyCrystals).toBe(50);
     expect(sess().completedMissions).toEqual(["m1"]);
-    expect(JSON.parse(sess().telemetryData[0])).toMatchObject({ gameType: "warp_drive", metrics: { accuracyRate: 80 } });
+    expect(JSON.parse(sess().telemetryData[0])).toMatchObject({ gameType: "warp_drive", metrics: { accuracyRate: 100 } });
     expect(sess().isCompleted).toBe(false);
   });
   it("completa el día al terminar todas", async () => {
-    await saveMissionProgress("kid1", "m1", 50, [{}]);
-    await saveMissionProgress("kid1", "m2", 30, [{}]);
+    await saveMissionProgress("kid1", "m1", 50, [PERFECT]);
+    await saveMissionProgress("kid1", "m2", 30, [PERFECT]);
     expect(sess().isCompleted).toBe(true);
   });
-  it("nunca paga más que energyReward ni negativos", async () => {
-    await saveMissionProgress("kid1", "m1", 99999, [{}]);
-    expect(kid().energyCrystals).toBe(50);
-    await saveMissionProgress("kid1", "m2", -500, [{}]);
-    expect(kid().energyCrystals).toBe(50);
+  it("ignora lo que mande el navegador: ni más que energyReward ni negativos", async () => {
+    await saveMissionProgress("kid1", "m1", 99999, [PERFECT]);
+    expect(kid().energyCrystals).toBe(50); // el máximo de la misión, no 99999
+    await saveMissionProgress("kid1", "m2", -500, [{ ...PERFECT }]);
+    expect(kid().energyCrystals).toBe(80); // m2 paga su máximo (30), no negativo
   });
   it("doble envío de la misma misión: una sola recompensa y una sola telemetría", async () => {
-    await saveMissionProgress("kid1", "m1", 50, [{}]);
-    await saveMissionProgress("kid1", "m1", 50, [{}]);
+    await saveMissionProgress("kid1", "m1", 50, [PERFECT]);
+    await saveMissionProgress("kid1", "m1", 50, [PERFECT]);
     expect(kid().energyCrystals).toBe(50);
     expect(sess().telemetryData).toHaveLength(1);
   });
@@ -58,7 +60,7 @@ describe("saveMissionProgress", () => {
         s.touch("sess1");
       }
     };
-    expect(await saveMissionProgress("kid1", "m1", 50, [{}])).toEqual({ success: true });
+    expect(await saveMissionProgress("kid1", "m1", 50, [PERFECT])).toEqual({ success: true });
     expect(kid().energyCrystals).toBe(50);
     expect(sess().telemetryData).toHaveLength(1);
   });

@@ -1,5 +1,67 @@
 // src/lib/telemetry-engine.ts
 
+/** Precisión (0-100) de una partida según la forma de su telemetría (cada juego guarda la suya). */
+export function computeAccuracy(metrics: any): number {
+  let calculatedAccuracy = 0;
+
+  // --- LÓGICA DE DETECCIÓN DE JUEGOS ---
+
+  if (metrics.accuracyRate !== undefined) {
+    // 🔥 NUEVO: Juegos con Tasa de Precisión pre-calculada (Ej: Propulsores Warp / Suma Continua)
+    calculatedAccuracy = metrics.accuracyRate;
+  } else if (
+    metrics.successfulDocks !== undefined &&
+    metrics.totalAttempts !== undefined
+  ) {
+    // 🔥 NUEVO: Lógica para Star Docking
+    calculatedAccuracy =
+      metrics.totalAttempts > 0
+        ? (metrics.successfulDocks / metrics.totalAttempts) * 100
+        : 0;
+  } else if (
+    metrics.stagesCompleted !== undefined &&
+    metrics.invalidMoves !== undefined
+  ) {
+    // 🔥 NUEVO: Lógica de Hull Disassembly (Eficiencia de Planificación)
+    // Calculamos la precisión basándonos en la ausencia de movimientos inválidos
+    const totalValidMoves = metrics.totalMoves - metrics.invalidMoves;
+    calculatedAccuracy =
+      metrics.totalMoves > 0
+        ? Math.max(0, (totalValidMoves / metrics.totalMoves) * 100)
+        : 0;
+  } else if (
+    metrics.invalidPours !== undefined &&
+    metrics.undosUsed !== undefined
+  ) {
+    // 🔥 NUEVO: Lógica de Water Sort (Eficiencia Clínica)
+    // Calculamos precisión penalizando errores por impulsividad (invalidPours).
+    // Usar 'undo' es bueno clínicamente, así que no lo penalizamos tan fuerte en la gráfica.
+    const totalValidPours = metrics.totalMoves - metrics.invalidPours;
+    calculatedAccuracy =
+      metrics.totalMoves > 0
+        ? Math.max(0, (totalValidPours / metrics.totalMoves) * 100)
+        : 0;
+  } else if (
+    metrics.correctClicks !== undefined &&
+    metrics.incorrectClicks !== undefined
+  ) {
+    // Juegos basados en clics (Ej: Space Cleanup)
+    const totalClicks = metrics.correctClicks + metrics.incorrectClicks;
+    calculatedAccuracy =
+      totalClicks > 0 ? (metrics.correctClicks / totalClicks) * 100 : 0;
+  } else if (metrics.success !== undefined) {
+    // Juegos basados en acierto/fallo (Ej: Go/No-Go o Reverse Communicator)
+    calculatedAccuracy = metrics.success === true ? 100 : 0;
+  } else if (metrics.efficiencyScore !== undefined) {
+    // Juegos de Planificación (Ej: Ruta de Navegación)
+    calculatedAccuracy = metrics.efficiencyScore;
+  } else {
+    // Resto de juegos: antes caían aquí y salían con 0% en la gráfica
+    calculatedAccuracy = computeOtherAccuracy(metrics);
+  }
+    return calculatedAccuracy;
+}
+
 export function parseTelemetryHistory(sessionsHistory: any[]) {
   if (!sessionsHistory || sessionsHistory.length === 0) return [];
 
@@ -18,65 +80,8 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
               ? `${dateParts[2]}/${dateParts[1]}`
               : session.date;
 
-          // 🔥 EL CEREBRO MATEMÁTICO: Calculamos la precisión (0-100) según el tipo de juego
-          let calculatedAccuracy = 0;
           const metrics = data.metrics || {};
-
-          // --- LÓGICA DE DETECCIÓN DE JUEGOS ---
-
-          if (metrics.accuracyRate !== undefined) {
-            // 🔥 NUEVO: Juegos con Tasa de Precisión pre-calculada (Ej: Propulsores Warp / Suma Continua)
-            calculatedAccuracy = metrics.accuracyRate;
-          } else if (
-            metrics.successfulDocks !== undefined &&
-            metrics.totalAttempts !== undefined
-          ) {
-            // 🔥 NUEVO: Lógica para Star Docking
-            calculatedAccuracy =
-              metrics.totalAttempts > 0
-                ? (metrics.successfulDocks / metrics.totalAttempts) * 100
-                : 0;
-          } else if (
-            metrics.stagesCompleted !== undefined &&
-            metrics.invalidMoves !== undefined
-          ) {
-            // 🔥 NUEVO: Lógica de Hull Disassembly (Eficiencia de Planificación)
-            // Calculamos la precisión basándonos en la ausencia de movimientos inválidos
-            const totalValidMoves = metrics.totalMoves - metrics.invalidMoves;
-            calculatedAccuracy =
-              metrics.totalMoves > 0
-                ? Math.max(0, (totalValidMoves / metrics.totalMoves) * 100)
-                : 0;
-          } else if (
-            metrics.invalidPours !== undefined &&
-            metrics.undosUsed !== undefined
-          ) {
-            // 🔥 NUEVO: Lógica de Water Sort (Eficiencia Clínica)
-            // Calculamos precisión penalizando errores por impulsividad (invalidPours).
-            // Usar 'undo' es bueno clínicamente, así que no lo penalizamos tan fuerte en la gráfica.
-            const totalValidPours = metrics.totalMoves - metrics.invalidPours;
-            calculatedAccuracy =
-              metrics.totalMoves > 0
-                ? Math.max(0, (totalValidPours / metrics.totalMoves) * 100)
-                : 0;
-          } else if (
-            metrics.correctClicks !== undefined &&
-            metrics.incorrectClicks !== undefined
-          ) {
-            // Juegos basados en clics (Ej: Space Cleanup)
-            const totalClicks = metrics.correctClicks + metrics.incorrectClicks;
-            calculatedAccuracy =
-              totalClicks > 0 ? (metrics.correctClicks / totalClicks) * 100 : 0;
-          } else if (metrics.success !== undefined) {
-            // Juegos basados en acierto/fallo (Ej: Go/No-Go o Reverse Communicator)
-            calculatedAccuracy = metrics.success === true ? 100 : 0;
-          } else if (metrics.efficiencyScore !== undefined) {
-            // Juegos de Planificación (Ej: Ruta de Navegación)
-            calculatedAccuracy = metrics.efficiencyScore;
-          } else {
-            // Resto de juegos: antes caían aquí y salían con 0% en la gráfica
-            calculatedAccuracy = computeOtherAccuracy(metrics);
-          }
+          const calculatedAccuracy = computeAccuracy(metrics);
 
           allEvents.push({ ...data, date: safeDate, fullDate: session.date, calculatedAccuracy });
         } catch (e) {

@@ -78,9 +78,8 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
       setIsSaving(true);
 
       // SOLUCIÓN 3: Evitamos enviar 'NaN' a Sanity asegurando un valor numérico
-      const baseReward = Number(config.energyReward) || 50;
-      const reward =
-        telemetry[0].result === "win" ? baseReward : Math.floor(baseReward / 2);
+      // La recompensa real la calcula el servidor (base + bonus según precisión)
+      const reward = Number(config.energyReward) || 50;
 
       await saveMissionAndGoHome(config.kidId, config.missionId, reward, telemetry);
     },

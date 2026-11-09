@@ -36,7 +36,7 @@ export default async function CursosPage() {
 
   if (activeKidId) {
     // Si hay un niño, buscamos específicamente qué cursos le asignó su terapeuta
-    const kidData = await client.fetch(
+    const kidData = await client.withConfig({ useCdn: false }).fetch(
       `*[_type == "kidProfile" && _id == $activeKidId][0]{
       assignedCourses[]->{
         _id, title, description, "image": image.asset->url, "slug": slug.current, duration, level

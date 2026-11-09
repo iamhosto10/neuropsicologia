@@ -1,14 +1,8 @@
 "use client";
 
-import SpaceCleanupGame from "@/components/games/space-cleanup-game";
 import { urlFor } from "@/sanity/lib/image";
 // 1. Importamos PortableText y sus tipos
 import { PortableText, type PortableTextComponents } from "next-sanity";
-import SatelliteTrackerGame from "../games/satellite-tracker-game";
-import AsteroidFieldGame from "../games/asteroid-field-game";
-import ReverseCommunicatorGame from "../games/reverse-communicator-game";
-import MemoryMatrixGame from "../games/memory-matrix-game";
-import MultitaskEvasionGame from "../games/multitask-evasion-game";
 
 // 2. Definimos los estilos SOLO para el texto (fuera del componente para orden)
 const textComponents: PortableTextComponents = {

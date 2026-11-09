@@ -254,7 +254,7 @@ export function useMultitaskEngine({
 
   const handlePointerMove = useCallback((xPercentage: number) => {
     if (!gameActiveRef.current) return;
-    let x = xPercentage - PLAYER_WIDTH / 2;
+    const x = xPercentage - PLAYER_WIDTH / 2;
     shipXRef.current = Math.max(0, Math.min(x, 100 - PLAYER_WIDTH));
   }, []);
 

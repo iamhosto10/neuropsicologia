@@ -243,7 +243,7 @@ export default async function AcademicReportPage({
 
                   <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 relative">
                     <span className="absolute top-4 left-4 text-6xl text-slate-200 font-serif leading-none select-none">
-                      "
+                      &ldquo;
                     </span>
                     <p className="text-slate-700 text-lg leading-relaxed relative z-10 pl-6 italic">
                       {record.responseText}

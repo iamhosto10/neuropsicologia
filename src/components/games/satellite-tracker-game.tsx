@@ -2,6 +2,7 @@
 "use client";
 
 import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -17,7 +18,6 @@ import {
   VolumeX,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
 import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useSatelliteEngine } from "@/hooks/useSatelliteEngine";
 
@@ -37,9 +37,13 @@ interface SatelliteGameProps {
 }
 
 export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
+  // Posición/velocidad de las nubes: se sortean UNA vez (antes Math.random() en el render las
+  // reiniciaba en cada fotograma de la partida).
+  const [cloudSpecs] = useState(() =>
+    Array.from({ length: 8 }, () => ({ top: Math.random() * 80, duration: 20 + Math.random() * 10 })),
+  );
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   // Sonidos (Estandarizados al formato del proyecto)
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
@@ -95,6 +99,8 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={toggleSound}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
           >
@@ -269,10 +275,10 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
               <motion.div
                 key={`cloud-${index}`}
                 className="absolute z-40 pointer-events-none"
-                initial={{ left: "-20%", top: `${Math.random() * 80}%` }}
+                initial={{ left: "-20%", top: `${cloudSpecs[index]?.top ?? 10}%` }}
                 animate={{ left: "120%" }}
                 transition={{
-                  duration: 20 + Math.random() * 10,
+                  duration: cloudSpecs[index]?.duration ?? 25,
                   repeat: Infinity,
                   ease: "linear",
                   delay: index * 2,

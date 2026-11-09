@@ -1,6 +1,6 @@
 // src/components/dashboard/clinical-report-template.tsx
 import { forwardRef } from "react";
-import { Brain, Activity, Target } from "lucide-react";
+import { Brain, Target } from "lucide-react";
 import { CLINICAL_DICTIONARY } from "@/lib/clinical-dictionary";
 import { APP_TIME_ZONE, getTodayDate } from "@/lib/utils";
 

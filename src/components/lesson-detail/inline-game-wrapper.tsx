@@ -21,6 +21,7 @@ import WaterSortGame from "../games/water-sort-game";
 export default function InlineGameWrapper({ value }: { value: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false); // 🔥 Nuevo estado para Pantalla Completa
+  const [practiceId] = useState(() => `practice-${Math.random().toString(36).slice(2)}`);
 
   const { gameType, title, difficulty, duration, instruction } = value;
 
@@ -53,7 +54,7 @@ export default function InlineGameWrapper({ value }: { value: any }) {
     difficulty: difficulty || "easy",
     duration: 200,
     kidId: "practice-mode",
-    missionId: `practice-${Math.random()}`,
+    missionId: practiceId,
     energyReward: 0,
     isPractice: true,
   };

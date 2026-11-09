@@ -2,6 +2,7 @@
 "use client";
 
 import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +18,6 @@ import {
   VolumeX,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
 import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useSpaceCleanupEngine } from "@/hooks/useSpaceCleanupEngine";
 
@@ -37,9 +37,8 @@ interface SpaceCleanupProps {
 }
 
 export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
@@ -108,6 +107,8 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
       >
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={toggleSound}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
           >
@@ -226,6 +227,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                     {config.targetImage ? (
                       <img
                         src={config.targetImage}
+                        alt=""
                         className="w-8 h-8 object-contain"
                       />
                     ) : (
@@ -238,6 +240,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                     config.distractorImages.length > 0 ? (
                       <img
                         src={config.distractorImages[0]}
+                        alt=""
                         className="w-8 h-8 object-contain"
                       />
                     ) : (

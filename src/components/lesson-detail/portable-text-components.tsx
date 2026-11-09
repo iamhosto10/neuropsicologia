@@ -1,5 +1,4 @@
 import { urlFor } from "@/sanity/lib/image";
-import { Gamepad2 } from "lucide-react";
 import InlineGameWrapper from "./inline-game-wrapper";
 
 export const ptComponents = {

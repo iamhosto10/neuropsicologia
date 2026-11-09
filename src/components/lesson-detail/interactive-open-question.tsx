@@ -102,7 +102,7 @@ export default function InteractiveOpenQuestion({
           </div>
         ) : (
           <div className="bg-slate-50 border-2 border-slate-100 rounded-2xl p-6 italic text-slate-600 text-lg">
-            "¡Ya enviaste tu respuesta! El comandante está revisando tus notas."
+            &ldquo;¡Ya enviaste tu respuesta! El comandante está revisando tus notas.&rdquo;
           </div>
         )}
       </CardContent>

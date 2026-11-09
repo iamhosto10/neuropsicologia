@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, Smile, Clock, Play, Heart, Star, Brain, Ligh
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge"
 
 export default function MyActivitiesDashboard() {

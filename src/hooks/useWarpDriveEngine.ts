@@ -23,6 +23,8 @@ export function useWarpDriveEngine(config: {
     "idle",
   );
   const [timeLeft, setTimeLeft] = useState(config.duration);
+  // Aciertos como ESTADO (antes se leía de un ref durante el render y la UI dependía de otro re-render)
+  const [correctCount, setCorrectCount] = useState(0);
 
   // Variables matemáticas
   const [currentBase, setCurrentBase] = useState(0);
@@ -74,6 +76,7 @@ export function useWarpDriveEngine(config: {
   const startGame = useCallback(() => {
     setGameState("playing");
     setTimeLeft(config.duration);
+    setCorrectCount(0);
     stats.current = {
       totalEquations: 0,
       correctAnswers: 0,
@@ -95,6 +98,7 @@ export function useWarpDriveEngine(config: {
       if (isCorrect) {
         // Registrar telemetría de éxito
         stats.current.correctAnswers++;
+        setCorrectCount((c) => c + 1);
         stats.current.currentStreak++;
         if (stats.current.currentStreak > stats.current.maxStreak) {
           stats.current.maxStreak = stats.current.currentStreak;
@@ -173,6 +177,6 @@ export function useWarpDriveEngine(config: {
     startGame,
     handleAnswer,
     getTelemetry,
-    currentScore: stats.current.correctAnswers,
+    currentScore: correctCount,
   };
 }

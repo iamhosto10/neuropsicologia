@@ -398,7 +398,7 @@ export function useNavigationEngine({
       if (signal.aborted) return;
 
       const cmd = commands[i];
-      let nextPos = { ...currentPos };
+      const nextPos = { ...currentPos };
 
       if (cmd === "UP") nextPos.y -= 1;
       if (cmd === "DOWN") nextPos.y += 1;

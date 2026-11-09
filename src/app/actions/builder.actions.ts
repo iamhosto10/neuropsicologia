@@ -178,7 +178,7 @@ export async function createLessonAction(
 
     // Vincular al Syllabus
     // 🔥 4. VINCULACIÓN AL SYLLABUS (VERSIÓN ROBUSTA) 🔥
-    const currentCourse = await client.fetch(
+    const currentCourse = await client.withConfig({ useCdn: false }).fetch(
       `*[_type == "course" && _id == $id][0]{ syllabus }`,
       { id: courseId },
     );
@@ -700,7 +700,7 @@ export async function updateCourseMetadataAction(
     if (imageError) throw new Error(imageError);
 
     // Preparamos los datos básicos a actualizar
-    let updateData: any = {
+    const updateData: any = {
       title,
       description,
       age,

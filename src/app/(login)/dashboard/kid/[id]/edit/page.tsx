@@ -3,7 +3,7 @@ import { client } from "@/sanity/lib/client";
 import { updateKidProfile } from "@/app/actions/profile.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Rocket, Save } from "lucide-react";
+import { ArrowLeft, Rocket } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import SubmitButton from "@/components/dashboard/submit-button";
@@ -16,7 +16,7 @@ export default async function EditCadetPage({
   const { id } = await params;
 
   // Traemos el alias actual del cadete
-  const kid = await client.fetch(
+  const kid = await client.withConfig({ useCdn: false }).fetch(
     `*[_type == "kidProfile" && _id == $id][0]{ alias }`,
     { id },
   );

@@ -1,9 +1,8 @@
 import { currentUser, auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import { getKidsByParentQuery } from "@/sanity/lib/queries";
 import { selectKidProfile } from "@/app/actions/profile.actions";
-import { Shield, Rocket, UserPlus, LogOut } from "lucide-react";
+import { Rocket, UserPlus, LogOut } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
 import { getAvatarIcon } from "@/lib/utils";
 

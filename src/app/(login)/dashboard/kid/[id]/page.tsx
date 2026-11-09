@@ -73,7 +73,7 @@ export default async function KidReportPage({
   }
 
   // 2. Buscamos las lecciones completadas de ESTE cadete
-  const kidExtraData = await client.fetch(
+  const kidExtraData = await client.withConfig({ useCdn: false }).fetch(
     `*[_type == "kidProfile" && _id == $id][0]{
       completedLessons,
       "activityLog": activityLog[]{

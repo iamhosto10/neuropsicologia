@@ -2,10 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, Bell, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,

@@ -1,24 +1,11 @@
-import {
-  Target,
-  Star,
-  Shield,
-  Play,
-  Lock,
-  CheckCircle,
-  Battery,
-  ShoppingCart,
-  BookOpen,
-  Beaker,
-  Zap,
-  ArrowLeftRight,
-} from "lucide-react";
+import { Shield, Play, ShoppingCart, BookOpen, Beaker, Zap, ArrowLeftRight } from "lucide-react";
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
 import PendingSavesSync from "@/components/games/pending-saves-sync";
 import { getOwnedActiveKidId } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
-import { getAvatarIcon, getTodayDate } from "@/lib/utils";
+import { getTodayDate } from "@/lib/utils";
 import { sanityImageSrcSet, sanityImageUrl } from "@/sanity/lib/image";
 
 export default async function HeadquartersPage() {

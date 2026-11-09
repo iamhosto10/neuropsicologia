@@ -33,7 +33,7 @@ export default function DualApproach() {
                 Misiones
               </h3>
               <p className="text-slate-300 mb-8 text-lg leading-relaxed">
-                No más "tarea aburrida". El cadete entra a un Cuartel General
+                No más &ldquo;tarea aburrida&rdquo;. El cadete entra a un Cuartel General
                 donde cada ejercicio cognitivo es una misión vital para salvar
                 satélites o limpiar asteroides.
               </p>

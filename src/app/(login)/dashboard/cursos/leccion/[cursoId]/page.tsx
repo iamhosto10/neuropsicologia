@@ -1,6 +1,6 @@
 import { client } from "@/sanity/lib/client";
 import { canEditContent } from "@/lib/auth-guards";
-import { BookOpen, ArrowLeft, Layers, PlusCircle } from "lucide-react";
+import { BookOpen, ArrowLeft, Layers } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";

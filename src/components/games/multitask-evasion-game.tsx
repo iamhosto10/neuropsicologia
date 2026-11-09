@@ -2,10 +2,10 @@
 "use client";
 
 import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import {
   Rocket,
@@ -36,9 +36,8 @@ interface MultitaskGameProps {
 }
 
 export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   // --- AUDIO ---
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
@@ -114,6 +113,8 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={toggleSound}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
           >

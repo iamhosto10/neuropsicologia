@@ -42,7 +42,7 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
   const router = useRouter();
 
   // Audios
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
@@ -114,7 +114,6 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
       // 🔥 Bloqueamos la UI inmediatamente al terminar
       setIsSaving(true);
 
-      console.log("Telemetría Resumida Comunicador Inverso:", telemetry);
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });

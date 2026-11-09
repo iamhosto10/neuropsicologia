@@ -47,13 +47,13 @@ export default function StarDockingGame({
   const [isSaving, setIsSaving] = useState(false); // CANDADO VISUAL (SOP)
   const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.3,
   });
-  const [playRotate] = useSound("/sounds/ui-click.mp3", { volume: 0.4 });
+  const [playRotate] = useSound("/sounds/beep-press.mp3", { volume: 0.4 });
   const [playSuccess] = useSound("/sounds/ui-correct.mp3", { volume: 0.6 });
-  const [playError] = useSound("/sounds/wall-crash.mp3", { volume: 0.5 });
+  const [playError] = useSound("/sounds/clank.mp3", { volume: 0.5 });
 
   // --- CONEXIÓN CON EL CEREBRO (HOOK) ---
   const handleGameFinish = async (

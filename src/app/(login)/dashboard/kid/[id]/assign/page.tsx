@@ -233,3 +233,6 @@ export default async function AgendaMisionesPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Agenda de Misiones" };

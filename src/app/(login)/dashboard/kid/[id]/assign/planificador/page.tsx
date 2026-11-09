@@ -73,3 +73,6 @@ export default async function PlanificadorMisionesPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Planificador de Misiones" };

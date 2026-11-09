@@ -237,7 +237,6 @@ export default async function KidReportPage({
     );
   };
 
-  console.log("3. DATA FINAL PARA LA GRÁFICA:", accuracyData);
 
   return (
     <div className="max-w-6xl mx-auto md:p-8 space-y-8 font-sans animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -643,3 +642,6 @@ export default async function KidReportPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Ficha del Cadete" };

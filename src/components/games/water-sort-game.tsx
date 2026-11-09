@@ -49,14 +49,14 @@ export default function WaterSortGame({
   const router = useRouter();
 
   // --- AUDIO ---
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
   const [playClink] = useSound("/sounds/glass-clink.mp3", { volume: 0.6 });
   const [playPour] = useSound("/sounds/pour-water.mp3", { volume: 0.8 });
   const [playError] = useSound("/sounds/error-buzz.mp3", { volume: 0.4 });
-  const [playUndo] = useSound("/sounds/rewind.mp3", { volume: 0.5 });
+  const [playUndo] = useSound("/sounds/whoosh-metal.mp3", { volume: 0.5 });
   const [playLevelUp] = useSound("/sounds/ui-correct.mp3", { volume: 0.7 });
 
   const handleGameFinish = async (

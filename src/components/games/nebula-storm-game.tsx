@@ -61,7 +61,6 @@ export default function NebulaStormGame({ config }: NebulaStormProps) {
 
       setIsSaving(true);
 
-      console.log("Telemetría Flanker (Nebulosa):", telemetry);
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });

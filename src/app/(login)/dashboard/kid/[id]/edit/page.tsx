@@ -87,3 +87,6 @@ export default async function EditCadetPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Editar Cadete" };

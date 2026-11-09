@@ -156,3 +156,6 @@ export default async function CourseConstructorPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Constructor de Lecciones" };

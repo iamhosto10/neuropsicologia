@@ -48,7 +48,7 @@ export default function DualApproach() {
                 </li>
                 <li className="flex items-center gap-3 font-medium text-slate-200 text-lg">
                   <CheckCircle2 className="w-6 h-6 text-blue-400 shrink-0" />{" "}
-                  Cero frustración, 100% gamificado
+                  Pensado para jugar sin presión
                 </li>
               </ul>
             </div>

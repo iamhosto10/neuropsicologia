@@ -8,6 +8,7 @@ let s: FakeSanity;
 const form = (alias: string) => {
   const f = new FormData();
   f.set("alias", alias);
+  f.set("consent", "on");
   return f;
 };
 const rethrowRedirect = async (p: Promise<any>) => {
@@ -87,6 +88,12 @@ describe("crear cadete", () => {
     expect(await createKidProfile(form("   "))).toHaveProperty("error");
     expect(await createKidProfile(form("x".repeat(21)))).toMatchObject({ error: expect.stringMatching(/20/) });
     expect(Object.values(s.docs).some((d: any) => d.alias === "x".repeat(21))).toBe(false);
+  });
+  it("sin la casilla de consentimiento del tutor no se crea el perfil", async () => {
+    const f = new FormData();
+    f.set("alias", "Leo");
+    expect(await createKidProfile(f)).toMatchObject({ error: expect.stringMatching(/Privacidad/) });
+    expect(Object.values(s.docs).some((d: any) => d.alias === "Leo")).toBe(false);
   });
   it("sin sesión: error", async () => {
     state.userId = null;

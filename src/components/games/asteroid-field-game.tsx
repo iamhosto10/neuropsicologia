@@ -63,7 +63,6 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
       // 🔥 Candado Visual INMEDIATO
       setIsSaving(true);
 
-      console.log("Telemetría Resumida Go/No-Go:", telemetry);
 
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },

@@ -41,7 +41,7 @@ export default function HullDisassemblyGame({
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });

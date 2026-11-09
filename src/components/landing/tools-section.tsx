@@ -14,18 +14,18 @@ const toolsData = [
   {
     id: 1,
     title: "Limpieza Espacial",
-    cognitiveArea: "Atención Sostenida",
+    cognitiveArea: "Atención Selectiva",
     description:
-      "Entrena la capacidad de mantener el foco en estímulos específicos ignorando los distractores de la basura espacial.",
+      "Encuentra y toca solo los objetivos azules mientras ignoras la basura espacial. Entrena el foco y la búsqueda visual.",
     icon: <Target className="w-6 h-6 text-orange-500" />,
     color: "bg-orange-50",
   },
   {
     id: 2,
     title: "Rastreador Satelital",
-    cognitiveArea: "Memoria de Trabajo",
+    cognitiveArea: "Atención Sostenida",
     description:
-      "Fortalece la retención a corto plazo obligando al cadete a recordar secuencias de luces y sonidos.",
+      "Mantén el cursor o el dedo sobre el satélite para no perder la señal y reacciona rápido cuando se ponga en alerta roja.",
     icon: <Satellite className="w-6 h-6 text-blue-500" />,
     color: "bg-blue-50",
   },
@@ -34,7 +34,7 @@ const toolsData = [
     title: "Campo de Asteroides",
     cognitiveArea: "Control Inhibitorio",
     description:
-      "Clásico paradigma 'Go/No-Go'. Dispara a los asteroides, pero frena tus impulsos cuando aparezcan naves aliadas.",
+      "Inspirado en la tarea Go/No-Go: toca rápido cuando veas verde y frena tu impulso cuando veas rojo.",
     icon: <Telescope className="w-6 h-6 text-slate-700" />,
     color: "bg-slate-100",
   },
@@ -49,10 +49,10 @@ const toolsData = [
   },
   {
     id: 5,
-    title: "Matriz de Memoria",
+    title: "Panel de Seguridad",
     cognitiveArea: "Memoria Visoespacial",
     description:
-      "Memoriza la ubicación exacta de las celdas de energía en una cuadrícula que se vuelve más compleja con cada nivel.",
+      "Observa la secuencia de luces del panel y repítela, a veces al revés. Cada nivel agrega un paso más.",
     icon: <LayoutGrid className="w-6 h-6 text-purple-500" />,
     color: "bg-purple-50",
   },

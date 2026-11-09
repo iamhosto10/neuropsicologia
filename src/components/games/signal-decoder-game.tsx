@@ -35,7 +35,7 @@ export default function SignalDecoderGame({ config }: SignalDecoderProps) {
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-tech.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.15,
   });
@@ -56,7 +56,6 @@ export default function SignalDecoderGame({ config }: SignalDecoderProps) {
 
       setIsSaving(true);
 
-      console.log("Telemetría SDMT (Velocidad Procesamiento):", telemetry);
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });

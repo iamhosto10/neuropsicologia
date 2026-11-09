@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { Menu, Bell, Search } from "lucide-react";
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +15,7 @@ import {
 import Sidebar from "./sidebar";
 
 export default function Topbar() {
+  const { user } = useUser();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -50,18 +51,12 @@ export default function Topbar() {
 
       {/* CONTROLES DE LA DERECHA */}
       <div className="flex items-center gap-3 md:gap-6">
-        <button className="relative p-2 text-slate-400 hover:text-cyan-500 transition-colors">
-          <Bell className="w-6 h-6" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-
-        <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
 
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-black text-slate-900">Comandante</p>
+            <p className="text-sm font-black text-slate-900">{user?.firstName || "Comandante"}</p>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-              Especialista
+              Cuenta
             </p>
           </div>
           {/* AVATAR REAL DE CLERK */}

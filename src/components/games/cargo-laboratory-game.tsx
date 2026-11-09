@@ -43,7 +43,7 @@ export default function CargoLaboratoryGame({ config }: CargoLabProps) {
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.15,
   });
@@ -72,7 +72,6 @@ export default function CargoLaboratoryGame({ config }: CargoLabProps) {
 
       setIsSaving(true); // Candado Visual Activo
 
-      console.log("Telemetría N-Back (Memoria):", telemetry);
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });

@@ -258,3 +258,6 @@ export default async function AcademicReportPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Boletín Académico" };

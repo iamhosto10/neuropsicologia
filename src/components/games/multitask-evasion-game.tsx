@@ -41,13 +41,13 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
   const router = useRouter();
 
   // --- AUDIO ---
-  const [playBg, { stop: stopBg }] = useSound("/sounds/bg-warp.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
-  const [playGood] = useSound("/sounds/collect-good.mp3", { volume: 0.7 });
-  const [playBad] = useSound("/sounds/collect-bad.mp3", { volume: 0.7 });
-  const [playCrash] = useSound("/sounds/wall-crash.mp3", { volume: 0.6 });
+  const [playGood] = useSound("/sounds/ui-correct.mp3", { volume: 0.7 });
+  const [playBad] = useSound("/sounds/error-buzz.mp3", { volume: 0.7 });
+  const [playCrash] = useSound("/sounds/clank.mp3", { volume: 0.6 });
 
   // --- EFECTOS VISUALES ---
   const triggerShake = () => {
@@ -82,7 +82,6 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
       // 🔥 Candado Visual INMEDIATO
       setIsSaving(true);
 
-      console.log("Telemetría Clínica (Multitask):", telemetry);
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });

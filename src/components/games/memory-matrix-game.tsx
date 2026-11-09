@@ -40,7 +40,7 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
   const [feedbackSuccess, setFeedbackSuccess] = useState(true);
   const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/bg-tech.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
@@ -79,7 +79,6 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       // 🔥 Candado Visual INMEDIATO
       setIsSaving(true);
 
-      console.log("Telemetría Resumida (Memoria):", telemetry);
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });

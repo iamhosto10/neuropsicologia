@@ -14,7 +14,6 @@ import NebulaStormGame from "../games/nebula-storm-game";
 import SignalDecoderGame from "../games/signal-decoder-game";
 import NavigationGame from "../games/navigation-game";
 import WarpDriveGame from "../games/warp-drive-game";
-import config from "../../../sanity.config";
 import StarDockingGame from "../games/star-docking-game";
 import HullDisassemblyGame from "../games/hull-disassembly-game";
 import WaterSortGame from "../games/water-sort-game";
@@ -101,8 +100,14 @@ export default function InlineGameWrapper({ value }: { value: any }) {
 
   return (
     <div className={wrapperClasses}>
+      {/* Barra superior en el flujo normal (antes iba encima del HUD del juego y lo tapaba) */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 bg-slate-950">
+      {/* Etiqueta de Laboratorio más sutil */}
+      <div className="bg-cyan-500/90 text-slate-950 px-4 py-2 rounded-full backdrop-blur-md font-bold text-xs flex items-center gap-2 shadow-lg tracking-wider uppercase">
+        <FlaskConical className="w-4 h-4" /> Laboratorio
+      </div>
       {/* Controles Superiores (Pantalla Completa y Cerrar) */}
-      <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+      <div className="flex items-center gap-3">
         <button
           onClick={() => setIsFullscreen(!isFullscreen)}
           className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-full backdrop-blur-md transition-colors shadow-sm"
@@ -128,10 +133,6 @@ export default function InlineGameWrapper({ value }: { value: any }) {
           </span>
         </button>
       </div>
-
-      {/* Etiqueta de Laboratorio más sutil */}
-      <div className="absolute top-6 left-6 z-50 bg-cyan-500/90 text-slate-950 px-4 py-2 rounded-full backdrop-blur-md font-bold text-xs flex items-center gap-2 shadow-lg tracking-wider uppercase">
-        <FlaskConical className="w-4 h-4" /> Laboratorio
       </div>
 
       <div className="flex-1 w-full h-full relative">{renderGameEngine()}</div>

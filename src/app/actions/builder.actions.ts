@@ -3,7 +3,7 @@
 import { client, writeClient } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
 import { requireContentEditor } from "@/lib/auth-guards";
-import { validateImageFile, validateTtsBlocks } from "@/lib/content-roles";
+import { parseReward, slugify, validateImageFile, validateTtsBlocks } from "@/lib/content-roles";
 import { v4 as uuidv4 } from "uuid"; // Opcional, pero bueno para slugs únicos
 
 export async function createCourseAction(formData: FormData) {
@@ -24,10 +24,7 @@ export async function createCourseAction(formData: FormData) {
     const imageError = validateImageFile(imageFile);
     if (imageError) throw new Error(imageError);
 
-    const baseSlug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
+    const baseSlug = slugify(title);
     const uniqueSlug = `${baseSlug}-${uuidv4().substring(0, 5)}`;
 
     let imageRef = undefined;
@@ -83,10 +80,7 @@ export async function createLessonAction(
     const title = formData.get("lessonTitle") as string;
     if (!title) throw new Error("El título de la lección es obligatorio");
 
-    const baseSlug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)+/g, "");
+    const baseSlug = slugify(title);
     const uniqueSlug = `${baseSlug}-${uuidv4().substring(0, 5)}`;
 
     const rawBlocks = formData.get("contentBlocks") as string;
@@ -159,7 +153,7 @@ export async function createLessonAction(
           question: block.question,
           options: block.options,
           correctOptionIndex: parseInt(block.correctOptionIndex, 10),
-          reward: parseInt(block.reward, 10) || 10,
+          reward: parseReward(block.reward, 10),
         });
       }
 
@@ -169,7 +163,7 @@ export async function createLessonAction(
           _key: blockKey,
           _type: "lessonOpenQuestion",
           question: block.question,
-          reward: parseInt(block.reward, 10) || 15,
+          reward: parseReward(block.reward, 15),
         });
       }
     }
@@ -651,7 +645,7 @@ export async function updateLessonAction(
           question: block.question,
           options: block.options,
           correctOptionIndex: parseInt(block.correctOptionIndex, 10),
-          reward: parseInt(block.reward, 10) || 10,
+          reward: parseReward(block.reward, 10),
         });
       }
 
@@ -661,7 +655,7 @@ export async function updateLessonAction(
           _key: blockKey,
           _type: "lessonOpenQuestion",
           question: block.question,
-          reward: parseInt(block.reward, 10) || 15,
+          reward: parseReward(block.reward, 15),
         });
       }
     }

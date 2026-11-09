@@ -46,6 +46,11 @@ export async function createKidProfile(formData: FormData) {
     return { error: `El nombre no puede superar ${MAX_ALIAS_LENGTH} caracteres.` };
   }
 
+  // Autorización del tutor para tratar datos del menor (Ley 1581 de 2012)
+  if (formData.get("consent") !== "on") {
+    return { error: "Debes aceptar la Política de Privacidad y confirmar que eres el tutor del menor." };
+  }
+
   const { userId } = await auth();
   if (!userId) {
     return { error: "No autorizado. Inicia sesión nuevamente." };

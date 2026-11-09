@@ -69,7 +69,6 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
       // Bloqueamos la UI inmediatamente
       setIsSaving(true);
 
-      console.log("Telemetría Radar Satelital:", telemetry);
 
       // Enviamos a la BD
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);

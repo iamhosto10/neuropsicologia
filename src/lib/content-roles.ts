@@ -43,3 +43,22 @@ export function validateTtsBlocks(blocks: Array<{ type?: string; scriptText?: st
   if (total > TTS_MAX_CHARS_PER_LESSON) return `Los audios de una lección no pueden superar ${TTS_MAX_CHARS_PER_LESSON} caracteres en total.`;
   return null;
 }
+
+// Slug sin tildes ("Atención" -> "atencion"; antes salía "atenci-n"). Nunca vacío.
+export function slugify(title: string, fallback = "contenido"): string {
+  const s = String(title ?? "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "")
+    .slice(0, 80);
+  return s || fallback;
+}
+
+// Recompensa de un bloque: 0 es válido (antes `parseInt(x) || 10` lo convertía en 10), tope 100.
+export function parseReward(value: unknown, fallback: number): number {
+  const n = Number.parseInt(String(value ?? ""), 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(Math.max(n, 0), 100);
+}

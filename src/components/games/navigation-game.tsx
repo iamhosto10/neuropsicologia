@@ -65,7 +65,6 @@ export default function NavigationGame({ config }: NavigationGameProps) {
       if (config.isPractice) return;
 
       setIsSaving(true);
-      console.log("Telemetría Planificación Clínica:", telemetry);
 
       await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },

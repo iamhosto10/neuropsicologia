@@ -139,7 +139,6 @@ export default async function HeadquartersPage() {
                 </p>
               </div>
             )}
-            {console.log(dashboardData)}
             {dashboardData.todaySession.missions.map(
               (mission: any, index: number) => {
                 // 🔥 1. Cambiamos mission._id por mission._key
@@ -148,7 +147,6 @@ export default async function HeadquartersPage() {
                     mission?._key,
                   );
 
-                console.log("mission: ", mission);
 
                 return (
                   <div

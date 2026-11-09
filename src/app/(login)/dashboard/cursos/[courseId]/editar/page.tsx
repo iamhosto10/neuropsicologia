@@ -30,3 +30,6 @@ export default async function EditarCursoPage({
 
   return <EditCourseForm course={course} />;
 }
+
+
+export const metadata = { title: "Editar Curso" };

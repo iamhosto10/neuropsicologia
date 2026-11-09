@@ -16,6 +16,7 @@ Complementa `AUDITORIA_NEUROPLAY.md` (mapa de funcionalidades y guía para el cl
 
 ---
 
+> ✅ **Ítems 15 a 20 y 22-23 corregidos** (15 respaldo de audio; 16 páginas legales BORRADOR con [REVISAR] + consentimiento del tutor; 17 sonidos reasignados a archivos existentes; 18 landing; 19 sin console.log de datos, proxy.ts, bundle y límite de cuerpo; 20 slug sin tildes y recompensa 0; 22-23 títulos, barra superior real y cabecera del modo práctica). **Pendientes:** 21 (política de recompensas: requiere decisión), 24 (accesibilidad), 25 (migración de datos antiguos), 26-29 (lint, caché CDN, CI/E2E, iPad real). Aún falta en el panel de Sanity registrar el dominio de producción en CORS (15).
 > ✅ **Ítems 8 a 14 corregidos** (excepto 11.5: misiones sin interacción); verificado en vivo: mínimos de duración, reasignación, relojes, duración de Carga, guardado único, etiquetas de la ficha y botón de reinicio del Casco; pendiente de verificar en vivo: arrastre táctil del Satelital (el panel limita rAF) y el aviso de "sin movimientos" del Casco.
 > ✅ **Ítems 1 a 7 corregidos y commiteados** con pruebas de regresión (`npm test`, 88 pruebas): 1-3 acciones de servidor y `src/lib/sanity-safe.ts`; 4 permisos (`src/lib/content-roles.ts`; requiere rol `admin`/`therapist` en Clerk publicMetadata o env `CONTENT_EDITOR_USER_IDS`); 5 `src/lib/mission-save-client.ts`; 6-7 `src/lib/clerk-sync.ts`. Falta verificación en vivo de 4-7 (la sesión de Clerk del navegador expiró) y que quiz/pregunta abierta lean el resultado `{error}`.
 

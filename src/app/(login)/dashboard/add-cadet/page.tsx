@@ -84,6 +84,15 @@ export default function AddCadetPage() {
               </p>
             </div>
 
+            <label className="flex items-start gap-3 text-sm text-slate-600 cursor-pointer">
+              <input type="checkbox" name="consent" required className="mt-1 h-5 w-5 accent-cyan-600" />
+              <span>
+                Soy el padre, madre, tutor o profesional autorizado de este menor y acepto la{" "}
+                <Link href="/privacidad" target="_blank" className="underline text-cyan-700">Política de Privacidad</Link> y los{" "}
+                <Link href="/terminos" target="_blank" className="underline text-cyan-700">Términos de Servicio</Link>.
+              </span>
+            </label>
+
             {error && (
               <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-200">
                 {error}

@@ -11,11 +11,15 @@ const isProtectedRoute = createRouteMatcher([
   "/juegos",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+export default clerkMiddleware(
+  async (auth, req) => {
+    if (isProtectedRoute(req)) {
+      await auth.protect();
+    }
+  },
+  // Las rutas protegidas mandan a /sign-in de ESTA app (no al portal externo accounts.dev)
+  { signInUrl: "/sign-in", signUpUrl: "/sign-up" },
+);
 
 export const config = {
   matcher: [

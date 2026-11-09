@@ -16,7 +16,7 @@ Complementa `AUDITORIA_NEUROPLAY.md` (mapa de funcionalidades y guía para el cl
 
 ---
 
-> ✅ **Ítems 1, 2 y 3 corregidos** (sin commit): `quiz/open-question/activity/course/mission/store.actions.ts` + `src/lib/sanity-safe.ts`. Falta probar en la UI con QA Auditoría y que los clientes (`interactive-quiz.tsx`, `interactive-open-question.tsx`) lean el resultado `{error}`.
+> ✅ **Ítems 1 a 7 corregidos y commiteados** con pruebas de regresión (`npm test`, 88 pruebas): 1-3 acciones de servidor y `src/lib/sanity-safe.ts`; 4 permisos (`src/lib/content-roles.ts`; requiere rol `admin`/`therapist` en Clerk publicMetadata o env `CONTENT_EDITOR_USER_IDS`); 5 `src/lib/mission-save-client.ts`; 6-7 `src/lib/clerk-sync.ts`. Falta verificación en vivo de 4-7 (la sesión de Clerk del navegador expiró) y que quiz/pregunta abierta lean el resultado `{error}`.
 
 ## 🔴 URGENTE (pérdida de datos, dinero/trampas, seguridad) — hacer antes de usar con datos reales
 

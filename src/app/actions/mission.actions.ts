@@ -3,89 +3,89 @@
 import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
+import { retryOnConflict } from "@/lib/sanity-safe";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-// 1. EL MOTOR DE GUARDADO (Ahora inyecta el gameType en la telemetría)
+// 1. EL MOTOR DE GUARDADO (inyecta el gameType en la telemetría)
+// Seguro ante doble envío / peticiones simultáneas: escribe con ifRevisionID
+// y reintenta releyendo, así la recompensa se da una sola vez.
 export async function saveMissionProgress(
   kidId: string,
-  missionKey: string, // 🔥 Antes era missionId, ahora es el _key de la misión en la sesión
+  missionKey: string, // _key de la misión dentro de la sesión
   crystalsEarned: number,
   telemetry: any[],
 ) {
   if (!(await isKidOwnedByCurrentUser(kidId))) return { success: false };
+  if (typeof missionKey !== "string" || missionKey.length > 128) return { success: false };
+
+  // La telemetría viene del navegador: se acota antes de guardarla
+  const metrics = Array.isArray(telemetry) ? telemetry[0] : telemetry;
+  if (!metrics || typeof metrics !== "object" || Array.isArray(metrics)) return { success: false };
+  const metricsJson = JSON.stringify(metrics);
+  if (metricsJson.length > 5000) return { success: false };
+
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
       useCdn: false,
     });
 
-    // 1. Buscamos la sesión que contenga ESE _key específico en sus misiones
-    // Ya no dependemos de "date == today", lo buscamos por su ID único (_key)
-    const sessionQuery = `*[_type == "dailySession" && references($kidId) && $missionKey in missions[]._key][0]{
-      _id,
-      missions,
-      completedMissions
-    }`;
-    const session = await writeClient.fetch(sessionQuery, {
-      kidId,
-      missionKey,
+    let gameType = "unknown";
+    let found = true;
+
+    await retryOnConflict(async () => {
+      const session = await writeClient.fetch(
+        `*[_type == "dailySession" && kidProfile._ref == $kidId && $missionKey in missions[]._key][0]{
+          _id, _rev, missions, completedMissions
+        }`,
+        { kidId, missionKey },
+      );
+      if (!session) {
+        found = false;
+        return;
+      }
+
+      const currentMission = session.missions?.find((m: any) => m._key === missionKey);
+      gameType = currentMission?.gameType || "unknown";
+      const completedArray: string[] = session.completedMissions || [];
+      if (completedArray.includes(missionKey)) return; // ya guardada: no duplicar
+
+      // Cristales: nunca más de lo que da la misión
+      const maxReward = Number(currentMission?.energyReward) || 0;
+      const reward = Math.min(Math.max(0, Math.round(Number(crystalsEarned) || 0)), maxReward);
+
+      const newCompletedArray = [...completedArray, missionKey];
+      const isFullyCompleted = newCompletedArray.length >= (session.missions?.length || 0);
+      const telemetryRecord = JSON.stringify({
+        missionId: missionKey,
+        gameType,
+        timestamp: new Date().toISOString(),
+        metrics,
+      });
+
+      const tx = writeClient.transaction();
+      // El patch de la sesión lleva ifRevisionID: si otra petición ganó, falla (409) y se reintenta
+      tx.patch(session._id, {
+        ifRevisionID: session._rev,
+        setIfMissing: { telemetryData: [] },
+      });
+      tx.patch(session._id, (p) =>
+        p
+          .append("telemetryData", [telemetryRecord])
+          .set({ completedMissions: newCompletedArray, isCompleted: isFullyCompleted }),
+      );
+      tx.patch(kidId, (p) => p.inc({ energyCrystals: reward }));
+      await tx.commit();
     });
 
-    if (!session) {
+    if (!found) {
       console.error("❌ Sesión no encontrada para la llave:", missionKey);
       return { success: false };
     }
 
-    // 2. Extraemos qué juego era para pegarlo como "etiqueta" en la telemetría
-    const currentMission = session.missions?.find(
-      (m: any) => m._key === missionKey,
-    );
-    const gameType = currentMission?.gameType || "unknown";
-
-    // 3. Iniciamos la Transacción múltiple
-    const tx = writeClient.transaction();
-
-    const completedArray = session.completedMissions || [];
-
-    // Verificamos que no haya guardado esta misión ya (previene clics dobles)
-    if (!completedArray.includes(missionKey)) {
-      // Sumamos los cristales al niño, nunca más de lo que da la misión
-      const maxReward = Number(currentMission?.energyReward) || 0;
-      const reward = Math.min(
-        Math.max(0, Math.round(Number(crystalsEarned) || 0)),
-        maxReward,
-      );
-      tx.patch(kidId, (p) => p.inc({ energyCrystals: reward }));
-
-      const newCompletedArray = [...completedArray, missionKey];
-      const isFullyCompleted =
-        newCompletedArray.length >= (session.missions?.length || 0);
-
-      // 🔥 EL TRUCO MAESTRO: Metemos el gameType directo en el JSON
-      const telemetryRecord = JSON.stringify({
-        missionId: missionKey,
-        gameType: gameType, // Esto le salva la vida al Dashboard
-        timestamp: new Date().toISOString(),
-        metrics: telemetry[0] || telemetry,
-      });
-
-      tx.patch(session._id, (p) =>
-        p
-          .setIfMissing({ telemetryData: [] })
-          .append("telemetryData", [telemetryRecord])
-          .set({
-            completedMissions: newCompletedArray,
-            isCompleted: isFullyCompleted,
-          }),
-      );
-    }
-
-    await tx.commit();
-
-    console.log(`✅ Misión ${gameType} completada. Cristales sumados.`);
+    console.log(`✅ Misión ${gameType} completada.`);
     revalidatePath("/hq");
-
     return { success: true };
   } catch (error) {
     console.error("❌ Error guardando progreso:", error);

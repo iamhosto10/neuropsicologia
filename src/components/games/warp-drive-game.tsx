@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useEffect, useRef, useState } from "react";
 import { useWarpDriveEngine } from "@/hooks/useWarpDriveEngine";
 import { Button } from "@/components/ui/button";
@@ -65,12 +65,10 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
       (telemetry.accuracyRate / 100) * config.energyReward,
     );
 
-    saveMissionProgress(config.kidId, config.missionId, earnedCrystals, [
+    saveMissionAndGoHome(config.kidId, config.missionId, earnedCrystals, [
       telemetry,
-    ]).then(() => {
-      router.push("/hq");
-    });
-  }, [engine, config, router, stopBackground]);
+    ]);
+  }, [engine, config, stopBackground]);
 
   const handleStart = () => {
     if (soundEnabled) playBackground();

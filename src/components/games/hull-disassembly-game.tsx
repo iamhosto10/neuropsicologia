@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useHullEngine, HullTelemetry } from "@/hooks/useHullEngine";
 
 interface HullGameProps {
@@ -62,13 +62,7 @@ export default function HullDisassemblyGame({
     if (config.isPractice || !config.kidId || !config.missionId) return;
 
     setIsSaving(true);
-    await saveMissionProgress(
-      config.kidId,
-      config.missionId,
-      config.energyReward ?? 0,
-      [telemetry],
-    );
-    router.push("/hq");
+    await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward ?? 0, [telemetry]);
   };
 
   const {

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import {
   useWaterSortEngine,
   WaterSortTelemetry,
@@ -71,13 +71,7 @@ export default function WaterSortGame({
     if (config.isPractice || !config.kidId || !config.missionId) return;
 
     setIsSaving(true);
-    await saveMissionProgress(
-      config.kidId,
-      config.missionId,
-      config.energyReward ?? 0,
-      [telemetry],
-    );
-    router.push("/hq");
+    await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward ?? 0, [telemetry]);
   };
 
   const {

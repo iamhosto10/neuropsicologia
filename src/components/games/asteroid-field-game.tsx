@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -63,14 +63,7 @@ export default function AsteroidFieldGame({ config }: AsteroidGameProps) {
 
       console.log("Telemetría Resumida Go/No-Go:", telemetry);
 
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 

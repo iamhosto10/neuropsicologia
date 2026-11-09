@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useMemoryEngine } from "@/hooks/useMemoryEngine";
 
 interface MemoryGameProps {
@@ -78,13 +78,7 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       setIsSaving(true);
 
       console.log("Telemetría Resumida (Memoria):", telemetry);
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 

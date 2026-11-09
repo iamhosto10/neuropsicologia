@@ -15,6 +15,7 @@ import {
 import { client } from "@/sanity/lib/client";
 import { getKidDashboardQuery } from "@/sanity/lib/queries";
 import Link from "next/link";
+import PendingSavesSync from "@/components/games/pending-saves-sync";
 import { getOwnedActiveKidId } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import { getAvatarIcon, getTodayDate } from "@/lib/utils";
@@ -46,6 +47,7 @@ export default async function HeadquartersPage() {
 
   return (
     <div className="w-full max-w-5xl px-10 flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500 pb-16 overflow-auto relative [scrollbar-width:none]">
+      <PendingSavesSync kidId={kidId} />
       <div className="absolute top-0 right-0 z-50">
         <Link href="/select-profile">
           <button className="flex items-center gap-2 bg-slate-800/80 hover:bg-cyan-600/90 text-slate-300 hover:text-white px-4 py-2 rounded-full border border-slate-700 hover:border-cyan-400 backdrop-blur-sm transition-all shadow-lg hover:shadow-cyan-500/20 group cursor-pointer">

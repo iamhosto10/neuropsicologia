@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useSatelliteEngine } from "@/hooks/useSatelliteEngine";
 
 interface SatelliteGameProps {
@@ -70,15 +70,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
       console.log("Telemetría Radar Satelital:", telemetry);
 
       // Enviamos a la BD
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-
-      // Redirigimos sin quitar el isSaving para evitar destellos
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 

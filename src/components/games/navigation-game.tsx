@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -67,13 +67,7 @@ export default function NavigationGame({ config }: NavigationGameProps) {
       setIsSaving(true);
       console.log("Telemetría Planificación Clínica:", telemetry);
 
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 

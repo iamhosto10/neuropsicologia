@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import {
   Rocket,
   ShieldAlert,
@@ -81,13 +81,7 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
       setIsSaving(true);
 
       console.log("Telemetría Clínica (Multitask):", telemetry);
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 

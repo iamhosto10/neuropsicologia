@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useReverseEngine, Direction } from "@/hooks/useReverseEngine";
 
 interface ReverseGameProps {
@@ -113,13 +113,7 @@ export default function ReverseCommunicatorGame({ config }: ReverseGameProps) {
       setIsSaving(true);
 
       console.log("Telemetría Resumida Comunicador Inverso:", telemetry);
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import useSound from "use-sound";
 import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useSpaceCleanupEngine } from "@/hooks/useSpaceCleanupEngine";
 
 interface SpaceCleanupProps {
@@ -81,13 +81,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
       const reward =
         telemetry[0].result === "win" ? baseReward : Math.floor(baseReward / 2);
 
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        reward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, reward, telemetry);
     },
   });
 

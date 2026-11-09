@@ -17,6 +17,7 @@ describe("inicio de sesión dentro de la app", () => {
     expect(read("src/app/layout.tsx")).toMatch(/signInUrl="\/sign-in"/);
   });
   it("/sign-in no está protegida (si no, sería un bucle)", () => {
-    expect(read("src/proxy.ts")).not.toMatch(/"\/sign-in/);
+    const list = read("src/proxy.ts").match(/createRouteMatcher\(\[([\s\S]*?)\]\)/)?.[1] ?? "";
+    expect(list).not.toMatch(/sign-(in|up)/);
   });
 });

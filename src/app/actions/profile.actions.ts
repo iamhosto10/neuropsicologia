@@ -2,10 +2,13 @@
 "use server";
 import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 import { client } from "@/sanity/lib/client";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import { deleteKidCascade, ensureSanityUser } from "@/lib/clerk-sync";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+const MAX_ALIAS_LENGTH = 20;
 
 export async function selectKidProfile(kidId: string) {
   if (!(await isKidOwnedByCurrentUser(kidId))) redirect("/select-profile");
@@ -39,6 +42,14 @@ export async function createKidProfile(formData: FormData) {
   if (!alias || alias.trim() === "") {
     return { error: "El nombre del cadete es requerido." };
   }
+  if (alias.trim().length > MAX_ALIAS_LENGTH) {
+    return { error: `El nombre no puede superar ${MAX_ALIAS_LENGTH} caracteres.` };
+  }
+
+  // Autorización del tutor para tratar datos del menor (Ley 1581 de 2012)
+  if (formData.get("consent") !== "on") {
+    return { error: "Debes aceptar la Política de Privacidad y confirmar que eres el tutor del menor." };
+  }
 
   const { userId } = await auth();
   if (!userId) {
@@ -53,6 +64,16 @@ export async function createKidProfile(formData: FormData) {
       useCdn: false,
     });
 
+    // Si el webhook de Clerk no corrió, el usuario no existe en Sanity y la referencia
+    // del perfil fallaría: se crea al vuelo (idempotente).
+    const clerkUser = await currentUser();
+    await ensureSanityUser(writeClient, {
+      id: userId,
+      firstName: clerkUser?.firstName,
+      lastName: clerkUser?.lastName,
+      email: clerkUser?.emailAddresses?.[0]?.emailAddress,
+    });
+
     await writeClient.create({
       _type: "kidProfile",
       alias: alias.trim(),
@@ -61,7 +82,9 @@ export async function createKidProfile(formData: FormData) {
         _ref: parentSanityId,
       },
       energyCrystals: 0,
-      avatarStatus: "locked",
+      avatarStatus: "hungry",
+      unlockedAvatars: ["default-cadet"],
+      activeAvatar: "default-cadet",
     });
   } catch (error) {
     console.error("❌ Error creando el perfil:", error);
@@ -105,8 +128,13 @@ export async function deleteKidProfile(kidId: string) {
       useCdn: false,
     });
 
-    // Eliminamos el documento de Sanity usando su ID
-    await writeClient.delete(kidId);
+    // Sanity no deja borrar un documento referenciado: se borran también sus sesiones
+    // (todo en una transacción)
+    await deleteKidCascade(writeClient, kidId);
+
+    // Si era el cadete activo, se limpia la cookie
+    const cookieStore = await cookies();
+    if (cookieStore.get("activeKidId")?.value === kidId) cookieStore.delete("activeKidId");
 
     // Recargamos las páginas para que la tabla se actualice
     revalidatePath("/dashboard/pacientes");
@@ -125,6 +153,9 @@ export async function updateKidProfile(kidId: string, formData: FormData) {
 
   if (!alias || alias.trim() === "") {
     return { error: "El nombre del cadete es requerido." };
+  }
+  if (alias.trim().length > MAX_ALIAS_LENGTH) {
+    return { error: `El nombre no puede superar ${MAX_ALIAS_LENGTH} caracteres.` };
   }
 
   if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };

@@ -1,8 +1,10 @@
 // src/components/games/warp-drive-game.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useEffect, useRef, useState } from "react";
 import { useWarpDriveEngine } from "@/hooks/useWarpDriveEngine";
 import { Button } from "@/components/ui/button";
@@ -30,11 +32,10 @@ interface WarpDriveGameProps {
 }
 
 export default function WarpDriveGame({ config }: WarpDriveGameProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [visualState, setVisualState] = useState<"idle" | "success" | "error">(
     "idle",
   );
-  const router = useRouter();
 
   // Sonidos (Puedes cambiarlos por los tuyos si tienes otros nombres)
   const [playBackground, { stop: stopBackground }] = useSound(
@@ -61,16 +62,13 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
     stopBackground();
 
     const telemetry = engine.getTelemetry();
-    const earnedCrystals = Math.round(
-      (telemetry.accuracyRate / 100) * config.energyReward,
-    );
+    // La recompensa la calcula el servidor (base + bonus según precisión)
+    const earnedCrystals = config.energyReward;
 
-    saveMissionProgress(config.kidId, config.missionId, earnedCrystals, [
+    saveMissionAndGoHome(config.kidId, config.missionId, earnedCrystals, [
       telemetry,
-    ]).then(() => {
-      router.push("/hq");
-    });
-  }, [engine, config, router, stopBackground]);
+    ]);
+  }, [engine, config, stopBackground]);
 
   const handleStart = () => {
     if (soundEnabled) playBackground();
@@ -97,6 +95,8 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center z-20 relative shadow-lg">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={() => {
               setSoundEnabled(!soundEnabled);
               if (soundEnabled) stopBackground();
@@ -113,7 +113,7 @@ export default function WarpDriveGame({ config }: WarpDriveGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3 flex justify-end">

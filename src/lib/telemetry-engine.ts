@@ -1,5 +1,67 @@
 // src/lib/telemetry-engine.ts
 
+/** Precisión (0-100) de una partida según la forma de su telemetría (cada juego guarda la suya). */
+export function computeAccuracy(metrics: any): number {
+  let calculatedAccuracy = 0;
+
+  // --- LÓGICA DE DETECCIÓN DE JUEGOS ---
+
+  if (metrics.accuracyRate !== undefined) {
+    // 🔥 NUEVO: Juegos con Tasa de Precisión pre-calculada (Ej: Propulsores Warp / Suma Continua)
+    calculatedAccuracy = metrics.accuracyRate;
+  } else if (
+    metrics.successfulDocks !== undefined &&
+    metrics.totalAttempts !== undefined
+  ) {
+    // 🔥 NUEVO: Lógica para Star Docking
+    calculatedAccuracy =
+      metrics.totalAttempts > 0
+        ? (metrics.successfulDocks / metrics.totalAttempts) * 100
+        : 0;
+  } else if (
+    metrics.stagesCompleted !== undefined &&
+    metrics.invalidMoves !== undefined
+  ) {
+    // 🔥 NUEVO: Lógica de Hull Disassembly (Eficiencia de Planificación)
+    // Calculamos la precisión basándonos en la ausencia de movimientos inválidos
+    const totalValidMoves = metrics.totalMoves - metrics.invalidMoves;
+    calculatedAccuracy =
+      metrics.totalMoves > 0
+        ? Math.max(0, (totalValidMoves / metrics.totalMoves) * 100)
+        : 0;
+  } else if (
+    metrics.invalidPours !== undefined &&
+    metrics.undosUsed !== undefined
+  ) {
+    // 🔥 NUEVO: Lógica de Water Sort (Eficiencia Clínica)
+    // Calculamos precisión penalizando errores por impulsividad (invalidPours).
+    // Usar 'undo' es bueno clínicamente, así que no lo penalizamos tan fuerte en la gráfica.
+    const totalValidPours = metrics.totalMoves - metrics.invalidPours;
+    calculatedAccuracy =
+      metrics.totalMoves > 0
+        ? Math.max(0, (totalValidPours / metrics.totalMoves) * 100)
+        : 0;
+  } else if (
+    metrics.correctClicks !== undefined &&
+    metrics.incorrectClicks !== undefined
+  ) {
+    // Juegos basados en clics (Ej: Space Cleanup)
+    const totalClicks = metrics.correctClicks + metrics.incorrectClicks;
+    calculatedAccuracy =
+      totalClicks > 0 ? (metrics.correctClicks / totalClicks) * 100 : 0;
+  } else if (metrics.success !== undefined) {
+    // Juegos basados en acierto/fallo (Ej: Go/No-Go o Reverse Communicator)
+    calculatedAccuracy = metrics.success === true ? 100 : 0;
+  } else if (metrics.efficiencyScore !== undefined) {
+    // Juegos de Planificación (Ej: Ruta de Navegación)
+    calculatedAccuracy = metrics.efficiencyScore;
+  } else {
+    // Resto de juegos: antes caían aquí y salían con 0% en la gráfica
+    calculatedAccuracy = computeOtherAccuracy(metrics);
+  }
+    return calculatedAccuracy;
+}
+
 export function parseTelemetryHistory(sessionsHistory: any[]) {
   if (!sessionsHistory || sessionsHistory.length === 0) return [];
 
@@ -18,67 +80,10 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
               ? `${dateParts[2]}/${dateParts[1]}`
               : session.date;
 
-          // 🔥 EL CEREBRO MATEMÁTICO: Calculamos la precisión (0-100) según el tipo de juego
-          let calculatedAccuracy = 0;
           const metrics = data.metrics || {};
+          const calculatedAccuracy = computeAccuracy(metrics);
 
-          // --- LÓGICA DE DETECCIÓN DE JUEGOS ---
-
-          if (metrics.accuracyRate !== undefined) {
-            // 🔥 NUEVO: Juegos con Tasa de Precisión pre-calculada (Ej: Propulsores Warp / Suma Continua)
-            calculatedAccuracy = metrics.accuracyRate;
-          } else if (
-            metrics.successfulDocks !== undefined &&
-            metrics.totalAttempts !== undefined
-          ) {
-            // 🔥 NUEVO: Lógica para Star Docking
-            calculatedAccuracy =
-              metrics.totalAttempts > 0
-                ? (metrics.successfulDocks / metrics.totalAttempts) * 100
-                : 0;
-          } else if (
-            metrics.stagesCompleted !== undefined &&
-            metrics.invalidMoves !== undefined
-          ) {
-            // 🔥 NUEVO: Lógica de Hull Disassembly (Eficiencia de Planificación)
-            // Calculamos la precisión basándonos en la ausencia de movimientos inválidos
-            const totalValidMoves = metrics.totalMoves - metrics.invalidMoves;
-            calculatedAccuracy =
-              metrics.totalMoves > 0
-                ? Math.max(0, (totalValidMoves / metrics.totalMoves) * 100)
-                : 0;
-          } else if (
-            metrics.invalidPours !== undefined &&
-            metrics.undosUsed !== undefined
-          ) {
-            // 🔥 NUEVO: Lógica de Water Sort (Eficiencia Clínica)
-            // Calculamos precisión penalizando errores por impulsividad (invalidPours).
-            // Usar 'undo' es bueno clínicamente, así que no lo penalizamos tan fuerte en la gráfica.
-            const totalValidPours = metrics.totalMoves - metrics.invalidPours;
-            calculatedAccuracy =
-              metrics.totalMoves > 0
-                ? Math.max(0, (totalValidPours / metrics.totalMoves) * 100)
-                : 0;
-          } else if (
-            metrics.correctClicks !== undefined &&
-            metrics.incorrectClicks !== undefined
-          ) {
-            // Juegos basados en clics (Ej: Space Cleanup)
-            const totalClicks = metrics.correctClicks + metrics.incorrectClicks;
-            calculatedAccuracy =
-              totalClicks > 0 ? (metrics.correctClicks / totalClicks) * 100 : 0;
-          } else if (metrics.success !== undefined) {
-            // Juegos basados en acierto/fallo (Ej: Go/No-Go o Reverse Communicator)
-            calculatedAccuracy = metrics.success === true ? 100 : 0;
-          } else if (metrics.efficiencyScore !== undefined) {
-            // Juegos de Planificación (Ej: Ruta de Navegación)
-            calculatedAccuracy = metrics.efficiencyScore;
-          } else {
-            // Resto de juegos: antes caían aquí y salían con 0% en la gráfica
-            calculatedAccuracy = computeOtherAccuracy(metrics);
-          }
-
-          allEvents.push({ ...data, date: safeDate, calculatedAccuracy });
+          allEvents.push({ ...data, date: safeDate, fullDate: session.date, calculatedAccuracy });
         } catch (e) {
           console.error("Error parseando telemetría:", e);
         }
@@ -87,6 +92,26 @@ export function parseTelemetryHistory(sessionsHistory: any[]) {
   });
 
   return allEvents;
+}
+
+/**
+ * Promedia precisión directa e inversa SOLO con los tipos de ronda que se jugaron.
+ * Antes, en dificultad fácil (sin rondas inversas) promediaba con un 0 inventado y un niño
+ * perfecto aparecía con 50 %. Datos antiguos sin conteos: si no hubo ningún acierto inverso
+ * ni span inverso, se asume que no hubo rondas inversas.
+ */
+export function combineDirectReverse(m: Record<string, number>): number {
+  const direct = m.accuracyDirectPercent ?? 0;
+  const reverse = m.accuracyReversePercent ?? 0;
+  const hasCounts = m.directRounds !== undefined || m.reverseRounds !== undefined;
+  const reversePlayed = hasCounts
+    ? (m.reverseRounds ?? 0) > 0
+    : !(reverse === 0 && (m.maxSequenceReverse ?? 0) === 0);
+  const directPlayed = hasCounts ? (m.directRounds ?? 0) > 0 : true;
+  if (directPlayed && reversePlayed) return (direct + reverse) / 2;
+  if (directPlayed) return direct;
+  if (reversePlayed) return reverse;
+  return 0;
 }
 
 // Precisión (0-100) de los juegos que no entran en los casos de arriba,
@@ -100,8 +125,7 @@ function computeOtherAccuracy(m: Record<string, number>): number {
   if (m.accuracyCongruentPercent !== undefined)
     return avg(m.accuracyCongruentPercent, m.accuracyIncongruentPercent ?? 0);
   // Panel de Seguridad (Corsi) y Comunicador Inverso
-  if (m.accuracyDirectPercent !== undefined)
-    return avg(m.accuracyDirectPercent, m.accuracyReversePercent ?? 0);
+  if (m.accuracyDirectPercent !== undefined) return combineDirectReverse(m);
   // Decodificador de Señales (SDMT)
   if (m.accuracyPercent !== undefined) return m.accuracyPercent;
   // Rastreador de Satélites
@@ -130,11 +154,13 @@ function computeOtherAccuracy(m: Record<string, number>): number {
 export function generateAccuracyChartData(events: any[]) {
   // 1. Agrupamos por fecha y sacamos el promedio de accuracy calculado
   const groupedByDate = events.reduce((acc, event) => {
-    if (!acc[event.date]) {
-      acc[event.date] = { date: event.date, totalAccuracy: 0, count: 0 };
+    // Se agrupa por la fecha COMPLETA (DD/MM solo para mostrar): sin año, dos años distintos se mezclaban
+    const key = event.fullDate ?? event.date;
+    if (!acc[key]) {
+      acc[key] = { date: event.date, totalAccuracy: 0, count: 0 };
     }
-    acc[event.date].totalAccuracy += event.calculatedAccuracy || 0;
-    acc[event.date].count += 1;
+    acc[key].totalAccuracy += event.calculatedAccuracy || 0;
+    acc[key].count += 1;
     return acc;
   }, {});
 

@@ -195,3 +195,16 @@
     }
   }
 }
+
+/* Accesibilidad: si la persona pide menos movimiento, se reducen animaciones y transiciones
+   decorativas (pulsos, entradas, brillos). La lógica de los juegos no depende de ellas. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

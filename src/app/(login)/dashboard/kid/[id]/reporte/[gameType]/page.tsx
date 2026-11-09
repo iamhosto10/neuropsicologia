@@ -195,3 +195,6 @@ export default async function GameClinicalReportPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Reporte Clínico por Juego" };

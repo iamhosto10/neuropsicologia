@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "10mb", // Ajusta esto según tus necesidades. 5mb o 10mb es un buen estándar para fotos.
+      bodySizeLimit: "6mb", // las imágenes subidas se limitan a 5 MB en el servidor (ver content-roles.ts)
     },
   },
 };

@@ -19,12 +19,13 @@ export default async function PacientesPage() {
     alias,
     activeAvatar,
     energyCrystals,
-    "sessions": *[_type == "dailySession" && kidReference._ref == ^._id] | order(date desc) {
+    "sessions": *[_type == "dailySession" && kidProfile._ref == ^._id] | order(date desc) {
       date
     }
   }`;
 
-  const rawKids = await client.fetch(
+  // useCdn:false: la caché CDN de Sanity mostraba cadetes ya borrados
+  const rawKids = await client.withConfig({ useCdn: false }).fetch(
     query,
     { sanityUserId },
     { cache: "no-store", next: { revalidate: 0 } },

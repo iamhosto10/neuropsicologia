@@ -40,3 +40,12 @@ export function getTodayDate(date: Date = new Date()) {
     day: "2-digit",
   }).format(date);
 }
+
+// Reloj mm:ss para los HUD de los juegos (antes varios mostraban "00:{seg % 60}",
+// que con 60 s arrancaba en 00:00 y con 120 s contaba dos veces).
+export function formatClock(totalSeconds: number) {
+  const s = Math.max(0, Math.floor(Number.isFinite(totalSeconds) ? totalSeconds : 0));
+  const mm = Math.floor(s / 60).toString().padStart(2, "0");
+  const ss = (s % 60).toString().padStart(2, "0");
+  return `${mm}:${ss}`;
+}

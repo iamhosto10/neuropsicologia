@@ -169,3 +169,6 @@ export default async function LaboratorioPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Laboratorio del Cadete" };

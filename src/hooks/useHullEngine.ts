@@ -23,6 +23,15 @@ export interface HullTelemetry {
   stagesCompleted: number;
   invalidMoves: number;
   averageTimePerMoveMs: number;
+  resets?: number; // veces que reinició un sector (no penaliza; es información clínica)
+}
+
+/** ¿Sin salida? No queda ningún agujero libre y descubierto donde mover un tornillo. */
+export function isHullStuck(holes: Hole[], plates: Plate[]): boolean {
+  if (plates.length === 0 || plates.every((p) => p.isFallen)) return false;
+  return !holes.some(
+    (h) => !h.hasBolt && !plates.some((p) => !p.isFallen && p.coveredHoles.includes(h.id)),
+  );
 }
 
 // Función auxiliar para dibujar placas
@@ -75,7 +84,9 @@ export function useHullEngine(
     stagesCompleted: 0,
     invalidMoves: 0,
     averageTimePerMoveMs: 0,
+    resets: 0,
   });
+  const initialLayout = useRef<{ holes: Hole[]; plates: Plate[]; colCount: number } | null>(null);
   const turnStartTime = useRef<number>(0);
   const totalTimeAccumulated = useRef<number>(0);
 
@@ -202,6 +213,7 @@ export function useHullEngine(
         }),
       );
 
+      initialLayout.current = { holes: initialHoles, plates: initialPlates, colCount: newColCount };
       setColCount(newColCount);
       setHoles(initialHoles);
       setPlates(initialPlates);
@@ -329,6 +341,20 @@ export function useHullEngine(
     return () => clearInterval(timer);
   }, [gameState, timeLeft, score, onFinish]);
 
+  // Reinicia el sector actual con el MISMO tablero (salida cuando se queda sin movimientos)
+  const resetStage = useCallback(() => {
+    if (gameState !== "playing" || !initialLayout.current) return;
+    const { holes: h, plates: p, colCount: c } = initialLayout.current;
+    telemetry.current.resets = (telemetry.current.resets ?? 0) + 1;
+    setColCount(c);
+    setHoles(structuredClone(h));
+    setPlates(structuredClone(p));
+    setSelectedHole(null);
+    turnStartTime.current = Date.now();
+  }, [gameState]);
+
+  const isStuck = gameState === "playing" && isHullStuck(holes, plates);
+
   const startGame = () => {
     setScore(0);
     setTimeLeft(duration);
@@ -338,6 +364,7 @@ export function useHullEngine(
       stagesCompleted: 0,
       invalidMoves: 0,
       averageTimePerMoveMs: 0,
+      resets: 0,
     };
     totalTimeAccumulated.current = 0;
     setGameState("playing");
@@ -353,6 +380,7 @@ export function useHullEngine(
     holes,
     plates,
     selectedHole,
-    actions: { startGame, handleHoleClick },
+    isStuck,
+    actions: { startGame, handleHoleClick, resetStage },
   };
 }

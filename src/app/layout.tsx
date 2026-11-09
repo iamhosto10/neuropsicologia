@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider localization={esES}>
+    <ClerkProvider localization={esES} signInUrl="/sign-in" signUpUrl="/sign-up">
       <html lang="es">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}

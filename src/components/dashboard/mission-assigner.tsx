@@ -21,6 +21,7 @@ import {
   Gamepad2,
 } from "lucide-react";
 import { getTodayDate } from "@/lib/utils";
+import { MAX_DURATION_SECONDS, MAX_MISSIONS_PER_DAY, minDurationFor } from "@/lib/game-rules";
 
 // Helper para asignar un icono según el dominio clínico
 const getDomainIcon = (domain: string) => {
@@ -92,14 +93,21 @@ export default function MissionAssigner({
 
   const handleSelectGame = (gameType: string) => {
     setSelectedGameType(gameType);
+    // La duración nunca queda por debajo del mínimo jugable del juego elegido
+    setTempConfig((c) => ({ ...c, timeLimit: Math.max(c.timeLimit, minDurationFor(gameType)) }));
     setIsDropdownOpen(false);
     setSearchQuery("");
   };
 
   const handleAddMission = () => {
     if (!selectedGameType) return;
-    if (configuredMissions.length >= 5) {
-      setError("Un cadete no debe tener más de 5 misiones al día.");
+    if (configuredMissions.length >= MAX_MISSIONS_PER_DAY) {
+      setError(`Un cadete no debe tener más de ${MAX_MISSIONS_PER_DAY} misiones al día.`);
+      return;
+    }
+    const minSeconds = minDurationFor(selectedGameType);
+    if (tempConfig.timeLimit < minSeconds || tempConfig.timeLimit > MAX_DURATION_SECONDS) {
+      setError(`La duración de este juego debe estar entre ${minSeconds} y ${MAX_DURATION_SECONDS} segundos.`);
       return;
     }
 
@@ -295,7 +303,8 @@ export default function MissionAssigner({
                   <div className="relative">
                     <input
                       type="number"
-                      min="10"
+                      min={minDurationFor(selectedGameType)}
+                      max={MAX_DURATION_SECONDS}
                       className="w-full p-3 border border-slate-200 rounded-lg bg-white outline-none font-bold text-sm focus:ring-2 focus:ring-cyan-500 pr-8"
                       value={tempConfig.timeLimit}
                       onChange={(e) =>

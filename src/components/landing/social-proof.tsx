@@ -9,7 +9,7 @@ export default function SocialProof() {
           <Shield className="w-5 h-5 text-cyan-500" /> Entorno Seguro
         </div>
         <div className="flex items-center gap-2 font-bold text-slate-400">
-          <Activity className="w-5 h-5 text-cyan-500" /> Basado en Evidencia
+          <Activity className="w-5 h-5 text-cyan-500" /> Inspirado en tareas clásicas
         </div>
         <div className="flex items-center gap-2 font-bold text-slate-400">
           <BarChart3 className="w-5 h-5 text-cyan-500" /> Analítica Clínica

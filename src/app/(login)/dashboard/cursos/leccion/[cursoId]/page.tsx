@@ -1,5 +1,6 @@
 import { client } from "@/sanity/lib/client";
-import { BookOpen, ArrowLeft, Layers, PlusCircle } from "lucide-react";
+import { canEditContent } from "@/lib/auth-guards";
+import { BookOpen, ArrowLeft, Layers } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ export default async function CourseConstructorPage({
 }) {
   const { cursoId } = await params;
   const courseId = cursoId;
+  if (!(await canEditContent())) redirect("/dashboard/cursos");
 
   // 1. Traemos el curso con todo su syllabus expandido
   const query = `*[_type == "course" && _id == $courseId][0]{
@@ -154,3 +156,6 @@ export default async function CourseConstructorPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Constructor de Lecciones" };

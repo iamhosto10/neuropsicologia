@@ -19,6 +19,9 @@ export default function AudioPlayerBlock({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  // La onda necesita descargar el archivo con CORS; si el dominio no está permitido en Sanity
+  // falla. Entonces se usa el reproductor nativo (no requiere CORS) en vez de quedar cargando.
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -38,6 +41,7 @@ export default function AudioPlayerBlock({
     wavesurferRef.current = wavesurfer;
 
     wavesurfer.on("ready", () => setIsReady(true));
+    wavesurfer.on("error", () => setHasError(true));
     wavesurfer.on("play", () => setIsPlaying(true));
     wavesurfer.on("pause", () => setIsPlaying(false));
     wavesurfer.on("finish", () => setIsPlaying(false));
@@ -63,6 +67,12 @@ export default function AudioPlayerBlock({
       </CardHeader>
 
       <CardContent className="p-6 md:p-8 bg-white flex flex-col sm:flex-row items-center gap-6">
+        {hasError ? (
+          <div className="w-full" role="status">
+            <audio controls preload="metadata" src={audioUrl} className="w-full" />
+          </div>
+        ) : (
+          <>
         <button
           onClick={togglePlay}
           disabled={!isReady}
@@ -80,6 +90,8 @@ export default function AudioPlayerBlock({
         <div className="flex-1 w-full">
           <div ref={containerRef} className="w-full" />
         </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );

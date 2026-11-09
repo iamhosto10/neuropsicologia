@@ -28,7 +28,7 @@ export default async function ActividadesPage() {
 
   if (activeKidId) {
     // Buscamos las actividades asignadas
-    const kidData = await client.fetch(
+    const kidData = await client.withConfig({ useCdn: false }).fetch(
       `*[_type == "kidProfile" && _id == $activeKidId][0]{
       assignedActivities[]->{
         _id, title, description, "slug": slug.current, duration, ageRange, "imageUrl": image.asset->url

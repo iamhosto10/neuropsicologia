@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getOwnedActiveKidId } from "@/lib/auth-guards";
 
+import MissionSaveGuard from "@/components/games/mission-save-guard";
 import AsteroidFieldGame from "@/components/games/asteroid-field-game";
 import MemoryMatrixGame from "@/components/games/memory-matrix-game";
 import MultitaskEvasionGame from "@/components/games/multitask-evasion-game";
@@ -60,6 +61,7 @@ export default async function MissionPage({
 
   return (
     <div className="w-full h-full flex flex-col relative animate-in fade-in duration-700">
+      <MissionSaveGuard />
       <div className="absolute top-4 left-4 z-50">
         <Link
           href="/hq"

@@ -398,7 +398,7 @@ export function useNavigationEngine({
       if (signal.aborted) return;
 
       const cmd = commands[i];
-      let nextPos = { ...currentPos };
+      const nextPos = { ...currentPos };
 
       if (cmd === "UP") nextPos.y -= 1;
       if (cmd === "DOWN") nextPos.y += 1;
@@ -486,16 +486,16 @@ export function useNavigationEngine({
       timeLeft > 0
     ) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            finishGame();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft((prev) => Math.max(0, prev - 1));
       }, 1000);
     }
     return () => clearInterval(interval);
+  }, [gameState, timeLeft, finishGame]);
+
+  // El fin de partida se dispara aquí (efecto) y NO dentro del updater de setTimeLeft: allí
+  // provocaba "Cannot update a component (Router) while rendering" y guardados dobles en dev.
+  useEffect(() => {
+    if (gameState === "playing" && timeLeft <= 0) finishGame();
   }, [gameState, timeLeft, finishGame]);
 
   useEffect(() => {

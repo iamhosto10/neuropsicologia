@@ -2,7 +2,7 @@
 import Link from "next/link";
 // 🔥 1. Importamos useRef y useEffect
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Clock, ArrowRight, CheckCircle2, ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";

@@ -21,6 +21,8 @@ export type ReverseTelemetryConsolidated = {
   totalOmissions: number; // Veces que se quedó congelado (timeout)
   accuracyDirectPercent: number;
   accuracyReversePercent: number;
+  directRounds?: number;
+  reverseRounds?: number;
   avgReactionTimeDirectMs: number;
   avgReactionTimeReverseMs: number;
 };
@@ -116,6 +118,8 @@ export function useReverseEngine({
         totalOmissions: records.filter((r) => r.isTimeout).length,
         accuracyDirectPercent: getAccuracy(directRecords),
         accuracyReversePercent: getAccuracy(reverseRecords),
+        directRounds: directRecords.length,
+        reverseRounds: reverseRecords.length,
         avgReactionTimeDirectMs: getAvgReaction(directRecords),
         avgReactionTimeReverseMs: getAvgReaction(reverseRecords),
       },
@@ -251,16 +255,16 @@ export function useReverseEngine({
     let interval: NodeJS.Timeout;
     if (gameState === "playing" && timeLeft > 0) {
       interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            finishGame();
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeLeft((prev) => Math.max(0, prev - 1));
       }, 1000);
     }
     return () => clearInterval(interval);
+  }, [gameState, timeLeft, finishGame]);
+
+  // El fin de partida se dispara aquí (efecto) y NO dentro del updater de setTimeLeft: allí
+  // provocaba "Cannot update a component (Router) while rendering" y guardados dobles en dev.
+  useEffect(() => {
+    if (gameState === "playing" && timeLeft <= 0) finishGame();
   }, [gameState, timeLeft, finishGame]);
 
   useEffect(() => {

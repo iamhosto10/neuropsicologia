@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +12,6 @@ import { createKidProfile } from "@/app/actions/profile.actions";
 export default function AddCadetPage() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
@@ -83,6 +81,15 @@ export default function AddCadetPage() {
                 guardan de forma privada.
               </p>
             </div>
+
+            <label className="flex items-start gap-3 text-sm text-slate-600 cursor-pointer">
+              <input type="checkbox" name="consent" required className="mt-1 h-5 w-5 accent-cyan-600" />
+              <span>
+                Soy el padre, madre, tutor o profesional autorizado de este menor y acepto la{" "}
+                <Link href="/privacidad" target="_blank" className="underline text-cyan-700">Política de Privacidad</Link> y los{" "}
+                <Link href="/terminos" target="_blank" className="underline text-cyan-700">Términos de Servicio</Link>.
+              </span>
+            </label>
 
             {error && (
               <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm font-medium border border-red-200">

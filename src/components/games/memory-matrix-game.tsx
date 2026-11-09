@@ -1,6 +1,9 @@
 // src/components/games/memory-matrix-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -16,8 +19,7 @@ import {
   ServerCrash,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useMemoryEngine } from "@/hooks/useMemoryEngine";
 
 interface MemoryGameProps {
@@ -33,12 +35,11 @@ interface MemoryGameProps {
 }
 
 export default function MemoryMatrixGame({ config }: MemoryGameProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false);
   const [feedbackSuccess, setFeedbackSuccess] = useState(true);
-  const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/bg-tech.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
@@ -60,14 +61,20 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       if (soundEnabled) playLight();
     },
     onPlayVoice: (isReverse) => {
-      if (soundEnabled) isReverse ? playVoiceReverse() : playVoiceDirect();
+      if (soundEnabled) {
+        if (isReverse) playVoiceReverse();
+        else playVoiceDirect();
+      }
     },
     onPress: () => {
       if (soundEnabled) playPress();
     },
     onFeedback: (success) => {
       setFeedbackSuccess(success);
-      if (soundEnabled) success ? playGranted() : playDenied();
+      if (soundEnabled) {
+        if (success) playGranted();
+        else playDenied();
+      }
       if (!success) triggerShake();
     },
     onFinish: async (finalScore, telemetry) => {
@@ -77,14 +84,7 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       // 🔥 Candado Visual INMEDIATO
       setIsSaving(true);
 
-      console.log("Telemetría Resumida (Memoria):", telemetry);
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 
@@ -110,6 +110,8 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={() => {
               setSoundEnabled(!soundEnabled);
               if (soundEnabled) stopBg();
@@ -132,7 +134,7 @@ export default function MemoryMatrixGame({ config }: MemoryGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          00:{(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3">

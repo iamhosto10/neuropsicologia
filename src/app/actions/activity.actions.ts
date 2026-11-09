@@ -1,66 +1,79 @@
 // src/app/actions/activity.actions.ts
 "use server";
 import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
+import { isSafeId, retryOnConflict } from "@/lib/sanity-safe";
 
 import { client } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
-import { randomUUID } from "crypto"; // 🔥 Necesario para crear un _key único en Sanity
+import { randomUUID } from "crypto";
+
+const ACTIVITY_REWARD = 20;
 
 export async function markActivityCompleted(
   kidId: string,
   activityId: string,
   currentPath: string,
-  // 🔥 Nuevo parámetro opcional para recibir la bitácora
   reflectionData?: { mood: string; difficulty: number },
 ) {
   if (!(await isKidOwnedByCurrentUser(kidId))) return { error: "No autorizado" };
+  if (!isSafeId(activityId)) return { error: "Actividad no válida." };
   try {
     const writeClient = client.withConfig({
       token: process.env.SANITY_API_WRITE_TOKEN,
       useCdn: false,
     });
 
-    // 1. Buscamos los datos actuales del niño
-    const kid = await writeClient.fetch(
-      `*[_type == "kidProfile" && _id == $kidId][0]{completedActivities}`,
-      { kidId },
+    // La actividad debe existir (antes cualquier id inventado daba cristales)
+    const exists = await writeClient.fetch<boolean>(
+      `count(*[_type == "activity" && _id == $activityId]) > 0`,
+      { activityId },
     );
-    const completed = kid?.completedActivities || [];
+    if (!exists) return { error: "Actividad no encontrada." };
 
-    const patch = writeClient.patch(kidId);
+    const reflection = reflectionData
+      ? {
+          mood: String(reflectionData.mood ?? "").slice(0, 30),
+          difficulty: Math.min(5, Math.max(1, Math.round(Number(reflectionData.difficulty) || 1))),
+        }
+      : null;
 
-    // 2. Si no la ha completado antes, damos recompensa y guardamos
-    if (!completed.includes(activityId)) {
-      // Mantenemos el array viejo (completedActivities) para que el candado visual siga funcionando rápido
-      patch
-        .setIfMissing({ completedActivities: [], activityLog: [] })
-        .append("completedActivities", [activityId])
-        .inc({ energyCrystals: 20 });
+    await retryOnConflict(async () => {
+      const kid = await writeClient.fetch<{ _rev: string; completedActivities?: string[] } | null>(
+        `*[_type == "kidProfile" && _id == $kidId][0]{_rev, completedActivities}`,
+        { kidId },
+      );
+      if (!kid) throw new Error("Perfil no encontrado");
+      const firstTime = !(kid.completedActivities || []).includes(activityId);
 
-      // 🔥 SI VIENE REFLEXIÓN, LA AÑADIMOS A LA NUEVA BITÁCORA
-      if (reflectionData) {
-        const newLogEntry = {
-          _key: randomUUID(), // Sanity exige esto en arrays de objetos
-          activityRef: { _type: "reference", _ref: activityId },
-          completedAt: new Date().toISOString(),
-          reflection: {
-            mood: reflectionData.mood,
-            difficulty: reflectionData.difficulty,
-          },
-        };
-
-        patch.append("activityLog", [newLogEntry]);
+      // IMPORTANTE: un patch por cada append. Dos .append() en el mismo patch
+      // descartan el primero (se perdía completedActivities).
+      const tx = writeClient.transaction();
+      tx.patch(kidId, {
+        ifRevisionID: kid._rev,
+        setIfMissing: { completedActivities: [], activityLog: [] },
+      });
+      if (firstTime) {
+        tx.patch(kidId, (p) =>
+          p.append("completedActivities", [activityId]).inc({ energyCrystals: ACTIVITY_REWARD }),
+        );
+        if (reflection) {
+          tx.patch(kidId, (p) =>
+            p.append("activityLog", [
+              {
+                _key: randomUUID(),
+                activityRef: { _type: "reference", _ref: activityId },
+                completedAt: new Date().toISOString(),
+                reflection,
+              },
+            ]),
+          );
+        }
       }
-    }
+      // AUTO-CLEANUP: quitar de la bandeja de asignadas
+      tx.patch(kidId, (p) => p.unset([`assignedActivities[_ref == "${activityId}"]`]));
+      await tx.commit();
+    });
 
-    // 3. AUTO-CLEANUP: Quitamos la actividad de la bandeja de asignadas
-    patch.unset([`assignedActivities[_ref == "${activityId}"]`]);
-
-    // 4. Guardamos los cambios
-    await patch.commit();
-
-
-    // 6. Invalidamos las rutas
     revalidatePath(currentPath);
     revalidatePath("/dashboard");
     revalidatePath(`/dashboard/kid/${kidId}`);

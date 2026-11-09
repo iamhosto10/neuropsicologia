@@ -1,6 +1,9 @@
 // src/components/games/space-cleanup-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -15,8 +18,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useSpaceCleanupEngine } from "@/hooks/useSpaceCleanupEngine";
 
 interface SpaceCleanupProps {
@@ -35,9 +37,8 @@ interface SpaceCleanupProps {
 }
 
 export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
@@ -77,17 +78,10 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
       setIsSaving(true);
 
       // SOLUCIÓN 3: Evitamos enviar 'NaN' a Sanity asegurando un valor numérico
-      const baseReward = Number(config.energyReward) || 50;
-      const reward =
-        telemetry[0].result === "win" ? baseReward : Math.floor(baseReward / 2);
+      // La recompensa real la calcula el servidor (base + bonus según precisión)
+      const reward = Number(config.energyReward) || 50;
 
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        reward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, reward, telemetry);
     },
   });
 
@@ -112,6 +106,8 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
       >
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={toggleSound}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
           >
@@ -134,7 +130,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
           </div>
         </div>
         <div className="text-3xl font-bold font-mono text-slate-200">
-          {engine.timeLeft}s
+          {formatClock(engine.timeLeft)}
         </div>
         <div className="text-xl font-mono text-cyan-400 w-1/3 text-right">
           PTS: {engine.score}
@@ -230,6 +226,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                     {config.targetImage ? (
                       <img
                         src={config.targetImage}
+                        alt=""
                         className="w-8 h-8 object-contain"
                       />
                     ) : (
@@ -242,6 +239,7 @@ export default function SpaceCleanupGame({ config }: SpaceCleanupProps) {
                     config.distractorImages.length > 0 ? (
                       <img
                         src={config.distractorImages[0]}
+                        alt=""
                         className="w-8 h-8 object-contain"
                       />
                     ) : (

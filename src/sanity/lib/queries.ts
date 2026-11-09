@@ -142,7 +142,7 @@ export const getKidClinicalReportQuery = `
     _id,
     alias,
     energyCrystals,
-    "sessionsHistory": *[_type == "dailySession" && references(^._id)] | order(date desc)[0...7]{
+    "sessionsHistory": *[_type == "dailySession" && references(^._id)] | order(date desc)[0...30]{
       _id,
       date,
       isCompleted,

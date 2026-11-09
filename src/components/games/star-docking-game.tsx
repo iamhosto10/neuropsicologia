@@ -1,5 +1,8 @@
 "use client";
 
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -14,8 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useDockingEngine, DockingTelemetry } from "@/hooks/useDockingEngine";
 
 interface StarDockingProps {
@@ -41,17 +43,16 @@ export default function StarDockingGame({
   onFinishMission,
 }: StarDockingProps) {
   // --- ESTADOS DE UI Y AUDIO ---
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false); // CANDADO VISUAL (SOP)
-  const router = useRouter();
 
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.3,
   });
-  const [playRotate] = useSound("/sounds/ui-click.mp3", { volume: 0.4 });
+  const [playRotate] = useSound("/sounds/beep-press.mp3", { volume: 0.4 });
   const [playSuccess] = useSound("/sounds/ui-correct.mp3", { volume: 0.6 });
-  const [playError] = useSound("/sounds/wall-crash.mp3", { volume: 0.5 });
+  const [playError] = useSound("/sounds/clank.mp3", { volume: 0.5 });
 
   // --- CONEXIÓN CON EL CEREBRO (HOOK) ---
   const handleGameFinish = async (
@@ -68,13 +69,7 @@ export default function StarDockingGame({
     if (config.isPractice || !config.kidId || !config.missionId) return;
 
     setIsSaving(true);
-    await saveMissionProgress(
-      config.kidId,
-      config.missionId,
-      config.energyReward ?? 0,
-      [telemetry],
-    );
-    router.push("/hq");
+    await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward ?? 0, [telemetry]);
   };
 
   const {
@@ -138,6 +133,8 @@ export default function StarDockingGame({
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={() => {
               const newVal = !soundEnabled;
               setSoundEnabled(newVal);
@@ -162,8 +159,7 @@ export default function StarDockingGame({
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200 text-center">
-          {Math.floor(timeLeft / 60)}:
-          {(timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(timeLeft)}
         </div>
 
         <div className="text-right w-1/3">

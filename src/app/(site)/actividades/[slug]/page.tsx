@@ -13,6 +13,17 @@ import ActivityCompletionWizard from "@/components/activity-detail/activity-comp
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const a = await client
+    .withConfig({ useCdn: true })
+    .fetch<{ title?: string; description?: string } | null>(
+      `*[_type == "activity" && slug.current == $slug][0]{title, description}`,
+      { slug },
+    );
+  return a?.title ? { title: a.title, description: a.description } : { title: "Actividad" };
+}
+
 export default async function ActivityDetailPage({
   params,
 }: {

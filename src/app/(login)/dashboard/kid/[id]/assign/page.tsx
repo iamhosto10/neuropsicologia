@@ -1,19 +1,9 @@
 // src/app/(login)/dashboard/kid/[id]/assign/page.tsx
 import { client } from "@/sanity/lib/client";
-import {
-  ArrowLeft,
-  CalendarDays,
-  Plus,
-  CalendarCheck,
-  CalendarX,
-  Clock,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, CalendarDays, Plus, CalendarCheck, CalendarX, Clock, Pencil } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { deleteDailySession } from "@/app/actions/mission.actions";
+import { Card } from "@/components/ui/card";
 import DeleteSessionButton from "@/components/dashboard/delete-session-button";
 
 export const dynamic = "force-dynamic";
@@ -233,3 +223,6 @@ export default async function AgendaMisionesPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Agenda de Misiones" };

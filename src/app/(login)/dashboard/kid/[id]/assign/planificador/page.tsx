@@ -30,7 +30,7 @@ export default async function PlanificadorMisionesPage({
   // 2. Si hay una fecha en la URL, buscamos si ya existe una sesión para pre-llenar
   let initialSessionData = null;
   if (date) {
-    const existingSession = await client.fetch(
+    const existingSession = await client.withConfig({ useCdn: false }).fetch(
       `*[_type == "dailySession" && kidProfile._ref == $id && date == $date][0]{
         date,
         missions
@@ -73,3 +73,6 @@ export default async function PlanificadorMisionesPage({
     </div>
   );
 }
+
+
+export const metadata = { title: "Planificador de Misiones" };

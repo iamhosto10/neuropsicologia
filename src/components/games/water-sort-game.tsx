@@ -1,5 +1,8 @@
 "use client";
 
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -14,8 +17,7 @@ import {
   Zap,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import {
   useWaterSortEngine,
   WaterSortTelemetry,
@@ -42,19 +44,18 @@ export default function WaterSortGame({
   config,
   onFinishMission,
 }: WaterSortProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   // --- AUDIO ---
-  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-ship.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
   const [playClink] = useSound("/sounds/glass-clink.mp3", { volume: 0.6 });
   const [playPour] = useSound("/sounds/pour-water.mp3", { volume: 0.8 });
   const [playError] = useSound("/sounds/error-buzz.mp3", { volume: 0.4 });
-  const [playUndo] = useSound("/sounds/rewind.mp3", { volume: 0.5 });
+  const [playUndo] = useSound("/sounds/whoosh-metal.mp3", { volume: 0.5 });
   const [playLevelUp] = useSound("/sounds/ui-correct.mp3", { volume: 0.7 });
 
   const handleGameFinish = async (
@@ -71,13 +72,7 @@ export default function WaterSortGame({
     if (config.isPractice || !config.kidId || !config.missionId) return;
 
     setIsSaving(true);
-    await saveMissionProgress(
-      config.kidId,
-      config.missionId,
-      config.energyReward ?? 0,
-      [telemetry],
-    );
-    router.push("/hq");
+    await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward ?? 0, [telemetry]);
   };
 
   const {
@@ -152,6 +147,8 @@ export default function WaterSortGame({
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={() => {
               const newVal = !soundEnabled;
               setSoundEnabled(newVal);
@@ -174,8 +171,7 @@ export default function WaterSortGame({
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200 text-center">
-          {Math.floor(timeLeft / 60)}:
-          {(timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(timeLeft)}
         </div>
 
         <div className="text-right w-1/3 flex justify-end items-center gap-4">

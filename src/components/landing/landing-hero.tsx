@@ -17,7 +17,7 @@ export default function LandingHero() {
         </div>
 
         <h1 className="text-5xl md:text-7xl font-black text-white mb-6 tracking-tight max-w-5xl mx-auto leading-tight animate-in fade-in slide-in-from-bottom-6 duration-1000">
-          Terapia neuropsicológica que los niños{" "}
+          Entrenamiento cognitivo que los niños{" "}
           <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 to-blue-500">
             realmente quieren hacer
           </span>

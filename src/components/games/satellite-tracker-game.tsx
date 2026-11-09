@@ -1,6 +1,9 @@
 // src/components/games/satellite-tracker-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -15,8 +18,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import useSound from "use-sound";
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import { useSatelliteEngine } from "@/hooks/useSatelliteEngine";
 
 interface SatelliteGameProps {
@@ -35,9 +37,13 @@ interface SatelliteGameProps {
 }
 
 export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
+  // Posición/velocidad de las nubes: se sortean UNA vez (antes Math.random() en el render las
+  // reiniciaba en cada fotograma de la partida).
+  const [cloudSpecs] = useState(() =>
+    Array.from({ length: 8 }, () => ({ top: Math.random() * 80, duration: 20 + Math.random() * 10 })),
+  );
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   // Sonidos (Estandarizados al formato del proyecto)
   const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
@@ -67,18 +73,9 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
       // Bloqueamos la UI inmediatamente
       setIsSaving(true);
 
-      console.log("Telemetría Radar Satelital:", telemetry);
 
       // Enviamos a la BD
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-
-      // Redirigimos sin quitar el isSaving para evitar destellos
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 
@@ -102,6 +99,8 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={toggleSound}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
           >
@@ -137,8 +136,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200">
-          {Math.floor(engine.timeLeft / 60)}:
-          {(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3">
@@ -149,7 +147,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
 
       {/* VIEWPORT */}
       <div
-        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair"
+        className="relative h-125 w-full bg-black overflow-hidden rounded-b-xl border-x-4 border-b-4 border-slate-800 shadow-2xl cursor-crosshair touch-none"
         onPointerDown={engine.handleFalsePositive}
       >
         {/* Fondo Decorativo SIEMPRE visible de fondo */}
@@ -212,7 +210,7 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
                 </h2>
                 <p className="text-slate-300 text-lg leading-relaxed">
                   {config.instruction ||
-                    "Mantén el cursor sobre el satélite para no perder la señal. ¡Haz clic rápido si se pone rojo!"}
+                    "Mantén el cursor o el dedo sobre el satélite para no perder la señal. ¡Haz clic rápido si se pone rojo!"}
                 </p>
                 <Button
                   onClick={handleStart}
@@ -238,8 +236,9 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
                 ease: "easeInOut",
               }}
               onAnimationComplete={engine.moveToNewPosition}
-              onMouseEnter={() => engine.setHovering(true)}
-              onMouseLeave={() => engine.setHovering(false)}
+              onPointerEnter={() => engine.setHovering(true)}
+              onPointerLeave={() => engine.setHovering(false)}
+              onPointerCancel={() => engine.setHovering(false)}
               onPointerDown={(e) => engine.handleCriticalClick(e)}
             >
               <div
@@ -276,10 +275,10 @@ export default function SatelliteTrackerGame({ config }: SatelliteGameProps) {
               <motion.div
                 key={`cloud-${index}`}
                 className="absolute z-40 pointer-events-none"
-                initial={{ left: "-20%", top: `${Math.random() * 80}%` }}
+                initial={{ left: "-20%", top: `${cloudSpecs[index]?.top ?? 10}%` }}
                 animate={{ left: "120%" }}
                 transition={{
-                  duration: 20 + Math.random() * 10,
+                  duration: cloudSpecs[index]?.duration ?? 25,
                   repeat: Infinity,
                   ease: "linear",
                   delay: index * 2,

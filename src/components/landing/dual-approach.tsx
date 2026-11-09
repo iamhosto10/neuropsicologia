@@ -33,7 +33,7 @@ export default function DualApproach() {
                 Misiones
               </h3>
               <p className="text-slate-300 mb-8 text-lg leading-relaxed">
-                No más "tarea aburrida". El cadete entra a un Cuartel General
+                No más &ldquo;tarea aburrida&rdquo;. El cadete entra a un Cuartel General
                 donde cada ejercicio cognitivo es una misión vital para salvar
                 satélites o limpiar asteroides.
               </p>
@@ -48,7 +48,7 @@ export default function DualApproach() {
                 </li>
                 <li className="flex items-center gap-3 font-medium text-slate-200 text-lg">
                   <CheckCircle2 className="w-6 h-6 text-blue-400 shrink-0" />{" "}
-                  Cero frustración, 100% gamificado
+                  Pensado para jugar sin presión
                 </li>
               </ul>
             </div>

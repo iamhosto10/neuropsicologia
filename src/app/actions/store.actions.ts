@@ -2,6 +2,7 @@
 import { isKidOwnedByCurrentUser } from "@/lib/auth-guards";
 
 import { client } from "@/sanity/lib/client";
+import { retryOnConflict } from "@/lib/sanity-safe";
 import { revalidatePath } from "next/cache";
 
 // Acción para Comprar
@@ -16,13 +17,6 @@ export async function purchaseItem(
       token: process.env.SANITY_API_WRITE_TOKEN,
       useCdn: false,
     });
-    const kid = await writeClient.fetch(
-      `*[_type == "kidProfile" && _id == $kidId][0]{energyCrystals, unlockedAvatars}`,
-      { kidId },
-    );
-
-    if (!kid) return { error: "Perfil no encontrado." };
-
     // El precio real sale de Sanity; el que manda el navegador no se usa
     const price = await writeClient.fetch<number | null>(
       `*[_type == "storeAvatar" && slug.current == $itemId][0].price`,
@@ -30,18 +24,31 @@ export async function purchaseItem(
     );
     if (price == null) return { error: "Artículo no encontrado." };
     cost = price;
-    if (kid.energyCrystals < cost)
-      return { error: "No tienes suficientes cristales de energía." };
-    if (kid.unlockedAvatars?.includes(itemId))
-      return { error: "¡Ya tienes este artículo!" };
 
-    await writeClient
-      .patch(kidId)
-      .dec({ energyCrystals: cost }) // Restamos el costo
-      .setIfMissing({ unlockedAvatars: [] })
-      .append("unlockedAvatars", [itemId]) // Añadimos el item
-      .set({ activeAvatar: itemId })
-      .commit();
+    // Lee -> valida -> escribe con ifRevisionID; si otra compra ganó, reintenta
+    // releyendo (evita cobrar dos veces o dejar saldo negativo).
+    const outcome = await retryOnConflict(async () => {
+      const kid = await writeClient.fetch(
+        `*[_type == "kidProfile" && _id == $kidId][0]{_rev, energyCrystals, unlockedAvatars}`,
+        { kidId },
+      );
+      if (!kid) return { error: "Perfil no encontrado." };
+      if (kid.unlockedAvatars?.includes(itemId))
+        return { error: "¡Ya tienes este artículo!" };
+      if ((kid.energyCrystals ?? 0) < cost)
+        return { error: "No tienes suficientes cristales de energía." };
+
+      await writeClient
+        .patch(kidId)
+        .ifRevisionId(kid._rev)
+        .dec({ energyCrystals: cost })
+        .setIfMissing({ unlockedAvatars: [] })
+        .append("unlockedAvatars", [itemId])
+        .set({ activeAvatar: itemId })
+        .commit();
+      return null;
+    });
+    if (outcome) return outcome;
 
     // 3. Limpiamos caché
     revalidatePath("/hq");

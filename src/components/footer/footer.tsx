@@ -87,7 +87,7 @@ export default function Footer() {
             <ul className="space-y-4 text-sm font-medium">
               <li>
                 <Link
-                  href="#"
+                  href="/metodologia"
                   className="flex items-center gap-2 hover:text-cyan-400 transition-colors group"
                 >
                   <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-cyan-400 transition-colors" />{" "}
@@ -96,7 +96,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/faq"
                   className="flex items-center gap-2 hover:text-cyan-400 transition-colors group"
                 >
                   <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-cyan-400 transition-colors" />{" "}
@@ -105,7 +105,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/privacidad"
                   className="flex items-center gap-2 hover:text-cyan-400 transition-colors group"
                 >
                   <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-cyan-400 transition-colors" />{" "}
@@ -114,7 +114,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/terminos"
                   className="flex items-center gap-2 hover:text-cyan-400 transition-colors group"
                 >
                   <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-cyan-400 transition-colors" />{" "}

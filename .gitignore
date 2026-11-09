@@ -44,3 +44,6 @@ dev.log
 dev_server.log
 # clerk configuration (can include secrets)
 /.clerk/
+
+playwright-report/
+test-results/

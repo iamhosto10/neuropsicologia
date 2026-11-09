@@ -1,10 +1,12 @@
 // src/components/games/multitask-evasion-game.tsx
 "use client";
 
+import { formatClock } from "@/lib/utils";
+import { useSoundPreference } from "@/hooks/useSoundPreference";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { saveMissionProgress } from "@/app/actions/mission.actions";
+import { saveMissionAndGoHome } from "@/lib/mission-save-client";
 import {
   Rocket,
   ShieldAlert,
@@ -34,18 +36,17 @@ interface MultitaskGameProps {
 }
 
 export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useSoundPreference();
   const [isSaving, setIsSaving] = useState(false);
-  const router = useRouter();
 
   // --- AUDIO ---
-  const [playBg, { stop: stopBg }] = useSound("/sounds/bg-warp.mp3", {
+  const [playBg, { stop: stopBg }] = useSound("/sounds/ambient-space.mp3", {
     loop: true,
     volume: 0.2,
   });
-  const [playGood] = useSound("/sounds/collect-good.mp3", { volume: 0.7 });
-  const [playBad] = useSound("/sounds/collect-bad.mp3", { volume: 0.7 });
-  const [playCrash] = useSound("/sounds/wall-crash.mp3", { volume: 0.6 });
+  const [playGood] = useSound("/sounds/ui-correct.mp3", { volume: 0.7 });
+  const [playBad] = useSound("/sounds/error-buzz.mp3", { volume: 0.7 });
+  const [playCrash] = useSound("/sounds/clank.mp3", { volume: 0.6 });
 
   // --- EFECTOS VISUALES ---
   const triggerShake = () => {
@@ -80,14 +81,7 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
       // 🔥 Candado Visual INMEDIATO
       setIsSaving(true);
 
-      console.log("Telemetría Clínica (Multitask):", telemetry);
-      await saveMissionProgress(
-        config.kidId,
-        config.missionId,
-        config.energyReward,
-        telemetry,
-      );
-      router.push("/hq");
+      await saveMissionAndGoHome(config.kidId, config.missionId, config.energyReward, telemetry);
     },
   });
 
@@ -119,6 +113,8 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
       <div className="bg-slate-900 border-b-4 border-slate-700 p-4 rounded-t-xl flex justify-between items-center shadow-lg z-20 relative">
         <div className="flex items-center gap-4 w-1/3">
           <button
+            aria-label="Activar o silenciar el sonido"
+            aria-pressed={soundEnabled}
             onClick={toggleSound}
             className="p-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors hidden sm:block shrink-0"
           >
@@ -146,8 +142,7 @@ export default function MultitaskEvasionGame({ config }: MultitaskGameProps) {
         </div>
 
         <div className="text-3xl font-mono font-bold text-slate-200 text-center">
-          {Math.floor(engine.timeLeft / 60)}:
-          {(engine.timeLeft % 60).toString().padStart(2, "0")}
+          {formatClock(engine.timeLeft)}
         </div>
 
         <div className="text-right w-1/3 flex flex-col items-end">

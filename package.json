@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "check": "tsc --noEmit && eslint src --quiet && vitest run"
+    "check": "tsc --noEmit && eslint src --quiet && vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@clerk/localizations": "^3.35.3",
@@ -48,6 +49,7 @@
     "wavesurfer.js": "^7.12.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

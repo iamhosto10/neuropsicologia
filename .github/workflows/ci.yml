@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: Tipos, lint, pruebas y build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Valores de relleno: estas comprobaciones no hablan con Sanity ni con Clerk reales.
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ci-placeholder
+      NEXT_PUBLIC_SANITY_DATASET: production
+      NEXT_PUBLIC_SANITY_API_VERSION: "2026-01-07"
+      SANITY_API_WRITE_TOKEN: ci-placeholder
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2ktcGxhY2Vob2xkZXIuY2xlcmsuYWNjb3VudHMuZGV2JA
+      CLERK_SECRET_KEY: sk_test_ci_placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tipos
+        run: npx tsc --noEmit
+      - name: Lint (sin errores)
+        run: npx eslint src --quiet
+      - name: Pruebas unitarias y de regresión
+        run: npx vitest run
+      - name: Build de producción
+        run: npx next build
+
+  e2e:
+    name: Pruebas de punta a punta
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Necesita una instancia de Clerk DE DESARROLLO (claves de prueba) guardada como secretos del repo.
+      # Sin esos secretos este job se omite. Nunca uses claves de producción aquí.
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.E2E_CLERK_PUBLISHABLE_KEY }}
+      CLERK_SECRET_KEY: ${{ secrets.E2E_CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_SANITY_PROJECT_ID: ci-placeholder
+      NEXT_PUBLIC_SANITY_DATASET: production
+      NEXT_PUBLIC_SANITY_API_VERSION: "2026-01-07"
+      SANITY_API_WRITE_TOKEN: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+        if: env.CLERK_SECRET_KEY != ''
+      - uses: actions/setup-node@v4
+        if: env.CLERK_SECRET_KEY != ''
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+        if: env.CLERK_SECRET_KEY != ''
+      - run: npx playwright install --with-deps chromium
+        if: env.CLERK_SECRET_KEY != ''
+      - run: npx playwright test
+        if: env.CLERK_SECRET_KEY != ''
+        env:
+          CI: "1"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/

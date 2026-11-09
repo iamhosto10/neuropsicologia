@@ -1,5 +1,6 @@
 // src/app/(login)/dashboard/cursos/[courseId]/editar/page.tsx
 import { client } from "@/sanity/lib/client";
+import { canEditContent } from "@/lib/auth-guards";
 import { redirect } from "next/navigation";
 import EditCourseForm from "./edit-course-form";
 
@@ -11,6 +12,7 @@ export default async function EditarCursoPage({
   params: { courseId: string };
 }) {
   const { courseId } = await params;
+  if (!(await canEditContent())) redirect("/dashboard/cursos");
 
   // Traemos los datos básicos del curso
   const query = `*[_type == "course" && _id == $courseId][0]{

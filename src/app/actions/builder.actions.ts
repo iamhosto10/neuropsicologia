@@ -2,13 +2,13 @@
 "use server";
 import { client, writeClient } from "@/sanity/lib/client";
 import { revalidatePath } from "next/cache";
-import { auth } from "@clerk/nextjs/server";
+import { requireContentEditor } from "@/lib/auth-guards";
+import { validateImageFile, validateTtsBlocks } from "@/lib/content-roles";
 import { v4 as uuidv4 } from "uuid"; // Opcional, pero bueno para slugs únicos
 
 export async function createCourseAction(formData: FormData) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -21,6 +21,8 @@ export async function createCourseAction(formData: FormData) {
     if (!title) {
       throw new Error("El título es obligatorio");
     }
+    const imageError = validateImageFile(imageFile);
+    if (imageError) throw new Error(imageError);
 
     const baseSlug = title
       .toLowerCase()
@@ -75,9 +77,8 @@ export async function createLessonAction(
   moduleTitle: string,
   formData: FormData,
 ) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     const title = formData.get("lessonTitle") as string;
     if (!title) throw new Error("El título de la lección es obligatorio");
@@ -90,6 +91,9 @@ export async function createLessonAction(
 
     const rawBlocks = formData.get("contentBlocks") as string;
     const blocksData = rawBlocks ? JSON.parse(rawBlocks) : [];
+    if (!Array.isArray(blocksData)) throw new Error("Bloques no válidos");
+    const ttsError = validateTtsBlocks(blocksData);
+    if (ttsError) throw new Error(ttsError);
 
     const sanityContent = [];
 
@@ -325,9 +329,8 @@ export async function createLessonAction(
 // }
 
 export async function getLessonForEditAction(lessonId: string) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     // 🔥 CAMBIO: Añadimos 'asset' crudo y 'imageUrl' resuelta
     const query = `*[_type == "lesson" && _id == $id][0]{
@@ -564,15 +567,25 @@ export async function updateLessonAction(
   courseId: string,
   formData: FormData,
 ) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     const title = formData.get("lessonTitle") as string;
     if (!title) throw new Error("El título es obligatorio");
 
     const rawBlocks = formData.get("contentBlocks") as string;
     const blocksData = rawBlocks ? JSON.parse(rawBlocks) : [];
+    if (!Array.isArray(blocksData)) throw new Error("Bloques no válidos");
+    const ttsError = validateTtsBlocks(blocksData);
+    if (ttsError) throw new Error(ttsError);
+
+    const belongs = await client
+      .withConfig({ useCdn: false })
+      .fetch<boolean>(
+        `count(*[_type == "course" && _id == $courseId && $lessonId in syllabus[].lessons[]._ref]) > 0`,
+        { courseId, lessonId },
+      );
+    if (!belongs) throw new Error("La lección no pertenece a este curso");
 
     const sanityContent = [];
 
@@ -678,9 +691,8 @@ export async function updateCourseMetadataAction(
   courseId: string,
   formData: FormData,
 ) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
@@ -690,6 +702,8 @@ export async function updateCourseMetadataAction(
     const imageFile = formData.get("image") as File;
 
     if (!title) throw new Error("El título es obligatorio");
+    const imageError = validateImageFile(imageFile);
+    if (imageError) throw new Error(imageError);
 
     // Preparamos los datos básicos a actualizar
     let updateData: any = {
@@ -733,9 +747,8 @@ export async function updateCourseMetadataAction(
 // ACCIÓN 4: ELIMINAR LECCIÓN (VERSIÓN TRANSACCIÓN ATÓMICA)
 // ==========================================
 export async function deleteLessonAction(courseId: string, lessonId: string) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     const currentCourse = await client
       .withConfig({ useCdn: false })
@@ -758,6 +771,10 @@ export async function deleteLessonAction(courseId: string, lessonId: string) {
         });
       }
     });
+
+    if (pathsToUnset.length === 0) {
+      throw new Error("La lección no pertenece a este curso");
+    }
 
     // 🔥 LA MAGIA ESTÁ AQUÍ: Iniciamos una Transacción
     const transaction = writeClient.transaction();
@@ -786,12 +803,13 @@ export async function deleteLessonAction(courseId: string, lessonId: string) {
 }
 
 export async function uploadAssetAction(formData: FormData) {
-  if (!(await auth()).userId) {
-    return { success: false, error: "No autorizado. Inicia sesión." };
-  }
+  const denied = await requireContentEditor();
+  if (denied) return denied;
   try {
     const file = formData.get("file") as File;
     if (!file || file.size === 0) throw new Error("No hay archivo");
+    const fileError = validateImageFile(file);
+    if (fileError) return { success: false, error: fileError };
 
     const buffer = Buffer.from(await file.arrayBuffer());
 

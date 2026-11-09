@@ -56,6 +56,11 @@ vi.mock("@/sanity/lib/client", () => ({
 vi.mock("@/lib/auth-guards", () => ({
   isKidOwnedByCurrentUser: async () => state.owned,
   getOwnedActiveKidId: async () => (state.owned ? state.activeKid : null),
+  canEditContent: async () => state.role === "admin" || state.role === "therapist",
+  requireContentEditor: async () =>
+    state.role === "admin" || state.role === "therapist"
+      ? null
+      : { success: false, error: "No tienes permiso para editar el contenido de la Academia." },
   getParentSanityId: async () => (state.userId ? `user-${state.userId}` : null),
 }));
 vi.mock("next/cache", () => ({ revalidatePath: () => {}, revalidateTag: () => {} }));

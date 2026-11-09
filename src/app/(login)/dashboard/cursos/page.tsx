@@ -2,6 +2,7 @@
 import { BookOpen, PlusCircle, Pencil } from "lucide-react"; // 🔥 Añadimos Pencil
 import { client } from "@/sanity/lib/client";
 import { auth } from "@clerk/nextjs/server";
+import { canEditContent } from "@/lib/auth-guards";
 import CoursesCard from "@/components/courses/courses-card";
 import AssignButton from "@/components/dashboard/assign-button";
 import Link from "next/link";
@@ -12,6 +13,7 @@ export const dynamic = "force-dynamic";
 export default async function MisCursosPage() {
   const { userId } = await auth();
   const sanityUserId = `user-${userId}`;
+  const canEdit = await canEditContent();
 
   // 1. Traemos todos los cursos de Sanity
   const queryCourses = `*[_type == "course"] | order(_createdAt desc) {
@@ -50,6 +52,7 @@ export default async function MisCursosPage() {
           </p>
         </div>
 
+        {canEdit && (
         <Button
           asChild
           className="shrink-0 h-12 rounded-xl font-bold bg-cyan-600 hover:bg-cyan-700 text-white shadow-md shadow-cyan-600/20"
@@ -59,6 +62,7 @@ export default async function MisCursosPage() {
             Crear Nuevo Curso
           </Link>
         </Button>
+        )}
       </div>
 
       {courses.length === 0 ? (
@@ -66,6 +70,7 @@ export default async function MisCursosPage() {
           <p className="text-slate-500 mb-4">
             No hay cursos disponibles en la plataforma por ahora.
           </p>
+          {canEdit && (
           <Button
             asChild
             variant="outline"
@@ -75,6 +80,7 @@ export default async function MisCursosPage() {
               Sé el primero en crear uno
             </Link>
           </Button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -89,8 +95,8 @@ export default async function MisCursosPage() {
               // 🔥 EL ACTION SLOT AHORA TIENE 2 BOTONES
               actionSlot={
                 <div className="flex flex-wrap items-center gap-2 w-full mt-2 max-w-full">
-                  {/* Botón de Editar (Constructor) */}
-                  <Button
+                  {/* Botón de Editar (Constructor): solo editores de contenido */}
+                  {canEdit && (<Button
                     asChild
                     variant="outline"
                     className="w-full sm:w-auto rounded-xl text-slate-600 border-slate-200 hover:bg-slate-50 font-bold"
@@ -99,7 +105,7 @@ export default async function MisCursosPage() {
                       <Pencil className="w-4 h-4 mr-2" />
                       Editar
                     </Link>
-                  </Button>
+                  </Button>)}
 
                   {/* Botón de Asignar (Solo si hay cadetes) */}
                   {kids.length > 0 && (

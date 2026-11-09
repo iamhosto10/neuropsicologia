@@ -17,6 +17,7 @@ export function freshWorld(): FakeSanity {
   state.role = "admin";
   state.userId = "user_1";
 
+  fake.seed({ _id: "user-user_1", _type: "user", clerkId: "user_1" });
   fake.seed({ _id: "kid1", _type: "kidProfile", energyCrystals: 0, parent: { _ref: "user-user_1" } });
   fake.seed({
     _id: "lesson1",
@@ -68,4 +69,22 @@ vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
     throw new Error(`NEXT_REDIRECT:${url}`);
   },
+}));
+
+export const clerk = {
+  user: { firstName: "Ana", lastName: "Pérez", emailAddresses: [{ emailAddress: "ana@example.com" }] } as any,
+  cookies: new Map<string, string>(),
+};
+vi.mock("@clerk/nextjs/server", () => ({
+  auth: async () => ({ userId: state.userId }),
+  currentUser: async () => (state.userId ? { id: state.userId, ...clerk.user } : null),
+  clerkClient: async () => ({ users: { getUser: async () => ({ publicMetadata: { role: state.role } }) } }),
+}));
+vi.mock("next/headers", () => ({
+  cookies: async () => ({
+    get: (k: string) => (clerk.cookies.has(k) ? { value: clerk.cookies.get(k) } : undefined),
+    set: (k: string, v: string) => void clerk.cookies.set(k, v),
+    delete: (k: string) => void clerk.cookies.delete(k),
+  }),
+  headers: async () => new Headers({ "svix-id": "i", "svix-timestamp": "t", "svix-signature": "s" }),
 }));

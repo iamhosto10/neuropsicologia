@@ -46,12 +46,13 @@ export default function PacientesTable({
   const handleDelete = (id: string, name: string) => {
     if (
       window.confirm(
-        `¿Alerta Roja! ¿Estás seguro de que deseas eliminar permanentemente al cadete ${name}? Todo su progreso clínico se perderá.`,
+        `¿Alerta Roja! ¿Estás seguro de que deseas eliminar permanentemente al cadete ${name}? Se borrarán también todas sus sesiones y su progreso clínico. Esta acción no se puede deshacer.`,
       )
     ) {
       setDeletingId(id);
       startTransition(async () => {
-        await deleteKidProfile(id);
+        const result = await deleteKidProfile(id);
+        if (result && "error" in result && result.error) window.alert(result.error);
         setDeletingId(null);
         router.refresh();
       });

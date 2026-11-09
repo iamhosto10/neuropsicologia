@@ -108,6 +108,7 @@ describe("actividades", () => {
     expect(await markActivityCompleted("kid1", 'x"] || _ref != "', "/a")).toHaveProperty("error");
   });
   it("quita la actividad de las asignadas y normaliza la reflexión", async () => {
+    s.seed({ _id: "otra", _type: "activity" });
     s.docs.kid1.assignedActivities = [{ _ref: "act1" }, { _ref: "otra" }];
     await markActivityCompleted("kid1", "act1", "/a", { mood: "x".repeat(100), difficulty: 99 });
     expect(kid().assignedActivities).toEqual([{ _ref: "otra" }]);

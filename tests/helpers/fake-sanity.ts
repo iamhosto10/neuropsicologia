@@ -47,12 +47,42 @@ export class FakeSanity {
   touch(id: string) {
     this.docs[id]._rev = `r${this.rev++}`;
   }
-  applyAtomically(patches: Array<{ id: string; ops: Ops }>) {
+  /** Como Sanity real: no se puede crear/dejar un documento que referencia a uno inexistente */
+  private assertIntegrity(docs: Record<string, Doc>) {
+    const refs = (v: any, out: string[] = []) => {
+      if (Array.isArray(v)) v.forEach((x) => refs(x, out));
+      else if (v && typeof v === "object") {
+        if (typeof v._ref === "string") out.push(v._ref);
+        Object.values(v).forEach((x) => refs(x, out));
+      }
+      return out;
+    };
+    for (const d of Object.values(docs))
+      for (const r of refs(d))
+        if (!(docs as any)[r]) throw Object.assign(new Error(`Document "${d._id}" references non-existent/deleted document "${r}"`), { statusCode: 409, integrity: true });
+  }
+  async create(doc: Doc) {
+    if (this.docs[doc._id]) throw new Error("already exists");
+    const id = doc._id ?? `gen${this.rev}`;
+    const next = { ...this.docs, [id]: { _rev: `r${this.rev++}`, ...doc, _id: id } };
+    this.assertIntegrity(next);
+    this.docs = next;
+    return (next as any)[id];
+  }
+  async createIfNotExists(doc: Doc) {
+    if (this.docs[doc._id]) return this.docs[doc._id];
+    return this.create(doc);
+  }
+  applyAtomically(patches: Array<{ id: string; ops?: Ops; del?: boolean }>) {
     this.beforeCommit?.();
     this.commits++;
     const copy = structuredClone(this.docs);
     const touched = new Set<string>();
-    for (const { id, ops } of patches) {
+    for (const { id, ops = {}, del } of patches) {
+      if (del) {
+        delete copy[id];
+        continue;
+      }
       const d = copy[id];
       if (!d) throw Object.assign(new Error(`Document "${id}" not found`), { statusCode: 404 });
       if (ops.ifRevisionID !== undefined && ops.ifRevisionID !== this.docs[id]._rev)
@@ -72,7 +102,8 @@ export class FakeSanity {
       }
       touched.add(id);
     }
-    for (const id of touched) copy[id]._rev = `r${this.rev++}`;
+    for (const id of touched) if (copy[id]) copy[id]._rev = `r${this.rev++}`;
+    this.assertIntegrity(copy);
     this.docs = copy;
   }
 }
@@ -95,13 +126,14 @@ let current: FakeSanity;
 const fakeOf = (_: any) => current;
 
 class FakeTx {
-  items: Array<{ id: string; ops: Ops }> = [];
+  items: Array<{ id: string; ops?: Ops; del?: boolean }> = [];
   constructor(private s: FakeSanity) {}
   patch(id: string, arg: ((p: FakePatch) => FakePatch) | Ops) {
     if (typeof arg === "function") this.items.push({ id, ops: arg(new FakePatch(id)).ops });
     else this.items.push({ id, ops: arg });
     return this;
   }
+  delete(id: string) { this.items.push({ id, del: true }); return this; }
   async commit() { this.s.applyAtomically(this.items); }
 }
 

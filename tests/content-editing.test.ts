@@ -46,7 +46,7 @@ describe("solo editores de contenido pueden tocar el catálogo global", () => {
       }
       expect(state.fake.commits).toBe(0);
       expect(Object.keys(state.fake.docs).sort()).toEqual(
-        ["act1", "av-cheap", "av-pricey", "course1", "kid1", "lesson1"],
+        ["act1", "av-cheap", "av-pricey", "course1", "kid1", "lesson1", "user-user_1"],
       );
     });
   }
